@@ -1,4 +1,0 @@
-C:/Users/sean9/Desktop/NTUST/CG/ImageEditing/build/CMakeFiles/ImageEditing.dir
-C:/Users/sean9/Desktop/NTUST/CG/ImageEditing/build/CMakeFiles/libtarga.dir
-C:/Users/sean9/Desktop/NTUST/CG/ImageEditing/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/sean9/Desktop/NTUST/CG/ImageEditing/build/CMakeFiles/ZERO_CHECK.dir

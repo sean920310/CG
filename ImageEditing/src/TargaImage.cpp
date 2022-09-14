@@ -211,13 +211,16 @@ TargaImage* TargaImage::Load_Image(char *filename)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::To_Grayscale()
 {
-    for (int i = 0; i < width * height * 4; i += 4) {
-        float y = 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
-        for (int j = 0; j < 3; j++) {
-            data[i + j] = y;
+    for (int i = 0; i < width ; i++) {
+        for (int j = 0; j < height; j++) {
+            int index = (width * j + i) * 4;
+            float y = 0.299 * data[index] + 0.587 * data[index + 1] + 0.114 * data[index + 2];
+            for (int m = 0; m < 3; m++) {
+                data[index + m] = y;
+            }
         }
     }
-	return false;
+	return true;
 }// To_Grayscale
 
 
@@ -258,8 +261,22 @@ bool TargaImage::Quant_Populosity()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Threshold()
 {
-    ClearToBlack();
-    return false;
+    this->To_Grayscale();
+    for (int i = 0; i < width * height * 4; i += 4) {
+        if (data[i] > 127)
+        {
+            data[i] = 255;
+            data[i + 1] = 255;
+            data[i + 2] = 255;
+        }
+        else
+        {
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+        }
+    }
+    return true;
 }// Dither_Threshold
 
 
@@ -296,8 +313,28 @@ bool TargaImage::Dither_FS()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Bright()
 {
-    ClearToBlack();
-    return false;
+    this->To_Grayscale();
+    unsigned long long int total=0;
+    for (int i = 0; i < width * height * 4; i += 4) {
+        total += data[i];
+    }
+    float avg = total / (width * height);
+    
+    for (int i = 0; i < width * height * 4; i += 4) {
+        if (data[i] > avg)
+        {
+            data[i] = 255;
+            data[i + 1] = 255;
+            data[i + 2] = 255;
+        }
+        else
+        {
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+        }
+    }
+    return true;
 }// Dither_Bright
 
 
@@ -310,10 +347,10 @@ bool TargaImage::Dither_Cluster()
 {
     this->To_Grayscale();
     for (int i = 0; i < width * height * 4; i += 4) {
-        int x = i / 4 % width, y = i / width / 4;
+        int x = i / 4 % width, y = i / 4 / width;
         float mask[4][4] = {
             {0.7059,0.3529,0.5882,0.2353},
-            {0.0599,0.9412,0.8235,0.4118},
+            {0.0588,0.9412,0.8235,0.4118},
             {0.4706,0.7647,0.8824,0.1176},
             {0.1765,0.5294,0.2941,0.6471}
         };
@@ -330,7 +367,7 @@ bool TargaImage::Dither_Cluster()
             data[i + 2] = 0;
         }
     }
-    return false;
+    return true;
 }// Dither_Cluster
 
 
