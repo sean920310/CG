@@ -201,6 +201,14 @@ TargaImage* TargaImage::Load_Image(char *filename)
     return result;
 }// Load_Image
 
+void TargaImage::changePixelGrayScale(int x, int y, unsigned char color)
+{
+    unsigned int index = (width * y + x) * 4;
+    data[index] = color;
+    data[index + 1] = color;
+    data[index + 2] = color;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -287,8 +295,23 @@ bool TargaImage::Dither_Threshold()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Random()
 {
-    ClearToBlack();
-    return false;
+    this->To_Grayscale();
+    for (int i = 0; i < width * height * 4; i += 4) {
+        float randValue = float(rand()) / (RAND_MAX)*0.4-0.2;
+        if (data[i] + randValue * 255 > 127)
+        {
+            data[i] = 255;
+            data[i + 1] = 255;
+            data[i + 2] = 255;
+        }
+        else
+        {
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+        }
+    }
+    return true;
 }// Dither_Random
 
 
@@ -300,8 +323,31 @@ bool TargaImage::Dither_Random()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_FS()
 {
-    ClearToBlack();
-    return false;
+    this->To_Grayscale();
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            int index = (width * j + i) * 4;
+            int oldPixel = data[index];
+            if (data[index] > 127) 
+            {
+                changePixelGrayScale(i, j, 255);
+            }
+            else
+            {
+                changePixelGrayScale(i, j, 0);
+            }
+            int error = oldPixel - data[index];
+            if (i != width - 1)
+                changePixelGrayScale(i + 1, j, data[(width * j + i + 1) * 4] + 7.0f / 16 * error);
+            if (i != 0 && j != height - 1)
+                changePixelGrayScale(i - 1, j + 1, data[(width * (j + 1) + i - 1) * 4] + 3.0f / 16 * error);
+            if (j != height - 1)
+                changePixelGrayScale(i, j + 1, data[(width * (j + 1) + i) * 4] + 5.0f / 16 * error);
+            if (i != width - 1 && j != height - 1)
+                changePixelGrayScale(i + 1, j + 1, data[(width * (j + 1) + i + 1) * 4] + 1.0f / 16 * error);
+        }
+    }
+    return true;
 }// Dither_FS
 
 
