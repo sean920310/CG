@@ -19,27 +19,28 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <tuple>
 #include <algorithm>
 
 using namespace std;
 
 // constants
-const int           RED             = 0;                // red channel
-const int           GREEN           = 1;                // green channel
-const int           BLUE            = 2;                // blue channel
-const unsigned char BACKGROUND[3]   = { 0, 0, 0 };      // background color
+const int           RED = 0;                // red channel
+const int           GREEN = 1;                // green channel
+const int           BLUE = 2;                // blue channel
+const unsigned char BACKGROUND[3] = { 0, 0, 0 };      // background color
 
 
 // Computes n choose s, efficiently
 double Binomial(int n, int s)
 {
-    double        res;
+	double        res;
 
-    res = 1;
-    for (int i = 1 ; i <= s ; i++)
-        res = (n - i + 1) * res / i ;
+	res = 1;
+	for (int i = 1; i <= s; i++)
+		res = (n - i + 1) * res / i;
 
-    return res;
+	return res;
 }// Binomial
 
 
@@ -58,8 +59,8 @@ TargaImage::TargaImage() : width(0), height(0), data(NULL)
 ///////////////////////////////////////////////////////////////////////////////
 TargaImage::TargaImage(int w, int h) : width(w), height(h)
 {
-   data = new unsigned char[width * height * 4];
-   ClearToBlack();
+	data = new unsigned char[width * height * 4];
+	ClearToBlack();
 }// TargaImage
 
 
@@ -69,16 +70,16 @@ TargaImage::TargaImage(int w, int h) : width(w), height(h)
 //      Constructor.  Initialize member variables to values given.
 //
 ///////////////////////////////////////////////////////////////////////////////
-TargaImage::TargaImage(int w, int h, unsigned char *d)
+TargaImage::TargaImage(int w, int h, unsigned char* d)
 {
-    int i;
+	int i;
 
-    width = w;
-    height = h;
-    data = new unsigned char[width * height * 4];
+	width = w;
+	height = h;
+	data = new unsigned char[width * height * 4];
 
-    for (i = 0; i < width * height * 4; i++)
-	    data[i] = d[i];
+	for (i = 0; i < width * height * 4; i++)
+		data[i] = d[i];
 }// TargaImage
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,15 +87,15 @@ TargaImage::TargaImage(int w, int h, unsigned char *d)
 //      Copy Constructor.  Initialize member to that of input
 //
 ///////////////////////////////////////////////////////////////////////////////
-TargaImage::TargaImage(const TargaImage& image) 
+TargaImage::TargaImage(const TargaImage& image)
 {
-   width = image.width;
-   height = image.height;
-   data = NULL; 
-   if (image.data != NULL) {
-      data = new unsigned char[width * height * 4];
-      memcpy(data, image.data, sizeof(unsigned char) * width * height * 4);
-   }
+	width = image.width;
+	height = image.height;
+	data = NULL;
+	if (image.data != NULL) {
+		data = new unsigned char[width * height * 4];
+		memcpy(data, image.data, sizeof(unsigned char) * width * height * 4);
+	}
 }
 
 
@@ -105,8 +106,8 @@ TargaImage::TargaImage(const TargaImage& image)
 ///////////////////////////////////////////////////////////////////////////////
 TargaImage::~TargaImage()
 {
-    if (data)
-        delete[] data;
+	if (data)
+		delete[] data;
 }// ~TargaImage
 
 
@@ -119,25 +120,25 @@ TargaImage::~TargaImage()
 ///////////////////////////////////////////////////////////////////////////////
 unsigned char* TargaImage::To_RGB(void)
 {
-    unsigned char   *rgb = new unsigned char[width * height * 3];
-    int		    i, j;
+	unsigned char* rgb = new unsigned char[width * height * 3];
+	int		    i, j;
 
-    if (! data)
-	    return NULL;
+	if (!data)
+		return NULL;
 
-    // Divide out the alpha
-    for (i = 0 ; i < height ; i++)
-    {
-	    int in_offset = i * width * 4;
-	    int out_offset = i * width * 3;
+	// Divide out the alpha
+	for (i = 0; i < height; i++)
+	{
+		int in_offset = i * width * 4;
+		int out_offset = i * width * 3;
 
-	    for (j = 0 ; j < width ; j++)
-        {
-	        RGBA_To_RGB(data + (in_offset + j*4), rgb + (out_offset + j*3));
-	    }
-    }
+		for (j = 0; j < width; j++)
+		{
+			RGBA_To_RGB(data + (in_offset + j * 4), rgb + (out_offset + j * 3));
+		}
+	}
 
-    return rgb;
+	return rgb;
 }// TargaImage
 
 
@@ -146,22 +147,22 @@ unsigned char* TargaImage::To_RGB(void)
 //      Save the image to a targa file. Returns 1 on success, 0 on failure.
 //
 ///////////////////////////////////////////////////////////////////////////////
-bool TargaImage::Save_Image(const char *filename)
+bool TargaImage::Save_Image(const char* filename)
 {
-    TargaImage	*out_image = Reverse_Rows();
+	TargaImage* out_image = Reverse_Rows();
 
-    if (! out_image)
-	    return false;
+	if (!out_image)
+		return false;
 
-    if (!tga_write_raw(filename, width, height, out_image->data, TGA_TRUECOLOR_32))
-    {
-	    cout << "TGA Save Error: %s\n", tga_error_string(tga_get_last_error());
-	    return false;
-    }
+	if (!tga_write_raw(filename, width, height, out_image->data, TGA_TRUECOLOR_32))
+	{
+		cout << "TGA Save Error: %s\n", tga_error_string(tga_get_last_error());
+		return false;
+	}
 
-    delete out_image;
+	delete out_image;
 
-    return true;
+	return true;
 }// Save_Image
 
 
@@ -171,42 +172,39 @@ bool TargaImage::Save_Image(const char *filename)
 //  must be deleted by caller.  Return NULL on failure.
 //
 ///////////////////////////////////////////////////////////////////////////////
-TargaImage* TargaImage::Load_Image(char *filename)
+TargaImage* TargaImage::Load_Image(char* filename)
 {
-    unsigned char   *temp_data;
-    TargaImage	    *temp_image;
-    TargaImage	    *result;
-    int		        width, height;
+	unsigned char* temp_data;
+	TargaImage* temp_image;
+	TargaImage* result;
+	int		        width, height;
 
-    if (!filename)
-    {
-        cout << "No filename given." << endl;
-        return NULL;
-    }// if
+	if (!filename)
+	{
+		cout << "No filename given." << endl;
+		return NULL;
+	}// if
 
-    temp_data = (unsigned char*)tga_load(filename, &width, &height, TGA_TRUECOLOR_32);
-    if (!temp_data)
-    {
-        cout << "TGA Error: %s\n", tga_error_string(tga_get_last_error());
-	    width = height = 0;
-	    return NULL;
-    }
-    temp_image = new TargaImage(width, height, temp_data);
-    free(temp_data);
+	temp_data = (unsigned char*)tga_load(filename, &width, &height, TGA_TRUECOLOR_32);
+	if (!temp_data)
+	{
+		cout << "TGA Error: %s\n", tga_error_string(tga_get_last_error());
+		width = height = 0;
+		return NULL;
+	}
+	temp_image = new TargaImage(width, height, temp_data);
+	free(temp_data);
 
-    result = temp_image->Reverse_Rows();
+	result = temp_image->Reverse_Rows();
 
-    delete temp_image;
+	delete temp_image;
 
-    return result;
+	return result;
 }// Load_Image
 
-void TargaImage::changePixelGrayScale(int x, int y, unsigned char color)
+int TargaImage::indexOfPixel(int x, int y)
 {
-    unsigned int index = (width * y + x) * 4;
-    data[index] = color;
-    data[index + 1] = color;
-    data[index + 2] = color;
+	return (width * y + x) * 4;
 }
 
 
@@ -219,15 +217,15 @@ void TargaImage::changePixelGrayScale(int x, int y, unsigned char color)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::To_Grayscale()
 {
-    for (int i = 0; i < width ; i++) {
-        for (int j = 0; j < height; j++) {
-            int index = (width * j + i) * 4;
-            float y = 0.299 * data[index] + 0.587 * data[index + 1] + 0.114 * data[index + 2];
-            for (int m = 0; m < 3; m++) {
-                data[index + m] = y;
-            }
-        }
-    }
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			int index = (width * j + i) * 4;
+			float y = 0.299 * data[index] + 0.587 * data[index + 1] + 0.114 * data[index + 2];
+			for (int m = 0; m < 3; m++) {
+				data[index + m] = y;
+			}
+		}
+	}
 	return true;
 }// To_Grayscale
 
@@ -240,12 +238,12 @@ bool TargaImage::To_Grayscale()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Quant_Uniform()
 {
-    for (int i = 0; i < width * height * 4; i += 4) {
-        data[i] = int(data[i] / 32) * 32;
-        data[i + 1] = int(data[i + 1] / 32) * 32;
-        data[i + 2] = int(data[i + 2] / 64) * 64;
-    }
-    return false;
+	for (int i = 0; i < width * height * 4; i += 4) {
+		data[i] = int(data[i] / 32) * 32;
+		data[i + 1] = int(data[i + 1] / 32) * 32;
+		data[i + 2] = int(data[i + 2] / 64) * 64;
+	}
+	return true;
 }// Quant_Uniform
 
 
@@ -257,8 +255,67 @@ bool TargaImage::Quant_Uniform()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Quant_Populosity()
 {
-    ClearToBlack();
-    return false;
+	vector<unsigned char> origin(width*height*4,0);
+	//set img to 15bit
+	for (int i = 0; i < width * height * 4; i += 4) {
+		origin[i] = int(data[i] / 8) * 8;
+		origin[i + 1] = int(data[i + 1] / 8) * 8;
+		origin[i + 2] = int(data[i + 2] / 8) * 8;
+		origin[i + 3] = data[i + 3];
+	}
+
+	//count each color amount
+	vector<pair<tuple<unsigned char, unsigned char, unsigned char>, int>> mostColor;
+	for (int i = 0; i < width * height * 4; i += 4) {
+		tuple<unsigned char, unsigned char, unsigned char> pixelColor(origin[i], origin[i + 1], origin[i + 2]);
+		bool found = false;
+		for (auto& v : mostColor) {
+			if (v.first._Equals(pixelColor))
+			{
+				v.second++;
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			mostColor.push_back({ pixelColor,1 });
+		}
+	}
+
+	//sort
+	for (int i = 0; i < mostColor.size() - 1; i++)
+	{
+		for (int j = 0; j < mostColor.size() - 1; j++)
+		{
+			if (mostColor[j].second < mostColor[j + 1].second)
+			{
+				auto temp = mostColor[j];
+				mostColor[j] = mostColor[j + 1];
+				mostColor[j + 1] = temp;
+			}
+		}
+	}
+
+	for (int i = 0; i < width * height * 4; i += 4) {
+		//find closest color
+		double dis = DBL_MAX;
+		int closestIndex = 0, j;
+		for (j = 0; j < 256 ; j++) {
+			double temp = sqrt(pow(data[i] - get<0>(mostColor[j].first), 2) + pow(data[i + 1] - get<1>(mostColor[j].first), 2) + pow(data[i + 2] - get<2>(mostColor[j].first), 2));
+			if (temp < dis) {
+				dis = temp;
+				closestIndex = j;
+			}
+			if (dis == 0)
+				break;
+		}
+		data[i] = get<0>(mostColor[closestIndex].first);
+		data[i+1] = get<1>(mostColor[closestIndex].first);
+		data[i+2] = get<2>(mostColor[closestIndex].first);
+	}
+
+	return true;
 }// Quant_Populosity
 
 
@@ -269,22 +326,22 @@ bool TargaImage::Quant_Populosity()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Threshold()
 {
-    this->To_Grayscale();
-    for (int i = 0; i < width * height * 4; i += 4) {
-        if (data[i] > 127)
-        {
-            data[i] = 255;
-            data[i + 1] = 255;
-            data[i + 2] = 255;
-        }
-        else
-        {
-            data[i] = 0;
-            data[i + 1] = 0;
-            data[i + 2] = 0;
-        }
-    }
-    return true;
+	this->To_Grayscale();
+	for (int i = 0; i < width * height * 4; i += 4) {
+		if (data[i] > 127)
+		{
+			data[i] = 255;
+			data[i + 1] = 255;
+			data[i + 2] = 255;
+		}
+		else
+		{
+			data[i] = 0;
+			data[i + 1] = 0;
+			data[i + 2] = 0;
+		}
+	}
+	return true;
 }// Dither_Threshold
 
 
@@ -295,23 +352,23 @@ bool TargaImage::Dither_Threshold()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Random()
 {
-    this->To_Grayscale();
-    for (int i = 0; i < width * height * 4; i += 4) {
-        float randValue = float(rand()) / (RAND_MAX)*0.4-0.2;
-        if (data[i] + randValue * 255 > 127)
-        {
-            data[i] = 255;
-            data[i + 1] = 255;
-            data[i + 2] = 255;
-        }
-        else
-        {
-            data[i] = 0;
-            data[i + 1] = 0;
-            data[i + 2] = 0;
-        }
-    }
-    return true;
+	this->To_Grayscale();
+	for (int i = 0; i < width * height * 4; i += 4) {
+		float randValue = float(rand()) / (RAND_MAX) * 0.4 - 0.2;
+		if (data[i] + randValue * 255 > 127)
+		{
+			data[i] = 255;
+			data[i + 1] = 255;
+			data[i + 2] = 255;
+		}
+		else
+		{
+			data[i] = 0;
+			data[i + 1] = 0;
+			data[i + 2] = 0;
+		}
+	}
+	return true;
 }// Dither_Random
 
 
@@ -323,31 +380,64 @@ bool TargaImage::Dither_Random()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_FS()
 {
-    this->To_Grayscale();
-    for (int j = 0; j < height; j++) {
-        for (int i = 0; i < width; i++) {
-            int index = (width * j + i) * 4;
-            int oldPixel = data[index];
-            if (data[index] > 127) 
-            {
-                changePixelGrayScale(i, j, 255);
-            }
-            else
-            {
-                changePixelGrayScale(i, j, 0);
-            }
-            int error = oldPixel - data[index];
-            if (i != width - 1)
-                changePixelGrayScale(i + 1, j, data[(width * j + i + 1) * 4] + 7.0f / 16 * error);
-            if (i != 0 && j != height - 1)
-                changePixelGrayScale(i - 1, j + 1, data[(width * (j + 1) + i - 1) * 4] + 3.0f / 16 * error);
-            if (j != height - 1)
-                changePixelGrayScale(i, j + 1, data[(width * (j + 1) + i) * 4] + 5.0f / 16 * error);
-            if (i != width - 1 && j != height - 1)
-                changePixelGrayScale(i + 1, j + 1, data[(width * (j + 1) + i + 1) * 4] + 1.0f / 16 * error);
-        }
-    }
-    return true;
+	this->To_Grayscale();
+	for (int j = 0; j < height; j++) {
+		for (int i = (j % 2) ? width - 1 : 0; (j % 2) ? i >= 0 : i < width; (j % 2) ? i-- : i++)
+		{
+			int index = (width * j + i) * 4;
+			int oldPixel = data[index];
+			if (data[index] > 127)
+			{
+				for (int n = 0; n < 3; n++)
+					data[index + n] = 255;
+			}
+			else
+			{
+				for (int n = 0; n < 3; n++)
+					data[index + n] = 0;
+			}
+			int error = oldPixel - data[index];
+			if (j % 2)
+			{
+				if (i != 0) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i - 1, j) + n] = data[indexOfPixel(i - 1, j) + n] + (7.0f / 16 * error);
+				}
+				if (i != width - 1 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (3.0f / 16 * error);
+				}
+				if (j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error);
+				}
+				if (i != 0 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (1.0f / 16 * error);
+				}
+			}
+			else
+			{
+				if (i != width - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i + 1, j) + n] = data[indexOfPixel(i + 1, j) + n] + (7.0f / 16 * error);
+				}
+				if (i != 0 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (3.0f / 16 * error);
+				}
+				if (j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error);
+				}
+				if (i != width - 1 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (1.0f / 16 * error);
+				}
+			}
+		}
+	}
+	return true;
 }// Dither_FS
 
 
@@ -359,28 +449,28 @@ bool TargaImage::Dither_FS()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Bright()
 {
-    this->To_Grayscale();
-    unsigned long long int total=0;
-    for (int i = 0; i < width * height * 4; i += 4) {
-        total += data[i];
-    }
-    float avg = total / (width * height);
-    
-    for (int i = 0; i < width * height * 4; i += 4) {
-        if (data[i] > avg)
-        {
-            data[i] = 255;
-            data[i + 1] = 255;
-            data[i + 2] = 255;
-        }
-        else
-        {
-            data[i] = 0;
-            data[i + 1] = 0;
-            data[i + 2] = 0;
-        }
-    }
-    return true;
+	this->To_Grayscale();
+	unsigned long long int total = 0;
+	for (int i = 0; i < width * height * 4; i += 4) {
+		total += data[i];
+	}
+	float avg = total / (width * height);
+
+	for (int i = 0; i < width * height * 4; i += 4) {
+		if (data[i] > avg)
+		{
+			data[i] = 255;
+			data[i + 1] = 255;
+			data[i + 2] = 255;
+		}
+		else
+		{
+			data[i] = 0;
+			data[i + 1] = 0;
+			data[i + 2] = 0;
+		}
+	}
+	return true;
 }// Dither_Bright
 
 
@@ -391,29 +481,29 @@ bool TargaImage::Dither_Bright()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Cluster()
 {
-    this->To_Grayscale();
-    for (int i = 0; i < width * height * 4; i += 4) {
-        int x = i / 4 % width, y = i / 4 / width;
-        float mask[4][4] = {
-            {0.7059,0.3529,0.5882,0.2353},
-            {0.0588,0.9412,0.8235,0.4118},
-            {0.4706,0.7647,0.8824,0.1176},
-            {0.1765,0.5294,0.2941,0.6471}
-        };
-        if (data[i] >= mask[x % 4][y % 4] * 255)
-        {
-            data[i] = 255;
-            data[i + 1] = 255;
-            data[i + 2] = 255;
-        }
-        else
-        {
-            data[i] = 0;
-            data[i + 1] = 0;
-            data[i + 2] = 0;
-        }
-    }
-    return true;
+	this->To_Grayscale();
+	for (int i = 0; i < width * height * 4; i += 4) {
+		int x = i / 4 % width, y = i / 4 / width;
+		float mask[4][4] = {
+			{0.7059,0.3529,0.5882,0.2353},
+			{0.0588,0.9412,0.8235,0.4118},
+			{0.4706,0.7647,0.8824,0.1176},
+			{0.1765,0.5294,0.2941,0.6471}
+		};
+		if (data[i] >= mask[x % 4][y % 4] * 255)
+		{
+			data[i] = 255;
+			data[i + 1] = 255;
+			data[i + 2] = 255;
+		}
+		else
+		{
+			data[i] = 0;
+			data[i + 1] = 0;
+			data[i + 2] = 0;
+		}
+	}
+	return true;
 }// Dither_Cluster
 
 
@@ -426,8 +516,61 @@ bool TargaImage::Dither_Cluster()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Dither_Color()
 {
-    ClearToBlack();
-    return false;
+	int error[3];
+	const int rg[8] = { 0, 36, 73, 109, 146, 182, 219 , 255 };
+	const int b[4] = { 0, 85, 170, 255 };
+	for (int j = 0; j < height; j++) {
+		for (int i = (j % 2) ? width - 1 : 0; (j % 2) ? i >= 0 : i < width; (j % 2) ? i-- : i++)
+		{
+
+			error[0] = data[indexOfPixel(i, j) + 0] - rg[int(data[indexOfPixel(i, j) + 0] / 32)];
+			error[1] = data[indexOfPixel(i, j) + 1] - rg[int(data[indexOfPixel(i, j) + 1] / 32)];
+			error[2] = data[indexOfPixel(i, j) + 2] - b[int(data[indexOfPixel(i, j) + 2] / 64)];
+			data[indexOfPixel(i, j) + 0] = rg[int(data[indexOfPixel(i, j) + 0] / 32)];
+			data[indexOfPixel(i, j) + 1] = rg[int(data[indexOfPixel(i, j) + 1] / 32)];
+			data[indexOfPixel(i, j) + 2] = b[int(data[indexOfPixel(i, j) + 2] / 64)];
+
+			if (j % 2)
+			{
+				if (i != 0) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i - 1, j) + n] = data[indexOfPixel(i - 1, j) + n] + (7.0f / 16 * error[n]);
+				}
+				if (i != width - 1 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (3.0f / 16 * error[n]);
+				}
+				if (j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error[n]);
+				}
+				if (i != 0 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (1.0f / 16 * error[n]);
+				}
+			}
+			else
+			{
+				if (i != width - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i + 1, j) + n] = data[indexOfPixel(i + 1, j) + n] + (7.0f / 16 * error[n]);
+				}
+				if (i != 0 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (3.0f / 16 * error[n]);
+				}
+				if (j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error[n]);
+				}
+				if (i != width - 1 && j != height - 1) {
+					for (int n = 0; n < 3; n++)
+						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (1.0f / 16 * error[n]);
+				}
+			}
+		}
+	}
+	return true;
 }// Dither_Color
 
 
@@ -439,14 +582,14 @@ bool TargaImage::Dither_Color()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Comp_Over(TargaImage* pImage)
 {
-    if (width != pImage->width || height != pImage->height)
-    {
-        cout <<  "Comp_Over: Images not the same size\n";
-        return false;
-    }
+	if (width != pImage->width || height != pImage->height)
+	{
+		cout << "Comp_Over: Images not the same size\n";
+		return false;
+	}
 
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Comp_Over
 
 
@@ -458,14 +601,14 @@ bool TargaImage::Comp_Over(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Comp_In(TargaImage* pImage)
 {
-    if (width != pImage->width || height != pImage->height)
-    {
-        cout << "Comp_In: Images not the same size\n";
-        return false;
-    }
+	if (width != pImage->width || height != pImage->height)
+	{
+		cout << "Comp_In: Images not the same size\n";
+		return false;
+	}
 
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Comp_In
 
 
@@ -477,14 +620,14 @@ bool TargaImage::Comp_In(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Comp_Out(TargaImage* pImage)
 {
-    if (width != pImage->width || height != pImage->height)
-    {
-        cout << "Comp_Out: Images not the same size\n";
-        return false;
-    }
+	if (width != pImage->width || height != pImage->height)
+	{
+		cout << "Comp_Out: Images not the same size\n";
+		return false;
+	}
 
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Comp_Out
 
 
@@ -496,14 +639,14 @@ bool TargaImage::Comp_Out(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Comp_Atop(TargaImage* pImage)
 {
-    if (width != pImage->width || height != pImage->height)
-    {
-        cout << "Comp_Atop: Images not the same size\n";
-        return false;
-    }
+	if (width != pImage->width || height != pImage->height)
+	{
+		cout << "Comp_Atop: Images not the same size\n";
+		return false;
+	}
 
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Comp_Atop
 
 
@@ -515,14 +658,14 @@ bool TargaImage::Comp_Atop(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Comp_Xor(TargaImage* pImage)
 {
-    if (width != pImage->width || height != pImage->height)
-    {
-        cout << "Comp_Xor: Images not the same size\n";
-        return false;
-    }
+	if (width != pImage->width || height != pImage->height)
+	{
+		cout << "Comp_Xor: Images not the same size\n";
+		return false;
+	}
 
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Comp_Xor
 
 
@@ -534,30 +677,30 @@ bool TargaImage::Comp_Xor(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Difference(TargaImage* pImage)
 {
-    if (!pImage)
-        return false;
+	if (!pImage)
+		return false;
 
-    if (width != pImage->width || height != pImage->height)
-    {
-        cout << "Difference: Images not the same size\n";
-        return false;
-    }// if
+	if (width != pImage->width || height != pImage->height)
+	{
+		cout << "Difference: Images not the same size\n";
+		return false;
+	}// if
 
-    for (int i = 0 ; i < width * height * 4 ; i += 4)
-    {
-        unsigned char        rgb1[3];
-        unsigned char        rgb2[3];
+	for (int i = 0; i < width * height * 4; i += 4)
+	{
+		unsigned char        rgb1[3];
+		unsigned char        rgb2[3];
 
-        RGBA_To_RGB(data + i, rgb1);
-        RGBA_To_RGB(pImage->data + i, rgb2);
+		RGBA_To_RGB(data + i, rgb1);
+		RGBA_To_RGB(pImage->data + i, rgb2);
 
-        data[i] = abs(rgb1[0] - rgb2[0]);
-        data[i+1] = abs(rgb1[1] - rgb2[1]);
-        data[i+2] = abs(rgb1[2] - rgb2[2]);
-        data[i+3] = 255;
-    }
+		data[i] = abs(rgb1[0] - rgb2[0]);
+		data[i + 1] = abs(rgb1[1] - rgb2[1]);
+		data[i + 2] = abs(rgb1[2] - rgb2[2]);
+		data[i + 3] = 255;
+	}
 
-    return true;
+	return true;
 }// Difference
 
 
@@ -568,8 +711,8 @@ bool TargaImage::Difference(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Box()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Filter_Box
 
 
@@ -581,8 +724,8 @@ bool TargaImage::Filter_Box()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Bartlett()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Filter_Bartlett
 
 
@@ -594,8 +737,8 @@ bool TargaImage::Filter_Bartlett()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Gaussian()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Filter_Gaussian
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -605,10 +748,10 @@ bool TargaImage::Filter_Gaussian()
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-bool TargaImage::Filter_Gaussian_N( unsigned int N )
+bool TargaImage::Filter_Gaussian_N(unsigned int N)
 {
-    ClearToBlack();
-   return false;
+	ClearToBlack();
+	return false;
 }// Filter_Gaussian_N
 
 
@@ -620,8 +763,8 @@ bool TargaImage::Filter_Gaussian_N( unsigned int N )
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Edge()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Filter_Edge
 
 
@@ -633,8 +776,8 @@ bool TargaImage::Filter_Edge()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Enhance()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Filter_Enhance
 
 
@@ -648,8 +791,8 @@ bool TargaImage::Filter_Enhance()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::NPR_Paint()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }
 
 
@@ -661,8 +804,8 @@ bool TargaImage::NPR_Paint()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Half_Size()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Half_Size
 
 
@@ -673,8 +816,8 @@ bool TargaImage::Half_Size()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Double_Size()
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Double_Size
 
 
@@ -686,8 +829,8 @@ bool TargaImage::Double_Size()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Resize(float scale)
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Resize
 
 
@@ -699,8 +842,8 @@ bool TargaImage::Resize(float scale)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Rotate(float angleDegrees)
 {
-    ClearToBlack();
-    return false;
+	ClearToBlack();
+	return false;
 }// Rotate
 
 
@@ -710,35 +853,35 @@ bool TargaImage::Rotate(float angleDegrees)
 //      equivalent composited with a black background.
 //
 ///////////////////////////////////////////////////////////////////////////////
-void TargaImage::RGBA_To_RGB(unsigned char *rgba, unsigned char *rgb)
+void TargaImage::RGBA_To_RGB(unsigned char* rgba, unsigned char* rgb)
 {
-    const unsigned char	BACKGROUND[3] = { 0, 0, 0 };
+	const unsigned char	BACKGROUND[3] = { 0, 0, 0 };
 
-    unsigned char  alpha = rgba[3];
+	unsigned char  alpha = rgba[3];
 
-    if (alpha == 0)
-    {
-        rgb[0] = BACKGROUND[0];
-        rgb[1] = BACKGROUND[1];
-        rgb[2] = BACKGROUND[2];
-    }
-    else
-    {
-	    float	alpha_scale = (float)255 / (float)alpha;
-	    int	val;
-	    int	i;
+	if (alpha == 0)
+	{
+		rgb[0] = BACKGROUND[0];
+		rgb[1] = BACKGROUND[1];
+		rgb[2] = BACKGROUND[2];
+	}
+	else
+	{
+		float	alpha_scale = (float)255 / (float)alpha;
+		int	val;
+		int	i;
 
-	    for (i = 0 ; i < 3 ; i++)
-	    {
-	        val = (int)floor(rgba[i] * alpha_scale);
-	        if (val < 0)
-		    rgb[i] = 0;
-	        else if (val > 255)
-		    rgb[i] = 255;
-	        else
-		    rgb[i] = val;
-	    }
-    }
+		for (i = 0; i < 3; i++)
+		{
+			val = (int)floor(rgba[i] * alpha_scale);
+			if (val < 0)
+				rgb[i] = 0;
+			else if (val > 255)
+				rgb[i] = 255;
+			else
+				rgb[i] = val;
+		}
+	}
 }// RGA_To_RGB
 
 
@@ -750,30 +893,30 @@ void TargaImage::RGBA_To_RGB(unsigned char *rgba, unsigned char *rgb)
 ///////////////////////////////////////////////////////////////////////////////
 TargaImage* TargaImage::Reverse_Rows(void)
 {
-    unsigned char   *dest = new unsigned char[width * height * 4];
-    TargaImage	    *result;
-    int 	        i, j;
+	unsigned char* dest = new unsigned char[width * height * 4];
+	TargaImage* result;
+	int 	        i, j;
 
-    if (! data)
-    	return NULL;
+	if (!data)
+		return NULL;
 
-    for (i = 0 ; i < height ; i++)
-    {
-	    int in_offset = (height - i - 1) * width * 4;
-	    int out_offset = i * width * 4;
+	for (i = 0; i < height; i++)
+	{
+		int in_offset = (height - i - 1) * width * 4;
+		int out_offset = i * width * 4;
 
-	    for (j = 0 ; j < width ; j++)
-        {
-	        dest[out_offset + j * 4] = data[in_offset + j * 4];
-	        dest[out_offset + j * 4 + 1] = data[in_offset + j * 4 + 1];
-	        dest[out_offset + j * 4 + 2] = data[in_offset + j * 4 + 2];
-	        dest[out_offset + j * 4 + 3] = data[in_offset + j * 4 + 3];
-        }
-    }
+		for (j = 0; j < width; j++)
+		{
+			dest[out_offset + j * 4] = data[in_offset + j * 4];
+			dest[out_offset + j * 4 + 1] = data[in_offset + j * 4 + 1];
+			dest[out_offset + j * 4 + 2] = data[in_offset + j * 4 + 2];
+			dest[out_offset + j * 4 + 3] = data[in_offset + j * 4 + 3];
+		}
+	}
 
-    result = new TargaImage(width, height, dest);
-    delete[] dest;
-    return result;
+	result = new TargaImage(width, height, dest);
+	delete[] dest;
+	return result;
 }// Reverse_Rows
 
 
@@ -784,7 +927,7 @@ TargaImage* TargaImage::Reverse_Rows(void)
 ///////////////////////////////////////////////////////////////////////////////
 void TargaImage::ClearToBlack()
 {
-    memset(data, 0, width * height * 4);
+	memset(data, 0, width * height * 4);
 }// ClearToBlack
 
 
@@ -795,32 +938,33 @@ void TargaImage::ClearToBlack()
 //
 ///////////////////////////////////////////////////////////////////////////////
 void TargaImage::Paint_Stroke(const Stroke& s) {
-   int radius_squared = (int)s.radius * (int)s.radius;
-   for (int x_off = -((int)s.radius); x_off <= (int)s.radius; x_off++) {
-      for (int y_off = -((int)s.radius); y_off <= (int)s.radius; y_off++) {
-         int x_loc = (int)s.x + x_off;
-         int y_loc = (int)s.y + y_off;
-         // are we inside the circle, and inside the image?
-         if ((x_loc >= 0 && x_loc < width && y_loc >= 0 && y_loc < height)) {
-            int dist_squared = x_off * x_off + y_off * y_off;
-            if (dist_squared <= radius_squared) {
-               data[(y_loc * width + x_loc) * 4 + 0] = s.r;
-               data[(y_loc * width + x_loc) * 4 + 1] = s.g;
-               data[(y_loc * width + x_loc) * 4 + 2] = s.b;
-               data[(y_loc * width + x_loc) * 4 + 3] = s.a;
-            } else if (dist_squared == radius_squared + 1) {
-               data[(y_loc * width + x_loc) * 4 + 0] = 
-                  (data[(y_loc * width + x_loc) * 4 + 0] + s.r) / 2;
-               data[(y_loc * width + x_loc) * 4 + 1] = 
-                  (data[(y_loc * width + x_loc) * 4 + 1] + s.g) / 2;
-               data[(y_loc * width + x_loc) * 4 + 2] = 
-                  (data[(y_loc * width + x_loc) * 4 + 2] + s.b) / 2;
-               data[(y_loc * width + x_loc) * 4 + 3] = 
-                  (data[(y_loc * width + x_loc) * 4 + 3] + s.a) / 2;
-            }
-         }
-      }
-   }
+	int radius_squared = (int)s.radius * (int)s.radius;
+	for (int x_off = -((int)s.radius); x_off <= (int)s.radius; x_off++) {
+		for (int y_off = -((int)s.radius); y_off <= (int)s.radius; y_off++) {
+			int x_loc = (int)s.x + x_off;
+			int y_loc = (int)s.y + y_off;
+			// are we inside the circle, and inside the image?
+			if ((x_loc >= 0 && x_loc < width && y_loc >= 0 && y_loc < height)) {
+				int dist_squared = x_off * x_off + y_off * y_off;
+				if (dist_squared <= radius_squared) {
+					data[(y_loc * width + x_loc) * 4 + 0] = s.r;
+					data[(y_loc * width + x_loc) * 4 + 1] = s.g;
+					data[(y_loc * width + x_loc) * 4 + 2] = s.b;
+					data[(y_loc * width + x_loc) * 4 + 3] = s.a;
+				}
+				else if (dist_squared == radius_squared + 1) {
+					data[(y_loc * width + x_loc) * 4 + 0] =
+						(data[(y_loc * width + x_loc) * 4 + 0] + s.r) / 2;
+					data[(y_loc * width + x_loc) * 4 + 1] =
+						(data[(y_loc * width + x_loc) * 4 + 1] + s.g) / 2;
+					data[(y_loc * width + x_loc) * 4 + 2] =
+						(data[(y_loc * width + x_loc) * 4 + 2] + s.b) / 2;
+					data[(y_loc * width + x_loc) * 4 + 3] =
+						(data[(y_loc * width + x_loc) * 4 + 3] + s.a) / 2;
+				}
+			}
+		}
+	}
 }
 
 
@@ -837,8 +981,8 @@ Stroke::Stroke() {}
 //
 ///////////////////////////////////////////////////////////////////////////////
 Stroke::Stroke(unsigned int iradius, unsigned int ix, unsigned int iy,
-               unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia) :
-   radius(iradius),x(ix),y(iy),r(ir),g(ig),b(ib),a(ia)
+	unsigned char ir, unsigned char ig, unsigned char ib, unsigned char ia) :
+	radius(iradius), x(ix), y(iy), r(ir), g(ig), b(ib), a(ia)
 {
 }
 

@@ -33,7 +33,7 @@ class TargaImage
         bool Save_Image(const char*);               // save the image to a file
         static TargaImage* Load_Image(char*);       // Load a file and return a pointer to a new TargaImage object.  Returns NULL on failure
 
-        void changePixelGrayScale(int x, int y, unsigned char color);
+        int indexOfPixel(int x, int y);
 
         bool To_Grayscale();
 
