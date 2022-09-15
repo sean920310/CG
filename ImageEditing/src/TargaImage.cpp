@@ -207,6 +207,15 @@ int TargaImage::indexOfPixel(int x, int y)
 	return (width * y + x) * 4;
 }
 
+int toValidColor(int color) {
+	if (color > 255)
+		return 255;
+	else if (color < 0)
+		return 0;
+	else
+		return color;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -255,7 +264,7 @@ bool TargaImage::Quant_Uniform()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Quant_Populosity()
 {
-	vector<unsigned char> origin(width*height*4,0);
+	vector<unsigned char> origin(width * height * 4, 0);
 	//set img to 15bit
 	for (int i = 0; i < width * height * 4; i += 4) {
 		origin[i] = int(data[i] / 8) * 8;
@@ -301,7 +310,7 @@ bool TargaImage::Quant_Populosity()
 		//find closest color
 		double dis = DBL_MAX;
 		int closestIndex = 0, j;
-		for (j = 0; j < 256 ; j++) {
+		for (j = 0; j < 256; j++) {
 			double temp = sqrt(pow(data[i] - get<0>(mostColor[j].first), 2) + pow(data[i + 1] - get<1>(mostColor[j].first), 2) + pow(data[i + 2] - get<2>(mostColor[j].first), 2));
 			if (temp < dis) {
 				dis = temp;
@@ -311,8 +320,8 @@ bool TargaImage::Quant_Populosity()
 				break;
 		}
 		data[i] = get<0>(mostColor[closestIndex].first);
-		data[i+1] = get<1>(mostColor[closestIndex].first);
-		data[i+2] = get<2>(mostColor[closestIndex].first);
+		data[i + 1] = get<1>(mostColor[closestIndex].first);
+		data[i + 2] = get<2>(mostColor[closestIndex].first);
 	}
 
 	return true;
@@ -384,7 +393,7 @@ bool TargaImage::Dither_FS()
 	for (int j = 0; j < height; j++) {
 		for (int i = (j % 2) ? width - 1 : 0; (j % 2) ? i >= 0 : i < width; (j % 2) ? i-- : i++)
 		{
-			int index = (width * j + i) * 4;
+			int index = indexOfPixel(i, j);
 			int oldPixel = data[index];
 			if (data[index] > 127)
 			{
@@ -401,38 +410,38 @@ bool TargaImage::Dither_FS()
 			{
 				if (i != 0) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i - 1, j) + n] = data[indexOfPixel(i - 1, j) + n] + (7.0f / 16 * error);
+						data[indexOfPixel(i - 1, j) + n] = toValidColor(data[indexOfPixel(i - 1, j) + n] + (7.0f / 16 * error));
 				}
 				if (i != width - 1 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (3.0f / 16 * error);
+						data[indexOfPixel(i + 1, j + 1) + n] = toValidColor(data[indexOfPixel(i + 1, j + 1) + n] + (3.0f / 16 * error));
 				}
 				if (j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error);
+						data[indexOfPixel(i, j + 1) + n] = toValidColor(data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error));
 				}
 				if (i != 0 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (1.0f / 16 * error);
+						data[indexOfPixel(i - 1, j + 1) + n] = toValidColor(data[indexOfPixel(i - 1, j + 1) + n] + (1.0f / 16 * error));
 				}
 			}
 			else
 			{
 				if (i != width - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i + 1, j) + n] = data[indexOfPixel(i + 1, j) + n] + (7.0f / 16 * error);
+						data[indexOfPixel(i + 1, j) + n] = toValidColor(data[indexOfPixel(i + 1, j) + n] + (7.0f / 16 * error));
 				}
 				if (i != 0 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (3.0f / 16 * error);
+						data[indexOfPixel(i - 1, j + 1) + n] = toValidColor(data[indexOfPixel(i - 1, j + 1) + n] + (3.0f / 16 * error));
 				}
 				if (j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error);
+						data[indexOfPixel(i, j + 1) + n] = toValidColor(data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error));
 				}
 				if (i != width - 1 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (1.0f / 16 * error);
+						data[indexOfPixel(i + 1, j + 1) + n] = toValidColor(data[indexOfPixel(i + 1, j + 1) + n] + (1.0f / 16 * error));
 				}
 			}
 		}
@@ -534,38 +543,38 @@ bool TargaImage::Dither_Color()
 			{
 				if (i != 0) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i - 1, j) + n] = data[indexOfPixel(i - 1, j) + n] + (7.0f / 16 * error[n]);
+						data[indexOfPixel(i - 1, j) + n] = toValidColor(data[indexOfPixel(i - 1, j) + n] + (7.0f / 16 * error[n]));
 				}
 				if (i != width - 1 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (3.0f / 16 * error[n]);
+						data[indexOfPixel(i + 1, j + 1) + n] = toValidColor(data[indexOfPixel(i + 1, j + 1) + n] + (3.0f / 16 * error[n]));
 				}
 				if (j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error[n]);
+						data[indexOfPixel(i, j + 1) + n] = toValidColor(data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error[n]));
 				}
 				if (i != 0 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (1.0f / 16 * error[n]);
+						data[indexOfPixel(i - 1, j + 1) + n] = toValidColor(data[indexOfPixel(i - 1, j + 1) + n] + (1.0f / 16 * error[n]));
 				}
 			}
 			else
 			{
 				if (i != width - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i + 1, j) + n] = data[indexOfPixel(i + 1, j) + n] + (7.0f / 16 * error[n]);
+						data[indexOfPixel(i + 1, j) + n] = toValidColor(data[indexOfPixel(i + 1, j) + n] + (7.0f / 16 * error[n]));
 				}
 				if (i != 0 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i - 1, j + 1) + n] = data[indexOfPixel(i - 1, j + 1) + n] + (3.0f / 16 * error[n]);
+						data[indexOfPixel(i - 1, j + 1) + n] = toValidColor(data[indexOfPixel(i - 1, j + 1) + n] + (3.0f / 16 * error[n]));
 				}
 				if (j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i, j + 1) + n] = data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error[n]);
+						data[indexOfPixel(i, j + 1) + n] = toValidColor(data[indexOfPixel(i, j + 1) + n] + (5.0f / 16 * error[n]));
 				}
 				if (i != width - 1 && j != height - 1) {
 					for (int n = 0; n < 3; n++)
-						data[indexOfPixel(i + 1, j + 1) + n] = data[indexOfPixel(i + 1, j + 1) + n] + (1.0f / 16 * error[n]);
+						data[indexOfPixel(i + 1, j + 1) + n] = toValidColor(data[indexOfPixel(i + 1, j + 1) + n] + (1.0f / 16 * error[n]));
 				}
 			}
 		}
