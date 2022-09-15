@@ -720,8 +720,46 @@ bool TargaImage::Difference(TargaImage* pImage)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Filter_Box()
 {
-	ClearToBlack();
-	return false;
+	float filter[5][5] = {
+		{0.04,0.04,0.04,0.04,0.04},
+		{0.04,0.04,0.04,0.04,0.04},
+		{0.04,0.04,0.04,0.04,0.04},
+		{0.04,0.04,0.04,0.04,0.04},
+		{0.04,0.04,0.04,0.04,0.04}
+	};
+	vector<unsigned char> origin(width * height * 4, 0);
+
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			int index = indexOfPixel(i, j);
+
+			float dst[3] = {0,0,0};
+			for (int m = 0; m < 5; m++) {
+				for (int n = 0; n < 5; n++) {
+					int filterX = i + n - 3, filterY = j + m - 3;
+					if (filterX < 0)
+						filterX = 0;
+					if (filterY < 0)
+						filterY = 0;
+					if (filterX > width - 1)
+						filterX = width - 1;
+					if (filterY > height - 1)
+						filterY = height - 1;
+					for (int c = 0; c < 3; c++)
+						dst[c] += filter[n][m] * data[indexOfPixel(filterX, filterY) + c];
+				}
+			}
+			for (int c = 0; c < 3; c++)
+				origin[indexOfPixel(i, j) + c] = toValidColor(dst[c]);
+		}
+	}
+
+	for (int i = 0; i < width * height * 4; i +=4) {
+		data[i] = origin[i];
+		data[i+1] = origin[i+1];
+		data[i+2] = origin[i+2];
+	}
+	return true;
 }// Filter_Box
 
 
