@@ -736,15 +736,15 @@ bool TargaImage::Filter_Box()
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 3, filterY = j + m - 3;
+					int filterX = i + n - 2, filterY = j + m - 2;
 					if (filterX < 0)
-						filterX = 0;
+						filterX = -filterX;
 					if (filterY < 0)
-						filterY = 0;
+						filterY = -filterY;
 					if (filterX > width - 1)
-						filterX = width - 1;
+						filterX = width - 1 - (filterX - (width - 1));
 					if (filterY > height - 1)
-						filterY = height - 1;
+						filterY = height - 1 - (filterY - (height - 1));
 					for (int c = 0; c < 3; c++)
 						dst[c] += filter[n][m] * data[indexOfPixel(filterX, filterY) + c];
 				}
@@ -787,15 +787,15 @@ bool TargaImage::Filter_Bartlett()
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 3, filterY = j + m - 3;
+					int filterX = i + n - 2, filterY = j + m - 2;
 					if (filterX < 0)
-						filterX = 0;
+						filterX = -filterX;
 					if (filterY < 0)
-						filterY = 0;
+						filterY = -filterY;
 					if (filterX > width - 1)
-						filterX = width - 1;
+						filterX = width - 1 - (filterX - (width - 1));
 					if (filterY > height - 1)
-						filterY = height - 1;
+						filterY = height - 1 - (filterY - (height - 1));
 					for (int c = 0; c < 3; c++)
 						dst[c] += filter[n][m] * data[indexOfPixel(filterX, filterY) + c];
 				}
@@ -838,15 +838,15 @@ bool TargaImage::Filter_Gaussian()
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 3, filterY = j + m - 3;
+					int filterX = i + n - 2, filterY = j + m - 2;
 					if (filterX < 0)
-						filterX = 0;
+						filterX = -filterX;
 					if (filterY < 0)
-						filterY = 0;
+						filterY = -filterY;
 					if (filterX > width - 1)
-						filterX = width - 1;
+						filterX = width - 1 - (filterX - (width - 1));
 					if (filterY > height - 1)
-						filterY = height - 1;
+						filterY = height - 1 - (filterY - (height - 1));
 					for (int c = 0; c < 3; c++)
 						dst[c] += filter[n][m] * data[indexOfPixel(filterX, filterY) + c];
 				}
@@ -873,8 +873,56 @@ bool TargaImage::Filter_Gaussian()
 
 bool TargaImage::Filter_Gaussian_N(unsigned int N)
 {
-	ClearToBlack();
-	return false;
+	vector<vector<float>> filter(N, vector<float>(N, 0));
+	//Gaussian Function
+	//N * N matrix
+	float total = 0;
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			filter[i][j] = exp(-(pow(i - int(N / 2), 2) + pow(j - int(N / 2), 2))/2);
+			total += filter[i][j];
+		}
+	}
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			filter[i][j] /= total;
+			cout << filter[i][j] << " ";
+		}
+		cout << endl;
+	}
+
+	vector<unsigned char> origin(width * height * 4, 0);
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			int index = indexOfPixel(i, j);
+
+			float dst[3] = { 0,0,0 };
+			for (int m = 0; m < N; m++) {
+				for (int n = 0; n < N; n++) {
+					int filterX = i + n - (N / 2), filterY = j + m - (N / 2);
+					if (filterX < 0)
+						filterX = -filterX;
+					if (filterY < 0)
+						filterY = -filterY;
+					if (filterX > width - 1)
+						filterX = width - 1 - (filterX - (width - 1));
+					if (filterY > height - 1)
+						filterY = height - 1 - (filterY - (height - 1));
+					for (int c = 0; c < 3; c++)
+						dst[c] += filter[n][m] * data[indexOfPixel(filterX, filterY) + c];
+				}
+			}
+			for (int c = 0; c < 3; c++)
+				origin[indexOfPixel(i, j) + c] = toValidColor(dst[c]);
+		}
+	}
+
+	for (int i = 0; i < width * height * 4; i += 4) {
+		data[i] = origin[i];
+		data[i + 1] = origin[i + 1];
+		data[i + 2] = origin[i + 2];
+	}
+	return true;
 }// Filter_Gaussian_N
 
 
