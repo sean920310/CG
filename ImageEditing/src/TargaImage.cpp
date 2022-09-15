@@ -1067,8 +1067,50 @@ bool TargaImage::NPR_Paint()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Half_Size()
 {
-	ClearToBlack();
-	return false;
+	float filter[3][3] = {
+		{1.0f / 16, 1.0f / 8, 1.0f / 16},
+		{1.0f / 8, 1.0f / 4, 1.0f / 8},
+		{1.0f / 16, 1.0f / 8, 1.0f / 16}
+	};
+	vector<unsigned char> origin(width * height * 4, 0);
+
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			int index = indexOfPixel(i, j);
+
+			float dst[3] = { 0,0,0 };
+			for (int m = 0; m < 3; m++) {
+				for (int n = 0; n < 3; n++) {
+					int filterX = i + n - 1, filterY = j + m - 1;
+					if (filterX < 0)
+						filterX = -filterX;
+					if (filterY < 0)
+						filterY = -filterY;
+					if (filterX > width - 1)
+						filterX = width - 1 - (filterX - (width - 1));
+					if (filterY > height - 1)
+						filterY = height - 1 - (filterY - (height - 1));
+					for (int c = 0; c < 3; c++)
+						dst[c] += filter[n][m] * data[indexOfPixel(filterX, filterY) + c];
+				}
+			}
+			for (int c = 0; c < 3; c++)
+				origin[indexOfPixel(i, j) + c] = toValidColor(dst[c]);
+		}
+	}
+
+	for (int j = 0; j < height; j++)
+		for (int i = 0; i < width; i++) {
+		{
+			int newIndex = ((width/2) * ((j+1)/2) + (i+1)/2) * 4;
+			data[newIndex] = origin[indexOfPixel(i, j)];
+			data[newIndex + 1] = origin[indexOfPixel(i, j) + 1];
+			data[newIndex + 2] = origin[indexOfPixel(i, j) + 2];
+		}
+	}
+	width /= 2;
+	height /= 2;
+	return true;
 }// Half_Size
 
 
