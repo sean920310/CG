@@ -751,7 +751,7 @@ bool TargaImage::Filter_Box()
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 2, filterY = j + m - 2;
+					int filterX = i + m - 2, filterY = j + n - 2;
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -797,12 +797,10 @@ bool TargaImage::Filter_Bartlett()
 
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			int index = indexOfPixel(i, j);
-
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 2, filterY = j + m - 2;
+					int filterX = i + m - 2, filterY = j + n - 2;
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -848,12 +846,10 @@ bool TargaImage::Filter_Gaussian()
 
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			int index = indexOfPixel(i, j);
-
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 2, filterY = j + m - 2;
+					int filterX = i + m - 2, filterY = j + n - 2;
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -909,12 +905,10 @@ bool TargaImage::Filter_Gaussian_N(unsigned int N)
 	vector<unsigned char> origin(width * height * 4, 0);
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			int index = indexOfPixel(i, j);
-
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < N; m++) {
 				for (int n = 0; n < N; n++) {
-					int filterX = i + n - (N / 2), filterY = j + m - (N / 2);
+					int filterX = i + m - (N / 2), filterY = j + n - (N / 2);
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -960,12 +954,10 @@ bool TargaImage::Filter_Edge()
 
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			int index = indexOfPixel(i, j);
-
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 2, filterY = j + m - 2;
+					int filterX = i + m - 2, filterY = j + n - 2;
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -1011,12 +1003,10 @@ bool TargaImage::Filter_Enhance()
 
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			int index = indexOfPixel(i, j);
-
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 5; m++) {
 				for (int n = 0; n < 5; n++) {
-					int filterX = i + n - 2, filterY = j + m - 2;
+					int filterX = i + m - 2, filterY = j + n - 2;
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -1076,12 +1066,10 @@ bool TargaImage::Half_Size()
 
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			int index = indexOfPixel(i, j);
-
 			float dst[3] = { 0,0,0 };
 			for (int m = 0; m < 3; m++) {
 				for (int n = 0; n < 3; n++) {
-					int filterX = i + n - 1, filterY = j + m - 1;
+					int filterX = i + m - 1, filterY = j + n - 1;
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -1099,10 +1087,10 @@ bool TargaImage::Half_Size()
 		}
 	}
 
-	for (int j = 0; j < height; j++)
-		for (int i = 0; i < width; i++) {
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++)
 		{
-			int newIndex = ((width/2) * ((j+1)/2) + (i+1)/2) * 4;
+			int newIndex = ((width / 2) * ((j + 1) / 2) + (i + 1) / 2) * 4;
 			data[newIndex] = origin[indexOfPixel(i, j)];
 			data[newIndex + 1] = origin[indexOfPixel(i, j) + 1];
 			data[newIndex + 2] = origin[indexOfPixel(i, j) + 2];
@@ -1121,8 +1109,95 @@ bool TargaImage::Half_Size()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Double_Size()
 {
-	ClearToBlack();
-	return false;
+	double evenFilter[3][3] = {
+		{1.0f / 16, 1.0f / 8, 1.0f / 16},
+		{1.0f / 8, 1.0f / 4, 1.0f / 8},
+		{1.0f / 16, 1.0f / 8, 1.0f / 16}
+	},
+		oddFilter[4][4] = {
+			{1.0f / 64,3.0f / 64,3.0f / 64,1.0f / 64},
+			{3.0f / 64,9.0f / 64,9.0f / 64,3.0f / 64},
+			{3.0f / 64,9.0f / 64,9.0f / 64,3.0f / 64},
+			{1.0f / 64,3.0f / 64,3.0f / 64,1.0f / 64}
+	},
+		mixFilterV[4][3] = {
+			{1.0f / 32,2.0f / 32,1.0f / 32},
+			{3.0f / 32,6.0f / 32,3.0f / 32},
+			{3.0f / 32,6.0f / 32,3.0f / 32},
+			{1.0f / 32,2.0f / 32,1.0f / 32}
+	}, mixFilterH[3][4] = {
+			{1.0f / 32,3.0f / 32,3.0f / 32,1.0f / 32},
+			{2.0f / 32,6.0f / 32,6.0f / 32,2.0f / 32},
+			{1.0f / 32,3.0f / 32,3.0f / 32,1.0f / 32}
+	};
+	//vector<unsigned char> origin(width * height * 4 * 4, 0);
+	unsigned char* origin = new unsigned char[width * 2 * height * 2 * 4];
+
+	for (int j = 0; j < height * 2; j++) {
+		for (int i = 0; i < width * 2; i++) {
+			int sizeX = 0, sizeY = 0;
+			if (i % 2 == 0 && j % 2 == 0) {
+				sizeX = 3;
+				sizeY = 3;
+			}
+			else if (i % 2 && j % 2) {
+				sizeX = 4;
+				sizeY = 4;
+			}
+			else if (i % 2 == 0 && j % 2) {
+				sizeX = 3;
+				sizeY = 4;
+			}
+			else
+			{
+				sizeX = 4;
+				sizeY = 3;
+			}
+			double dst[4] = { 0,0,0,0 };
+			for (int m = 0; m < sizeX; m++) {
+				for (int n = 0; n < sizeY; n++) {
+					int filterX = i / 2 + m - 1, filterY = j / 2 + n - 1;
+					if (filterX < 0)
+						filterX = -filterX;
+					if (filterY < 0)
+						filterY = -filterY;
+					if (filterX > width - 1)
+						filterX = width - 1 - (filterX - (width - 1));
+					if (filterY > height - 1)
+						filterY = height - 1 - (filterY - (height - 1));
+
+					if (i % 2 == 0 && j % 2 == 0) {
+						for (int c = 0; c < 4; c++)
+							dst[c] += evenFilter[n][m] * data[indexOfPixel(filterX, filterY) + c];
+					}
+					else if (i % 2 && j % 2) {
+						for (int c = 0; c < 4; c++)
+							dst[c] += oddFilter[n][m] * data[indexOfPixel(filterX, filterY) + c];
+					}
+					else if (i % 2 == 0 && j % 2) {
+						for (int c = 0; c < 4; c++)
+							dst[c] += mixFilterV[n][m] * data[indexOfPixel(filterX, filterY) + c];
+					}
+					else
+					{
+						for (int c = 0; c < 4; c++)
+							dst[c] += mixFilterH[n][m] * data[indexOfPixel(filterX, filterY) + c];
+					}
+				}
+			}
+			for (int c = 0; c < 4; c++)
+				origin[((width * 2) * j + i)*4 + c] = toValidColor(dst[c]);
+		}
+	}
+
+
+	auto temp = data;
+	data = origin;
+	delete[] temp;
+
+	width *= 2;
+	height *= 2;
+	return true;
 }// Double_Size
 
 
