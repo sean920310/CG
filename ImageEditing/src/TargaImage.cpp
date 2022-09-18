@@ -1031,7 +1031,6 @@ bool TargaImage::Filter_Enhance()
 		data[i + 2] = toValidColor(int(data[i + 2]) + int(data[i + 2] - origin[i + 2]));
 	}
 	return true;
-	return false;
 }// Filter_Enhance
 
 
