@@ -506,25 +506,26 @@ bool TargaImage::Dither_Bright()
 bool TargaImage::Dither_Cluster()
 {
 	this->To_Grayscale();
-	for (int i = 0; i < width * height * 4; i += 4) {
-		int x = i / 4 % width, y = i / 4 / width;
-		float mask[4][4] = {
-			{0.7059,0.3529,0.5882,0.2353},
-			{0.0588,0.9412,0.8235,0.4118},
-			{0.4706,0.7647,0.8824,0.1176},
-			{0.1765,0.5294,0.2941,0.6471}
-		};
-		if (data[i] >= mask[x % 4][y % 4] * 255)
-		{
-			data[i] = 255;
-			data[i + 1] = 255;
-			data[i + 2] = 255;
-		}
-		else
-		{
-			data[i] = 0;
-			data[i + 1] = 0;
-			data[i + 2] = 0;
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			float mask[4][4] = {
+				{0.75,0.375,0.625,0.25},
+				{0.0625,1,0.875,0.4375},
+				{0.5,0.8125,0.9375,0.125},
+				{0.1875,0.5625,0.3125,0.6875}
+			};
+			if (data[indexOfPixel(x,y)] > mask[y % 4][x % 4] * 255)
+			{
+				data[indexOfPixel(x, y)] = 255;
+				data[indexOfPixel(x, y) + 1] = 255;
+				data[indexOfPixel(x, y )+ 2] = 255;
+			}
+			else
+			{
+				data[indexOfPixel(x, y)] = 0;
+				data[indexOfPixel(x, y) + 1] = 0;
+				data[indexOfPixel(x, y) + 2] = 0;
+			}
 		}
 	}
 	return true;
