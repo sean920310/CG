@@ -22,6 +22,8 @@
 #include <tuple>
 #include <algorithm>
 
+# define PI           3.14159265358979323846
+
 using namespace std;
 
 // constants
@@ -1263,8 +1265,59 @@ bool TargaImage::Resize(float scale)
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::Rotate(float angleDegrees)
 {
-	ClearToBlack();
-	return false;
+	double filter[4][4] = {
+			{1.0f / 64,3.0f / 64,3.0f / 64,1.0f / 64},
+			{3.0f / 64,9.0f / 64,9.0f / 64,3.0f / 64},
+			{3.0f / 64,9.0f / 64,9.0f / 64,3.0f / 64},
+			{1.0f / 64,3.0f / 64,3.0f / 64,1.0f / 64}
+	};
+
+	const double SIN = sin(-angleDegrees * PI / 180);
+	const double COS = cos(-angleDegrees * PI / 180);
+
+	unsigned char* rotated = new unsigned char[width * height * 4]();
+
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			int u = i - width / 2, v = j - height / 2;
+
+			int originX = u * COS - v * SIN;
+			int originY = u * SIN + v * COS;
+
+			originX += width / 2;
+			originY += height / 2;
+
+			if (originX >= width || originX < 0 || originY >= height || originY < 0)
+				continue;
+
+			double dst[4] = { 0,0,0,0 };
+			for (int m = 0; m < 4; m++) {
+				for (int n = 0; n < 4; n++) {
+					int filterX = originX + m - 1, filterY = originY + n - 1;
+					if (filterX < 0)
+						filterX = -filterX;
+					if (filterY < 0)
+						filterY = -filterY;
+					if (filterX > width - 1)
+						filterX = width - 1 - (filterX - (width - 1));
+					if (filterY > height - 1)
+						filterY = height - 1 - (filterY - (height - 1));
+
+
+					for (int c = 0; c < 4; c++)
+						dst[c] += filter[n][m] * data[indexOfPixel(filterX, filterY) + c];
+				}
+			}
+			for (int c = 0; c < 4; c++)
+				rotated[(width* j + i) * 4 + c] = toValidColor(dst[c]);
+		}
+	}
+
+	auto temp = data;
+	data = rotated;
+	delete[] temp;
+
+	return true;
 }// Rotate
 
 
