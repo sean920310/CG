@@ -94,6 +94,8 @@ class Maze {
 		// minimum and maximum corners of the window in which to draw.
 		void	Draw_Frustum(int, int, int, int);
 
+		void	Draw_Wall(const float start[2], const float end[2], const float color[3]);
+
 		// Draws the first-person view of the maze. It is passed the focal distance.
 		// THIS IS THE FUINCTION YOU SHOULD MODIFY.
 		void	Draw_View(const float);

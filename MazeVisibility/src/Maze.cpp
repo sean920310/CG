@@ -24,6 +24,8 @@
 #include <time.h>
 #include <FL/Fl.h>
 #include <FL/fl_draw.h>
+#include <Fl/gl.h>
+#include <GL/glu.h>
 
 const char Maze::X = 0;
 const char Maze::Y = 1;
@@ -621,6 +623,21 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 }
 
 
+void Maze::
+Draw_Wall(const float start[2], const float end[2], const float color[3])
+{
+	float edge0[3] = { start[Y], 0.0f, start[X] };
+	float edge1[3] = { end[Y], 0.0f, end[X] };
+	glBegin(GL_POLYGON);
+	glColor3fv(color);
+	glVertex3f(edge0[X], 1.0f, edge0[Z]);
+	glVertex3f(edge1[X], 1.0f, edge1[Z]);
+	glVertex3f(edge1[X], -1.0f, edge1[Z]);
+	glVertex3f(edge0[X], -1.0f, edge0[Z]);
+	glEnd();
+}
+
+
 //**********************************************************************
 //
 // * Draws the first-person view of the maze. It is passed the focal distance.
@@ -636,6 +653,22 @@ Draw_View(const float focal_dist)
 	// TODO
 	// The rest is up to you!
 	//###################################################################
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+	for (int i = 0; i < (int)this->num_edges; i++)
+	{
+		float edge_start[2] = {
+			this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
+			this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y] };
+		float edge_end[2] = {
+			this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],
+			this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y] };
+
+		float color[3] = { this->edges[i]->color[0],this->edges[i]->color[1],this->edges[i]->color[2] };
+		if (this->edges[i]->opaque)
+			Draw_Wall(edge_start, edge_end, color);
+	}
 }
 
 

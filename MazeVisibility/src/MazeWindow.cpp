@@ -118,6 +118,25 @@ draw(void)
 		// Note that all the information that is required to do the
 		// transformations and projection is contained in the Maze class,
 		// plus the focal length.
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
+		float aspect = (float)w() / h();
+		gluPerspective(maze->viewer_fov, aspect, 0.01, 200);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		float viewer_pos[3] = { maze->viewer_posn[Maze::Y] , 0.0f , maze->viewer_posn[Maze::X] };
+		gluLookAt(viewer_pos[Maze::X], viewer_pos[Maze::Y], viewer_pos[Maze::Z],
+			viewer_pos[Maze::X] + sin(Maze::To_Radians(maze->viewer_dir)),
+			viewer_pos[Maze::Y],
+			viewer_pos[Maze::Z] + cos(Maze::To_Radians(maze->viewer_dir)),
+			0.0, 1.0, 0.0);
+
 		maze->Draw_View(focal_length);
 	}
 }
