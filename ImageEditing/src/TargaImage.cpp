@@ -885,33 +885,59 @@ bool TargaImage::Filter_Gaussian()
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+long binomialCal(int n, int k) {
+	if (n == k)
+		return 1;
+	else if (k > 0)
+		return binomialCal(n - 1, k) + binomialCal(n - 1, k - 1);
+	else
+		return 1;
+}
+
 bool TargaImage::Filter_Gaussian_N(unsigned int N)
 {
-	vector<vector<float>> filter(N, vector<float>(N, 0));
+	vector<vector<double>> filter(N, vector<double>(N, 0));
 	//Gaussian Function
 	//N * N matrix
-	float total = 0;
+	double total = 0;
+	//for (int i = 0; i < N; i++) {
+	//	for (int j = 0; j < N; j++) {
+	//		filter[i][j] = exp(-(pow(i - int(N / 2), 2) + pow(j - int(N / 2), 2)) / 2.0);
+	//		total += filter[i][j];
+	//	}
+	//}
+	//for (int i = 0; i < N; i++) {
+	//	for (int j = 0; j < N; j++) {
+	//		filter[i][j] /= total;
+	//		//cout << filter[i][j] << " ";
+	//	}
+	//	//cout << endl;
+	//}
+
+	vector<double> binomial(N,0);
+	for (int i = 0; i < N; i++)
+	{
+		binomial[i] = binomialCal(N-1,i);
+	}
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
-			filter[i][j] = exp(-(pow(i - int(N / 2), 2) + pow(j - int(N / 2), 2)) / 2);
+			filter[i][j] = binomial[i]* binomial[j];
 			total += filter[i][j];
 		}
 	}
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
 			filter[i][j] /= total;
-			cout << filter[i][j] << " ";
 		}
-		cout << endl;
 	}
 
-	vector<unsigned char> origin(width * height * 4, 0);
+	unsigned char* origin = new unsigned char[width * 2 * height * 2 * 4];
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			float dst[3] = { 0,0,0 };
+			double dst[3] = { 0,0,0 };
 			for (int m = 0; m < N; m++) {
 				for (int n = 0; n < N; n++) {
-					int filterX = i + m - (N / 2), filterY = j + n - (N / 2);
+					int filterX = i + m - int(N / 2), filterY = j + n - int(N / 2);
 					if (filterX < 0)
 						filterX = -filterX;
 					if (filterY < 0)
@@ -926,14 +952,13 @@ bool TargaImage::Filter_Gaussian_N(unsigned int N)
 			}
 			for (int c = 0; c < 3; c++)
 				origin[indexOfPixel(i, j) + c] = toValidColor(dst[c]);
+			origin[indexOfPixel(i, j) + 3] = data[indexOfPixel(i, j) + 3];
 		}
 	}
 
-	for (int i = 0; i < width * height * 4; i += 4) {
-		data[i] = origin[i];
-		data[i + 1] = origin[i + 1];
-		data[i + 2] = origin[i + 2];
-	}
+	auto temp = data;
+	data = origin;
+	delete[] temp;
 	return true;
 }// Filter_Gaussian_N
 
@@ -1046,11 +1071,66 @@ bool TargaImage::Filter_Enhance()
 ///////////////////////////////////////////////////////////////////////////////
 bool TargaImage::NPR_Paint()
 {
-	ClearToBlack();
-	return false;
+	int radius[3] = {7,3,1 };
+	TargaImage origin(width,height, data), canvas(width,height);
+	for (int i = 0; i < 3; i++) {
+		origin.Filter_Gaussian_N(2 * radius[i] + 1);
+		origin.paintLayer(canvas, radius[i]);
+	}
+	for (int i = 0; i < width * height * 4; i++)
+		data[i] = canvas.data[i];
+	return true;
 }
 
+void TargaImage::paintLayer(TargaImage& canvas, int R) {
+	vector<Stroke> Strokes;
+	vector<vector<double>> difference(height, vector<double>(width, 0));
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			int r1 = canvas.data[indexOfPixel(i, j)];     
+			int r2 = data[indexOfPixel(i, j)];
+			int g1 = canvas.data[indexOfPixel(i, j)+1];
+			int g2 = data[indexOfPixel(i, j)+1];
+			int b1 = canvas.data[indexOfPixel(i, j)+2];
+			int b2 = data[indexOfPixel(i, j)+2];
+			difference[j][i] = sqrt(pow(r1 - r2,2) + pow(g1 - g2,2) + pow(b1 - b2,2));
+		}
+	}
 
+	double fg = 1;
+	int T = 25;
+	int grid = fg * R;
+	for (int x = 0; x < width; x += grid) {
+		for (int y = 0; y < height; y += grid) {
+			double areaError = 0.0, maxErr = 0.0;
+			int x1=0, y1=0;
+			for (int i = x - grid/2; i < x + grid/2; i++) {
+				for (int j = y - grid/2; j < y + grid/2; j++) {
+					if (i<0 || i>=width || j<0 || j>=height)
+						continue;
+					areaError += difference[j][i];
+					if (difference[j][i] > maxErr) {
+						maxErr = difference[j][i];
+						x1 = i;
+						y1 = j;
+					}
+				}
+			}
+
+			areaError /= pow(grid,2);
+			if (areaError > T) {
+				Stroke s(Stroke(R, x1, y1, data[indexOfPixel(x1, y1)], data[indexOfPixel(x1, y1) + 1], data[indexOfPixel(x1, y1) + 2], data[indexOfPixel(x1, y1) + 3]));
+				Strokes.push_back(s);
+			}
+		}
+	}
+
+	while (Strokes.size()) {
+		int index = rand() % Strokes.size();
+		canvas.Paint_Stroke(Strokes[index]);
+		Strokes.erase(Strokes.begin() + index);
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -1223,7 +1303,7 @@ bool TargaImage::Resize(float scale)
 
 	for (int j = 0; j < newHeight; j++) {
 		for (int i = 0; i < newWidth; i++) {
-			double dst[4] = { 0,0,0,0 };
+			/*double dst[4] = { 0,0,0,0 };
 			for (int m = 0; m < 4; m++) {
 				for (int n = 0; n < 4; n++) {
 					int filterX = i / scale + m - 1, filterY = j / scale + n - 1;
@@ -1243,7 +1323,9 @@ bool TargaImage::Resize(float scale)
 				}
 			}
 			for (int c = 0; c < 4; c++)
-				origin[((newWidth) * j + i) * 4 + c] = toValidColor(dst[c]);
+				origin[((newWidth) * j + i) * 4 + c] = toValidColor(dst[c]);*/
+			for (int c = 0; c < 4; c++)
+				origin[((newWidth)*j + i) * 4 + c] = data[indexOfPixel(i / scale, j / scale) + c];
 		}
 	}
 
@@ -1253,6 +1335,7 @@ bool TargaImage::Resize(float scale)
 
 	width = newWidth;
 	height = newHeight;
+	Filter_Bartlett();
 	return true;
 }// Resize
 

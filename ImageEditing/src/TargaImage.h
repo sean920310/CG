@@ -64,6 +64,7 @@ class TargaImage
         bool Filter_Enhance();
 
         bool NPR_Paint();
+        void paintLayer(TargaImage& canvas, int R);
 
         bool Half_Size();
         bool Double_Size();
