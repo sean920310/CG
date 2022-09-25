@@ -622,6 +622,46 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 		}
 }
 
+void Maze::
+LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ)
+{
+	Vector3 eye(eyeX, eyeY, eyeZ), center(centerX, centerY, centerZ), up(upX, upY, upZ);
+	Vector3 forward = eye - center;
+	forward.normalize();                 // make unit length
+
+	// compute the left vector
+	Vector3 left = up.cross(forward); // cross product
+	left.normalize();
+
+	// recompute the orthonormal up vector
+	Vector3 upDir = forward.cross(left);    // cross product
+
+	// init 4x4 matrix
+	double matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+
+	//// set rotation part, inverse rotation matrix: M^-1 = M^T for Euclidean transform
+	matrix[0] = left.x;
+	matrix[4] = left.y;
+	matrix[8] = left.z;
+	matrix[1] = upDir.x;
+	matrix[5] = upDir.y;
+	matrix[9] = upDir.z;
+	matrix[2] = forward.x;
+	matrix[6] = forward.y;
+	matrix[10] = forward.z;
+
+	//// set translation part
+	matrix[12] = -left.x * eye.x - left.y * eye.y - left.z * eye.z;
+	matrix[13] = -upDir.x * eye.x - upDir.y * eye.y - upDir.z * eye.z;
+	matrix[14] = -forward.x * eye.x - forward.y * eye.y - forward.z * eye.z;
+
+	/*for (int i = 0; i < 4; i++)
+		printf("%f %f %f %f\n", matrix[0 * 4 + i], matrix[1 * 4 + i], matrix[2 * 4 + i], matrix[3 * 4 + i]);
+	printf("\n");*/
+
+	memcpy(ModelViewMatrix, matrix, 16*sizeof(double));
+}
+
 
 void Maze::
 Draw_Wall(const float start[2], const float end[2], const float color[3])

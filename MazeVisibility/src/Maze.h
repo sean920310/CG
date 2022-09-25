@@ -94,6 +94,8 @@ class Maze {
 		// minimum and maximum corners of the window in which to draw.
 		void	Draw_Frustum(int, int, int, int);
 
+		void	inverseMatrix();
+		void	LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
 		void	Draw_Wall(const float start[2], const float end[2], const float color[3]);
 
 		// Draws the first-person view of the maze. It is passed the focal distance.
@@ -153,7 +155,42 @@ class Maze {
 											// looking. Measured in degrees about the z
 											// axis, in the usual way.
 		float		viewer_fov;			// The horizontal field of view, in degrees.
+
+		double		ModelViewMatrix[16];
+		double		ProjectionMatrix[16];
 };
+
+typedef struct Vector3
+{
+	double x;
+	double y;
+	double z;
+
+	Vector3(double x,double y,double z)
+		:x(x),y(y),z(z){}
+
+	Vector3 operator-(const Vector3& rhs)
+	{
+		return Vector3(x - rhs.x, y - rhs.y, z - rhs.z);
+	}
+
+	Vector3 operator+(const Vector3& rhs)
+	{
+		return Vector3(x + rhs.x, y + rhs.y, z + rhs.z);
+	}
+
+	void normalize() 
+	{
+		double len = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+		x /= len;
+		y /= len;
+		z /= len;
+	}
+	Vector3 cross(const Vector3& rhs)
+	{
+		return Vector3(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
+	}
+}Vector3;
 
 
 #endif

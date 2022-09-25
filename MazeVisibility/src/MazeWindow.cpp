@@ -131,14 +131,21 @@ draw(void)
 		glLoadIdentity();
 
 		float viewer_pos[3] = { maze->viewer_posn[Maze::Y] , 0.0f , maze->viewer_posn[Maze::X] };
-		gluLookAt(viewer_pos[Maze::X], viewer_pos[Maze::Y], viewer_pos[Maze::Z],
+		maze->LookAt(viewer_pos[Maze::X], viewer_pos[Maze::Y], viewer_pos[Maze::Z],
 			viewer_pos[Maze::X] + sin(Maze::To_Radians(maze->viewer_dir)),
 			viewer_pos[Maze::Y],
 			viewer_pos[Maze::Z] + cos(Maze::To_Radians(maze->viewer_dir)),
 			0.0, 1.0, 0.0);
 
+		glLoadMatrixd(maze->ModelViewMatrix);
+
 		maze->Draw_View(focal_length);
 	}
+	GLfloat ptr[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, ptr);
+	for (int i = 0; i < 4; i++)
+		printf("%f %f %f %f\n", ptr[0 * 4 + i], ptr[1 * 4 + i], ptr[2 * 4 + i], ptr[3 * 4 + i]);
+	printf("\n");
 }
 
 
