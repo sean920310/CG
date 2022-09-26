@@ -125,7 +125,8 @@ draw(void)
 		glLoadIdentity();
 
 		float aspect = (float)w() / h();
-		gluPerspective(maze->viewer_fov, aspect, 0.01, 200);
+		maze->Perspective(maze->viewer_fov, aspect, 0.01, 200);
+		glLoadMatrixd(maze->ProjectionMatrix);
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();

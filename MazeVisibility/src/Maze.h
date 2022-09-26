@@ -94,7 +94,7 @@ class Maze {
 		// minimum and maximum corners of the window in which to draw.
 		void	Draw_Frustum(int, int, int, int);
 
-		void	inverseMatrix();
+		void	Perspective(double fovy, double aspect, double nearZ, double farZ);
 		void	LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
 		void	Draw_Wall(const float start[2], const float end[2], const float color[3]);
 

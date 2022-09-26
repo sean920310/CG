@@ -623,6 +623,34 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 }
 
 void Maze::
+Perspective(double fovy, double aspect, double nearZ, double farZ)
+{
+	double matrix[16];
+	double left = -nearZ * tan(To_Radians(fovy / 2)), right = nearZ * tan(To_Radians(fovy / 2));
+	double top = right / aspect, bottom = left / aspect;
+	
+
+	matrix[0] = 2 * nearZ / (right - left);
+	matrix[1] = 0;
+	matrix[2] = 0;
+	matrix[3] = 0;
+	matrix[4] = 0;
+	matrix[5] = 2 * nearZ / (top - bottom);
+	matrix[6] = 0;
+	matrix[7] = 0;
+	matrix[8] = (right + left) / (right - left);
+	matrix[9] = (top + bottom) / (top - bottom);
+	matrix[10] = -(farZ + nearZ) / (farZ - nearZ);
+	matrix[11] = -1;
+	matrix[12] = 0;
+	matrix[13] = 0;
+	matrix[14] = -2 * farZ * nearZ / (farZ - nearZ);
+	matrix[15] = 0;
+
+	memcpy(ProjectionMatrix, matrix, 16 * sizeof(double));
+}
+
+void Maze::
 LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ)
 {
 	Vector3 eye(eyeX, eyeY, eyeZ), center(centerX, centerY, centerZ), up(upX, upY, upZ);
@@ -637,7 +665,7 @@ LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, do
 	Vector3 upDir = forward.cross(left);    // cross product
 
 	// init 4x4 matrix
-	double matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+	double matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};	//identity matrix
 
 	//// set rotation part, inverse rotation matrix: M^-1 = M^T for Euclidean transform
 	matrix[0] = left.x;
