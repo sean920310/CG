@@ -78,3 +78,28 @@ Cross_Param(LineSeg e)
 
 	return s / denom;
 }
+
+char LineSeg::
+Point_Side(float x, float y)
+{
+	// Compute the determinant: | xs ys 1 |
+	//                          | xe ye 1 |
+	//                          | x  y  1 |
+	// Use its sign to get the answer.
+
+	float   det;
+	
+	det = start[Vertex::X] *
+		(end[Vertex::Y] - y) -
+		start[Vertex::Y] *
+		(end[Vertex::X] - x) +
+		end[Vertex::X] * y -
+		end[Vertex::Y] * x;
+
+	if (det == 0.0)
+		return Edge::ON;
+	else if (det > 0.0)
+		return Edge::LEFT;
+	else
+		return Edge::RIGHT;
+}

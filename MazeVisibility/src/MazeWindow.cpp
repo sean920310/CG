@@ -81,7 +81,11 @@ draw(void)
 		// Sets the clear color to black.
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 	}
-
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity(); 
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glClear(GL_DEPTH_BUFFER_BIT);
 	// Clear the screen.
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -119,17 +123,8 @@ draw(void)
 		// transformations and projection is contained in the Maze class,
 		// plus the focal length.
 
-		glClear(GL_DEPTH_BUFFER_BIT);
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
 		float aspect = (float)w() / h();
 		maze->Perspective(maze->viewer_fov, aspect, 0.01, 200);
-		glLoadMatrixd(maze->ProjectionMatrix);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
 
 		float viewer_pos[3] = { maze->viewer_posn[Maze::Y] , 0.0f , maze->viewer_posn[Maze::X] };
 		maze->LookAt(viewer_pos[Maze::X], viewer_pos[Maze::Y], viewer_pos[Maze::Z],
@@ -138,15 +133,12 @@ draw(void)
 			viewer_pos[Maze::Z] + cos(Maze::To_Radians(maze->viewer_dir)),
 			0.0, 1.0, 0.0);
 
-		glLoadMatrixd(maze->ModelViewMatrix);
-
 		maze->Draw_View(focal_length);
+		for (int i = 0; i < 4; i++)
+			printf("%f %f %f %f\n", maze->ModelViewMatrix[0 * 4 + i], maze->ModelViewMatrix[1 * 4 + i], maze->ModelViewMatrix[2 * 4 + i], maze->ModelViewMatrix[3 * 4 + i]);
+		printf("\n");
 	}
-	GLfloat ptr[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, ptr);
-	for (int i = 0; i < 4; i++)
-		printf("%f %f %f %f\n", ptr[0 * 4 + i], ptr[1 * 4 + i], ptr[2 * 4 + i], ptr[3 * 4 + i]);
-	printf("\n");
+
 }
 
 

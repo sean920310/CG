@@ -38,6 +38,7 @@ class LineSeg {
 		// But you can use tests like Edge::Point_Side() to figure that out.
 		float   Cross_Param(LineSeg);
 
+		char	Point_Side(float x, float y);
 	public:
 		float   start[2];	// Starting point, x and y.
 		float   end[2];	// Ending point, x and y.

@@ -625,6 +625,8 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 void Maze::
 Perspective(double fovy, double aspect, double nearZ, double farZ)
 {
+	this->nearZ = nearZ;
+	this->farZ = farZ;
 	double matrix[16];
 	double left = -nearZ * tan(To_Radians(fovy / 2)), right = nearZ * tan(To_Radians(fovy / 2));
 	double top = right / aspect, bottom = left / aspect;
@@ -654,34 +656,33 @@ void Maze::
 LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ)
 {
 	Vector3 eye(eyeX, eyeY, eyeZ), center(centerX, centerY, centerZ), up(upX, upY, upZ);
-	Vector3 forward = eye - center;
-	forward.normalize();                 // make unit length
+	Vector3 rZ = eye - center;
+	rZ.normalize();                 
 
-	// compute the left vector
-	Vector3 left = up.cross(forward); // cross product
-	left.normalize();
+	Vector3 rX = up.cross(rZ); 
+	rX.normalize();
 
-	// recompute the orthonormal up vector
-	Vector3 upDir = forward.cross(left);    // cross product
+	Vector3 rY = rZ.cross(rX);
 
-	// init 4x4 matrix
 	double matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};	//identity matrix
 
-	//// set rotation part, inverse rotation matrix: M^-1 = M^T for Euclidean transform
-	matrix[0] = left.x;
-	matrix[4] = left.y;
-	matrix[8] = left.z;
-	matrix[1] = upDir.x;
-	matrix[5] = upDir.y;
-	matrix[9] = upDir.z;
-	matrix[2] = forward.x;
-	matrix[6] = forward.y;
-	matrix[10] = forward.z;
+	// Rotation
+	matrix[0] = rX.x;
+	matrix[1] = rY.x;
+	matrix[2] = rZ.x;
+	
+	matrix[4] = rX.y;
+	matrix[5] = rY.y;
+	matrix[6] = rZ.y;
 
-	//// set translation part
-	matrix[12] = -left.x * eye.x - left.y * eye.y - left.z * eye.z;
-	matrix[13] = -upDir.x * eye.x - upDir.y * eye.y - upDir.z * eye.z;
-	matrix[14] = -forward.x * eye.x - forward.y * eye.y - forward.z * eye.z;
+	matrix[8] = rX.z;
+	matrix[9] = rY.z;
+	matrix[10] = rZ.z;
+
+	// Translation
+	matrix[12] = -rX.x * eye.x - rX.y * eye.y - rX.z * eye.z;
+	matrix[13] = -rY.x * eye.x - rY.y * eye.y - rY.z * eye.z;
+	matrix[14] = -rZ.x * eye.x - rZ.y * eye.y - rZ.z * eye.z;
 
 	/*for (int i = 0; i < 4; i++)
 		printf("%f %f %f %f\n", matrix[0 * 4 + i], matrix[1 * 4 + i], matrix[2 * 4 + i], matrix[3 * 4 + i]);
@@ -705,6 +706,123 @@ Draw_Wall(const float start[2], const float end[2], const float color[3])
 	glEnd();
 }
 
+bool Maze::
+Clip(LineSeg line, float start[4], float end[4])
+{
+	const char startSide = line.Point_Side(start[0], start[2]);
+	const char endSide = line.Point_Side(end[0], end[2]);
+	if (startSide == Edge::RIGHT) {		//開始點在視錐射線的右邊
+		if (endSide == Edge::LEFT) {	//結束點在視錐射線的左邊
+			//狀況1
+			//結束點在視錐外
+			//所以要更新結束點到牆與視錐射線的交叉點
+			float param = line.Cross_Param(LineSeg(start[0], start[2], end[0], end[2]));
+			end[0] = line.start[0] + (line.end[0] - line.start[0]) * param;
+			end[2] = line.start[1] + (line.end[1] - line.start[1]) * param;
+		}
+		else {
+			//狀況2
+			//啥都不用更新，這面牆完全在視錐內
+		}
+	}
+	else if (endSide == Edge::RIGHT) {						//結束點在視錐射線的右邊
+		//狀況3
+		//開始點在視錐外
+		//所以要更新開始點到牆與視錐射線的交叉點
+		float param = line.Cross_Param(LineSeg(start[0], start[2], end[0], end[2]));
+		start[0] = line.start[0] + (line.end[0] - line.start[0]) * param;
+		start[2] = line.start[1] + (line.end[1] - line.start[1]) * param;
+	}
+	else {
+		//狀況4
+		//不用畫，直接跑下個牆(edge)
+		return false;
+	}
+	return true;
+}
+
+
+void Maze::
+Draw_Cell(Cell* tc, LineSeg L_point, LineSeg R_point)	//L,R 是視錐的左右射線
+{
+	tc->bFootPrint = true;			//Use it to determine whether to repeat
+	LineSeg front(R_point.end[0], R_point.end[1], L_point.start[0], L_point.start[1]);
+	for (int i = 0; i < 4; i++)
+	{
+		LineSeg edgeLine(tc->edges[i]);
+		float start[4] = { edgeLine.start[1],1.0,edgeLine.start[0],1.0 };
+		float end[4] = { edgeLine.end[1],1.0,edgeLine.end[0],1.0 };
+		for (int n = 0; n < 4; n++)		//ModelViewMatrix * start
+			start[n] = this->ModelViewMatrix[n] * start[0] + this->ModelViewMatrix[n + 4] * start[1] + this->ModelViewMatrix[n + 8] * start[2] + this->ModelViewMatrix[n + 12] + start[3];
+		for (int n = 0; n < 4; n++)		//ModelViewMatrix * start
+			end[n] = this->ModelViewMatrix[n] * end[0] + this->ModelViewMatrix[n + 4] * end[1] + this->ModelViewMatrix[n + 8] * end[2] + this->ModelViewMatrix[n + 12] + end[3];
+		if (!Clip(L_point, start, end) || !Clip(R_point, start, end)) continue;
+		edgeLine.start[0] = start[0];//把切過後的丟回來
+		edgeLine.start[1] = start[2];//把切過後的丟回來
+		edgeLine.end[0] = end[0];//把切過後的丟回來
+		edgeLine.end[1] = end[2];//把切過後的丟回來
+
+
+
+		if (tc->edges[i]->opaque)		//opaque不透明
+		{
+				//By the relationship between view and edge[i],draw wall
+				if (!Clip(front, start, end)) continue;
+				for (int n = 0; n < 4; n++)		//ProjectionMatrix * start
+					start[n] = this->ProjectionMatrix[n] * start[0] + this->ProjectionMatrix[n + 4] * start[1] + this->ProjectionMatrix[n + 8] * start[2] + this->ProjectionMatrix[n + 12] + start[3];
+				for (int n = 0; n < 4; n++)		//ProjectionMatrix * start
+					end[n] = this->ProjectionMatrix[n] * end[0] + this->ProjectionMatrix[n + 4] * end[1] + this->ProjectionMatrix[n + 8] * end[2] + this->ProjectionMatrix[n + 12] + end[3];
+				if (start[3] < nearZ && end[3] < nearZ) continue;
+				for (int n = 0; n < 4; n++)
+					start[n] /= start[3];
+				for (int n = 0; n < 4; n++)
+					end[n] /= end[3];
+
+				glBegin(GL_POLYGON);
+				glColor3fv(tc->edges[i]->color);
+				glVertex2f(start[0], start[1]);
+				glVertex2f(end[0], end[1]);
+				glVertex2f(end[0], -end[1]);
+				glVertex2f(start[0], -start[1]);
+				glEnd();
+		}
+		else
+		{
+			//if (!(tc->edges[i]->Neighbor(tc)->bFootPrint))		//avoid repeat cell
+			//{
+			//	//By the relationship between view and Transparent edge, clipping view,and pass next cell
+			//	Draw_Cell(tc->edges[i]->Neighbor(tc), new_L, new_R);
+			//}
+			if (tc->edges[i]->Neighbor(tc) == NULL) continue;
+			static float pre_Lx = 0.0f, pre_Rx = 0.0f, pre_Ly = 0.0f, pre_Ry = 0.0f; //因下面的if else if 可能都不會進去，所以要讓之前的值維持，才不會沒初始化變數就呼叫function
+			float Lx = pre_Lx, Rx = pre_Rx, Ly = pre_Ly, Ry = pre_Ry;
+
+			LineSeg midline(0.0f, 0.0f, (edgeLine.start[0] + edgeLine.end[0]) * 0.5, (edgeLine.start[1] + edgeLine.end[1]) * 0.5);
+			if (midline.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::LEFT && midline.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::RIGHT) {
+				Lx = edgeLine.start[0];
+				Ly = edgeLine.start[1];
+				Rx = edgeLine.end[0];
+				Ry = edgeLine.end[1];
+			}
+			else if (midline.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT && midline.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::LEFT) {
+				Lx = edgeLine.end[0];
+				Ly = edgeLine.end[1];
+				Rx = edgeLine.start[0];
+				Ry = edgeLine.start[1];
+			}
+			pre_Lx = Lx;
+			pre_Rx = Rx;
+			pre_Ly = Ly;
+			pre_Ry = Ry;
+			LineSeg newL(Lx, Ly, Lx / Ly * -farZ, -farZ);
+			LineSeg newR(Rx / Ry * -farZ, -farZ, Rx, Ry);
+			if (!tc->edges[i]->Neighbor(tc)->bFootPrint && fabs((Lx / Ly * -farZ) - (Rx / Ry * -farZ)) > 0.00001) {
+				Draw_Cell(tc->edges[i]->Neighbor(tc), newL, newR);
+			}
+		}
+	}
+}
+
 
 //**********************************************************************
 //
@@ -721,10 +839,10 @@ Draw_View(const float focal_dist)
 	// TODO
 	// The rest is up to you!
 	//###################################################################
-	glClear(GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
-	for (int i = 0; i < (int)this->num_edges; i++)
+	//glEnable(GL_DEPTH_TEST);
+	/*for (int i = 0; i < (int)this->num_edges; i++)
 	{
 		float edge_start[2] = {
 			this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
@@ -736,7 +854,12 @@ Draw_View(const float focal_dist)
 		float color[3] = { this->edges[i]->color[0],this->edges[i]->color[1],this->edges[i]->color[2] };
 		if (this->edges[i]->opaque)
 			Draw_Wall(edge_start, edge_end, color);
-	}
+	}*/
+	for (int i = 0; i < num_cells; i++)
+		cells[i]->bFootPrint = false;
+	Draw_Cell(view_cell,
+		LineSeg(nearZ * tan(To_Radians(viewer_fov * 0.5f)), -nearZ, farZ * tan(To_Radians(viewer_fov * 0.5f)), -farZ),
+		LineSeg(-farZ * tan(To_Radians(viewer_fov * 0.5f)), -farZ, -nearZ * tan(To_Radians(viewer_fov * 0.5f)), -nearZ));
 }
 
 
