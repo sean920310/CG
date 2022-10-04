@@ -132,11 +132,16 @@ draw(void)
 			viewer_pos[Maze::Y],
 			viewer_pos[Maze::Z] + cos(Maze::To_Radians(maze->viewer_dir)),
 			0.0, 1.0, 0.0);
+		/*glMatrixMode(GL_PROJECTION);
+		glLoadMatrixd(maze->ProjectionMatrix);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixd(maze->ModelViewMatrix);*/
+
 
 		maze->Draw_View(focal_length);
-		for (int i = 0; i < 4; i++)
+		/*for (int i = 0; i < 4; i++)
 			printf("%f %f %f %f\n", maze->ModelViewMatrix[0 * 4 + i], maze->ModelViewMatrix[1 * 4 + i], maze->ModelViewMatrix[2 * 4 + i], maze->ModelViewMatrix[3 * 4 + i]);
-		printf("\n");
+		printf("\n");*/
 	}
 
 }

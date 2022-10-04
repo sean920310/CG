@@ -747,31 +747,41 @@ Draw_Cell(Cell* tc, LineSeg L_point, LineSeg R_point)	//L,R 是視錐的左右射線
 {
 	tc->bFootPrint = true;			//Use it to determine whether to repeat
 	LineSeg front(R_point.end[0], R_point.end[1], L_point.start[0], L_point.start[1]);
+
 	for (int i = 0; i < 4; i++)
 	{
 		LineSeg edgeLine(tc->edges[i]);
 		float start[4] = { edgeLine.start[1],1.0,edgeLine.start[0],1.0 };
 		float end[4] = { edgeLine.end[1],1.0,edgeLine.end[0],1.0 };
-		for (int n = 0; n < 4; n++)		//ModelViewMatrix * start
-			start[n] = this->ModelViewMatrix[n] * start[0] + this->ModelViewMatrix[n + 4] * start[1] + this->ModelViewMatrix[n + 8] * start[2] + this->ModelViewMatrix[n + 12] + start[3];
-		for (int n = 0; n < 4; n++)		//ModelViewMatrix * start
-			end[n] = this->ModelViewMatrix[n] * end[0] + this->ModelViewMatrix[n + 4] * end[1] + this->ModelViewMatrix[n + 8] * end[2] + this->ModelViewMatrix[n + 12] + end[3];
-		if (!Clip(L_point, start, end) || !Clip(R_point, start, end)) continue;
-		edgeLine.start[0] = start[0];//把切過後的丟回來
-		edgeLine.start[1] = start[2];//把切過後的丟回來
-		edgeLine.end[0] = end[0];//把切過後的丟回來
-		edgeLine.end[1] = end[2];//把切過後的丟回來
+		float temp[4];
 
+		memcpy(temp, start, sizeof(float) * 4);
+		for (int n = 0; n < 4; n++)		//ModelViewMatrix * start
+			start[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
+		
+		memcpy(temp, end, sizeof(float) * 4);
+		for (int n = 0; n < 4; n++)		//ModelViewMatrix * end
+			end[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
+
+		if (!Clip(L_point, start, end) || !Clip(R_point, start, end)) continue;
+		
+		//把切過後的丟回來
+		edgeLine.start[0] = start[0];
+		edgeLine.start[1] = start[2];
+		edgeLine.end[0] = end[0];
+		edgeLine.end[1] = end[2];
 
 
 		if (tc->edges[i]->opaque)		//opaque不透明
 		{
 				//By the relationship between view and edge[i],draw wall
 				if (!Clip(front, start, end)) continue;
+				memcpy(temp, start, sizeof(float) * 4);
 				for (int n = 0; n < 4; n++)		//ProjectionMatrix * start
-					start[n] = this->ProjectionMatrix[n] * start[0] + this->ProjectionMatrix[n + 4] * start[1] + this->ProjectionMatrix[n + 8] * start[2] + this->ProjectionMatrix[n + 12] + start[3];
-				for (int n = 0; n < 4; n++)		//ProjectionMatrix * start
-					end[n] = this->ProjectionMatrix[n] * end[0] + this->ProjectionMatrix[n + 4] * end[1] + this->ProjectionMatrix[n + 8] * end[2] + this->ProjectionMatrix[n + 12] + end[3];
+					start[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
+				memcpy(temp, end, sizeof(float) * 4);
+				for (int n = 0; n < 4; n++)		//ProjectionMatrix * end
+					end[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
 				if (start[3] < nearZ && end[3] < nearZ) continue;
 				for (int n = 0; n < 4; n++)
 					start[n] /= start[3];
@@ -842,24 +852,24 @@ Draw_View(const float focal_dist)
 	//glClear(GL_DEPTH_BUFFER_BIT);
 
 	//glEnable(GL_DEPTH_TEST);
-	/*for (int i = 0; i < (int)this->num_edges; i++)
-	{
-		float edge_start[2] = {
-			this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
-			this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y] };
-		float edge_end[2] = {
-			this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],
-			this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y] };
+	//for (int i = 0; i < (int)this->num_edges; i++)
+	//{
+	//	float edge_start[2] = {
+	//		this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
+	//		this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y] };
+	//	float edge_end[2] = {
+	//		this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],
+	//		this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y] };
 
-		float color[3] = { this->edges[i]->color[0],this->edges[i]->color[1],this->edges[i]->color[2] };
-		if (this->edges[i]->opaque)
-			Draw_Wall(edge_start, edge_end, color);
-	}*/
+	//	float color[3] = { this->edges[i]->color[0],this->edges[i]->color[1],this->edges[i]->color[2] };
+	//	if (this->edges[i]->opaque)
+	//		Draw_Wall(edge_start, edge_end, color);
+	//}
 	for (int i = 0; i < num_cells; i++)
 		cells[i]->bFootPrint = false;
 	Draw_Cell(view_cell,
-		LineSeg(nearZ * tan(To_Radians(viewer_fov * 0.5f)), -nearZ, farZ * tan(To_Radians(viewer_fov * 0.5f)), -farZ),
-		LineSeg(-farZ * tan(To_Radians(viewer_fov * 0.5f)), -farZ, -nearZ * tan(To_Radians(viewer_fov * 0.5f)), -nearZ));
+		LineSeg(nearZ * tan(To_Radians(viewer_fov / 2)), -nearZ, farZ * tan(To_Radians(viewer_fov / 2)), -farZ),
+		LineSeg(-farZ * tan(To_Radians(viewer_fov / 2)), -farZ, -nearZ * tan(To_Radians(viewer_fov / 2)), -nearZ));
 }
 
 
