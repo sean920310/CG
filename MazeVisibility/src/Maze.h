@@ -98,7 +98,7 @@ class Maze {
 		void	Perspective(double fovy, double aspect, double nearZ, double farZ);
 		void	LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ);
 		void	Draw_Wall(const float start[2], const float end[2], const float color[3]);
-		void	Draw_Cell(Cell* tc, LineSeg L_point, LineSeg R_point);
+		void	Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine);
 		bool	Clip(LineSeg line, float start[4], float end[4]);
 
 		// Draws the first-person view of the maze. It is passed the focal distance.

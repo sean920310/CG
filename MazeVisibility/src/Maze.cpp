@@ -743,10 +743,10 @@ Clip(LineSeg line, float start[4], float end[4])
 
 
 void Maze::
-Draw_Cell(Cell* tc, LineSeg L_point, LineSeg R_point)	//L,R 是視錐的左右射線
+Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 {
 	tc->bFootPrint = true;			//Use it to determine whether to repeat
-	LineSeg front(R_point.end[0], R_point.end[1], L_point.start[0], L_point.start[1]);
+	LineSeg front(rightLine.end[0], rightLine.end[1], leftLine.start[0], leftLine.start[1]);
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -763,7 +763,8 @@ Draw_Cell(Cell* tc, LineSeg L_point, LineSeg R_point)	//L,R 是視錐的左右射線
 		for (int n = 0; n < 4; n++)		//ModelViewMatrix * end
 			end[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
 
-		if (!Clip(L_point, start, end) || !Clip(R_point, start, end)) continue;
+		if (!Clip(leftLine, start, end) || !Clip(rightLine, start, end)) 
+			continue;
 		
 		//把切過後的丟回來
 		edgeLine.start[0] = start[0];
@@ -775,14 +776,16 @@ Draw_Cell(Cell* tc, LineSeg L_point, LineSeg R_point)	//L,R 是視錐的左右射線
 		if (tc->edges[i]->opaque)		//opaque不透明
 		{
 				//By the relationship between view and edge[i],draw wall
-				if (!Clip(front, start, end)) continue;
+				if (!Clip(front, start, end)) 
+					continue;
 				memcpy(temp, start, sizeof(float) * 4);
 				for (int n = 0; n < 4; n++)		//ProjectionMatrix * start
 					start[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
 				memcpy(temp, end, sizeof(float) * 4);
 				for (int n = 0; n < 4; n++)		//ProjectionMatrix * end
 					end[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
-				if (start[3] < nearZ && end[3] < nearZ) continue;
+				if (start[3] < nearZ && end[3] < nearZ) 
+					continue;
 				for (int n = 0; n < 4; n++)
 					start[n] /= start[3];
 				for (int n = 0; n < 4; n++)
@@ -796,25 +799,25 @@ Draw_Cell(Cell* tc, LineSeg L_point, LineSeg R_point)	//L,R 是視錐的左右射線
 				glVertex2f(start[0], -start[1]);
 				glEnd();
 		}
-		else
+		else if (tc->edges[i]->Neighbor(tc) != NULL)	//是透明 且edge旁還有cell
 		{
 			//if (!(tc->edges[i]->Neighbor(tc)->bFootPrint))		//avoid repeat cell
 			//{
 			//	//By the relationship between view and Transparent edge, clipping view,and pass next cell
 			//	Draw_Cell(tc->edges[i]->Neighbor(tc), new_L, new_R);
 			//}
-			if (tc->edges[i]->Neighbor(tc) == NULL) continue;
+
 			static float pre_Lx = 0.0f, pre_Rx = 0.0f, pre_Ly = 0.0f, pre_Ry = 0.0f; //因下面的if else if 可能都不會進去，所以要讓之前的值維持，才不會沒初始化變數就呼叫function
 			float Lx = pre_Lx, Rx = pre_Rx, Ly = pre_Ly, Ry = pre_Ry;
 
-			LineSeg midline(0.0f, 0.0f, (edgeLine.start[0] + edgeLine.end[0]) * 0.5, (edgeLine.start[1] + edgeLine.end[1]) * 0.5);
-			if (midline.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::LEFT && midline.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::RIGHT) {
+			LineSeg midLine(0.0f, 0.0f, (edgeLine.start[0] + edgeLine.end[0]) / 2, (edgeLine.start[1] + edgeLine.end[1]) / 2);
+			if (midLine.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::LEFT && midLine.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::RIGHT) {
 				Lx = edgeLine.start[0];
 				Ly = edgeLine.start[1];
 				Rx = edgeLine.end[0];
-				Ry = edgeLine.end[1];
+				Ry = edgeLine.end[1]; 
 			}
-			else if (midline.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT && midline.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::LEFT) {
+			else if (midLine.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT && midLine.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::LEFT) {
 				Lx = edgeLine.end[0];
 				Ly = edgeLine.end[1];
 				Rx = edgeLine.start[0];
