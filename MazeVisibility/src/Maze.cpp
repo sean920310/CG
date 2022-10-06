@@ -801,35 +801,28 @@ Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 		}
 		else if (tc->edges[i]->Neighbor(tc) != NULL)	//是透明 且edge旁還有cell
 		{
-			//if (!(tc->edges[i]->Neighbor(tc)->bFootPrint))		//avoid repeat cell
-			//{
-			//	//By the relationship between view and Transparent edge, clipping view,and pass next cell
-			//	Draw_Cell(tc->edges[i]->Neighbor(tc), new_L, new_R);
-			//}
-
-			static float pre_Lx = 0.0f, pre_Rx = 0.0f, pre_Ly = 0.0f, pre_Ry = 0.0f; //因下面的if else if 可能都不會進去，所以要讓之前的值維持，才不會沒初始化變數就呼叫function
-			float Lx = pre_Lx, Rx = pre_Rx, Ly = pre_Ly, Ry = pre_Ry;
-
-			LineSeg midLine(0.0f, 0.0f, (edgeLine.start[0] + edgeLine.end[0]) / 2, (edgeLine.start[1] + edgeLine.end[1]) / 2);
-			if (midLine.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::LEFT && midLine.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::RIGHT) {
-				Lx = edgeLine.start[0];
-				Ly = edgeLine.start[1];
-				Rx = edgeLine.end[0];
-				Ry = edgeLine.end[1]; 
+			LineSeg toEdgeMide(0, 0, (edgeLine.start[0] + edgeLine.end[0]) / 2, (edgeLine.start[1] + edgeLine.end[1]) / 2);
+			float LCoord[2], RCoord[2];	//透明edge的左右邊緣座標
+			if (toEdgeMide.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT)
+			{
+				RCoord[0] = edgeLine.start[0];
+				RCoord[1] = edgeLine.start[1];
+				LCoord[0] = edgeLine.end[0];
+				LCoord[1] = edgeLine.end[1];
 			}
-			else if (midLine.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT && midLine.Point_Side(edgeLine.end[0], edgeLine.end[1]) == Edge::LEFT) {
-				Lx = edgeLine.end[0];
-				Ly = edgeLine.end[1];
-				Rx = edgeLine.start[0];
-				Ry = edgeLine.start[1];
+			else
+			{
+				RCoord[0] = edgeLine.end[0];
+				RCoord[1] = edgeLine.end[1];
+				LCoord[0] = edgeLine.start[0];
+				LCoord[1] = edgeLine.start[1];
 			}
-			pre_Lx = Lx;
-			pre_Rx = Rx;
-			pre_Ly = Ly;
-			pre_Ry = Ry;
-			LineSeg newL(Lx, Ly, Lx / Ly * -farZ, -farZ);
-			LineSeg newR(Rx / Ry * -farZ, -farZ, Rx, Ry);
-			if (!tc->edges[i]->Neighbor(tc)->bFootPrint && fabs((Lx / Ly * -farZ) - (Rx / Ry * -farZ)) > 0.00001) {
+
+			LineSeg newL(LCoord[0], LCoord[1], (LCoord[0] / LCoord[1]) * -farZ, -farZ);
+			LineSeg newR((RCoord[0] / RCoord[1]) * -farZ, -farZ, RCoord[0], RCoord[1]);
+
+
+			if (!tc->edges[i]->Neighbor(tc)->bFootPrint) {
 				Draw_Cell(tc->edges[i]->Neighbor(tc), newL, newR);
 			}
 		}
