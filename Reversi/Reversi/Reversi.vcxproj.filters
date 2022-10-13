@@ -24,6 +24,12 @@
     <ClCompile Include="GameManager.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="Board.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Chess.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameHeader.h">
@@ -33,6 +39,12 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="GameManager.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Board.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

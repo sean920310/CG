@@ -1,5 +1,4 @@
 #pragma once
-
 #include "GameHeader.h"
 
 class Viewer
@@ -40,4 +39,11 @@ public:
 	void drawCanMovePos(std::vector<Coord> coords);
 	void drawSprite(std::vector<sf::Sprite> sprites);
 	void display();
+public:
+	static const char	 MENU_EXIT;
+	static const char	 MENU_START;
+	static const char	 MENU_FILE;
+	static const char	 PAUSE_EXIT;
+	static const char	 PAUSE_CONTINUE;
+	static const char	 PAUSE_MENU;
 };

@@ -1,0 +1,32 @@
+﻿  Board.cpp
+  Chess.cpp
+E:\NTUST\CG\Reversi\Reversi\Chess.cpp(26,64): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Chess.cpp(27,62): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+  GameManager.cpp
+E:\NTUST\CG\Reversi\Reversi\GameManager.cpp(47,18): warning C4101: 'teamWin': 未參考的區域變數
+E:\NTUST\CG\Reversi\Reversi\GameManager.cpp(47,7): warning C4101: 'teamCheck': 未參考的區域變數
+  Reversi.cpp
+  Viewer.cpp
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(134,28): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(135,29): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(146,27): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(147,28): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(158,27): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(159,28): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(260,26): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(261,27): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(270,25): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(271,26): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(312,28): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(321,27): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(368,26): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(369,23): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(378,28): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(379,25): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(432,24): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(441,23): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(534,30): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(536,65): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\Reversi\Reversi\Viewer.cpp(537,63): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+  正在產生程式碼...
+  Reversi.vcxproj -> E:\NTUST\CG\Reversi\x64\Debug\Reversi.exe
