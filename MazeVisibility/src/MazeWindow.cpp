@@ -126,7 +126,7 @@ draw(void)
 		float aspect = (float)w() / h();
 		maze->Perspective(maze->viewer_fov, aspect, 0.01, 200);
 
-		float viewer_pos[3] = { maze->viewer_posn[Maze::Y] , 0.0f , maze->viewer_posn[Maze::X] };
+		float viewer_pos[3] = { maze->viewer_posn[Maze::Y] , maze->viewer_posn[Maze::Z] , maze->viewer_posn[Maze::X] };
 		maze->LookAt(viewer_pos[Maze::X], viewer_pos[Maze::Y], viewer_pos[Maze::Z],
 			viewer_pos[Maze::X] + sin(Maze::To_Radians(maze->viewer_dir)),
 			viewer_pos[Maze::Y],
@@ -176,6 +176,21 @@ Drag(float dt)
 		y_move = 0.0;
 	}
 
+	if (x_key)
+	{
+		float dist = dt * x_key * 2.5f;
+		x_move = dist * (float)cos(Maze::To_Radians(maze->viewer_dir - 90));
+		y_move = dist * (float)sin(Maze::To_Radians(maze->viewer_dir - 90));
+		x_key = 0;
+	}
+	if (y_key)
+	{
+		float dist = dt * y_key * 2.5f;
+		x_move = dist * (float)cos(Maze::To_Radians(maze->viewer_dir));
+		y_move = dist * (float)sin(Maze::To_Radians(maze->viewer_dir));
+		y_key = 0;
+	}
+	
 	// Update the z posn
 	z_move = z_key * 0.1f;
 	z_key = 0;
@@ -198,7 +213,7 @@ Update(float dt)
 {
 	// Update the view
 
-	if ( down || z_key ) // Only do anything if the mouse button is down.
+	if ( down || z_key || x_key || y_key) // Only do anything if the mouse button is down.
 		return Drag(dt);
 
 	// Nothing changed, so no need for a redraw.
@@ -229,11 +244,11 @@ handle(int event)
 			x_last = Fl::event_x();
 			y_last = Fl::event_y();
 			return 1;
-			case FL_RELEASE:
+		case FL_RELEASE:
 			down = false;
 			return 1;
 		case FL_KEYBOARD:
-			/*
+			
 			if ( Fl::event_key() == FL_Up )	{
 				z_key = 1;
 				return 1;
@@ -242,7 +257,23 @@ handle(int event)
 				z_key = -1;
 				return 1;
 			}
-			*/
+			if (Fl::event_key() == 'w') {
+				y_key = 1;
+				return 1;
+			}
+			else if (Fl::event_key() == 's') {
+				y_key = -1;
+				return 1;
+			}
+			if (Fl::event_key() == 'a') {
+				x_key = -1;
+				return 1;
+			}
+			else if (Fl::event_key() == 'd') {
+				x_key = 1;
+				return 1;
+			}
+			
 			return Fl_Gl_Window::handle(event);
 		case FL_FOCUS:
 		case FL_UNFOCUS:

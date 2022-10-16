@@ -30,6 +30,7 @@
 
 enum class Team
 {
+	None,
 	Black,
 	White
 };

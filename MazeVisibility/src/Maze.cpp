@@ -751,56 +751,78 @@ Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 	for (int i = 0; i < 4; i++)
 	{
 		LineSeg edgeLine(tc->edges[i]);
-		float start[4] = { edgeLine.start[1],1.0,edgeLine.start[0],1.0 };
-		float end[4] = { edgeLine.end[1],1.0,edgeLine.end[0],1.0 };
+		float startTop[4] = { edgeLine.start[1],1.0,edgeLine.start[0],1.0 };
+		float startBottom[4] = { edgeLine.start[1],-1.0,edgeLine.start[0],1.0 };
+		float endTop[4] = { edgeLine.end[1],1.0,edgeLine.end[0],1.0 };
+		float endBottom[4] = { edgeLine.end[1],-1.0,edgeLine.end[0],1.0 };
 		float temp[4];
 
-		memcpy(temp, start, sizeof(float) * 4);
+		memcpy(temp, startTop, sizeof(float) * 4);
 		for (int n = 0; n < 4; n++)		//ModelViewMatrix * start
-			start[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
-		
-		memcpy(temp, end, sizeof(float) * 4);
-		for (int n = 0; n < 4; n++)		//ModelViewMatrix * end
-			end[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
+			startTop[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
+		memcpy(temp, startBottom, sizeof(float) * 4);
+		for (int n = 0; n < 4; n++)		//ModelViewMatrix * start
+			startBottom[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
 
-		if (!Clip(leftLine, start, end) || !Clip(rightLine, start, end)) 
+		memcpy(temp, endTop, sizeof(float) * 4);
+		for (int n = 0; n < 4; n++)		//ModelViewMatrix * end
+			endTop[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
+		memcpy(temp, endBottom, sizeof(float) * 4);
+		for (int n = 0; n < 4; n++)		//ModelViewMatrix * end
+			endBottom[n] = ModelViewMatrix[n] * temp[0] + ModelViewMatrix[n + 4] * temp[1] + ModelViewMatrix[n + 8] * temp[2] + ModelViewMatrix[n + 12] * temp[3];
+
+		if (!Clip(leftLine, startTop, endTop) || !Clip(rightLine, startTop, endTop)||!Clip(leftLine, startBottom, endBottom) || !Clip(rightLine, startBottom, endBottom))
 			continue;
 		
 		//把切過後的丟回來
-		edgeLine.start[0] = start[0];
-		edgeLine.start[1] = start[2];
-		edgeLine.end[0] = end[0];
-		edgeLine.end[1] = end[2];
+		edgeLine.start[0] = startTop[0];
+		edgeLine.start[1] = startTop[2];
+		edgeLine.end[0] = endTop[0];
+		edgeLine.end[1] = endTop[2];
 
 
 		if (tc->edges[i]->opaque)		//opaque不透明
 		{
 				//By the relationship between view and edge[i],draw wall
-				if (!Clip(front, start, end)) 
+				if (!Clip(front, startTop, endTop)||!Clip(front, startBottom, endBottom))
 					continue;
-				memcpy(temp, start, sizeof(float) * 4);
+				memcpy(temp, startTop, sizeof(float) * 4);
 				for (int n = 0; n < 4; n++)		//ProjectionMatrix * start
-					start[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
-				memcpy(temp, end, sizeof(float) * 4);
+					startTop[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
+				memcpy(temp, startBottom, sizeof(float) * 4);
+				for (int n = 0; n < 4; n++)		//ProjectionMatrix * start
+					startBottom[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
+
+				memcpy(temp, endTop, sizeof(float) * 4);
 				for (int n = 0; n < 4; n++)		//ProjectionMatrix * end
-					end[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
-				if (start[3] < nearZ && end[3] < nearZ) 
+					endTop[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
+				memcpy(temp, endBottom, sizeof(float) * 4);
+				for (int n = 0; n < 4; n++)		//ProjectionMatrix * end
+					endBottom[n] = ProjectionMatrix[n] * temp[0] + ProjectionMatrix[n + 4] * temp[1] + ProjectionMatrix[n + 8] * temp[2] + ProjectionMatrix[n + 12] * temp[3];
+
+				if (startTop[3] < nearZ && endTop[3] < nearZ) 
 					continue;
+				//壓縮NDC座標到平面(screen space) 螢幕座標=NDC座標/NDC座標的w值 (screen_coord = NDC/NDC[3])
 				for (int n = 0; n < 4; n++)
-					start[n] /= start[3];
+					startTop[n] /= startTop[3];
 				for (int n = 0; n < 4; n++)
-					end[n] /= end[3];
+					startBottom[n] /= startBottom[3];
+				for (int n = 0; n < 4; n++)
+					endTop[n] /= endTop[3];
+				for (int n = 0; n < 4; n++)
+					endBottom[n] /= endBottom[3];
 
 				glBegin(GL_POLYGON);
 				glColor3fv(tc->edges[i]->color);
-				glVertex2f(start[0], start[1]);
-				glVertex2f(end[0], end[1]);
-				glVertex2f(end[0], -end[1]);
-				glVertex2f(start[0], -start[1]);
+				glVertex2f(startTop[0], startTop[1]);
+				glVertex2f(endTop[0], endTop[1]);
+				glVertex2f(endBottom[0], endBottom[1]);
+				glVertex2f(startBottom[0], startBottom[1]);
 				glEnd();
 		}
 		else if (tc->edges[i]->Neighbor(tc) != NULL)	//是透明 且edge旁還有cell
 		{
+			if (!tc->edges[i]->Neighbor(tc)->bFootPrint) {
 			LineSeg toEdgeMide(0, 0, (edgeLine.start[0] + edgeLine.end[0]) / 2, (edgeLine.start[1] + edgeLine.end[1]) / 2);
 			float LCoord[2], RCoord[2];	//透明edge的左右邊緣座標
 			if (toEdgeMide.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT)
@@ -822,7 +844,6 @@ Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 			LineSeg newR((RCoord[0] / RCoord[1]) * -farZ, -farZ, RCoord[0], RCoord[1]);
 
 
-			if (!tc->edges[i]->Neighbor(tc)->bFootPrint) {
 				Draw_Cell(tc->edges[i]->Neighbor(tc), newL, newR);
 			}
 		}

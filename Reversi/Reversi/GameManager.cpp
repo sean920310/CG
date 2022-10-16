@@ -2,7 +2,6 @@
 
 GameManager::GameManager():board(),viewer()
 {
-	//onBoard = board.getAllChess();
 	currentPlayer = Team::Black;
 	//one side time limit
 	timeLimit = sf::seconds(TIMELIMIT * 60);
@@ -51,8 +50,6 @@ void GameManager::inGame(InGameState state)
 
 	while (viewer.windowIsOpen())
 	{
-	//	onBoard = board.getAllChess();
-
 	//	switch (state)
 	//	{
 	//		//======================================================start====================================================	**start a new game

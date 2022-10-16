@@ -149,14 +149,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
-    <ClCompile Include="Chess.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Reversi.cpp" />
     <ClCompile Include="Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
-    <ClInclude Include="Chess.h" />
     <ClInclude Include="GameHeader.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Viewer.h" />

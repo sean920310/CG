@@ -59,6 +59,8 @@ class MazeWindow : public Fl_Gl_Window {
 		int	y_last;
 		int	x_down;	// The location of the mouse when the button was pushed
 		int	y_down;
+		int x_key;
+		int y_key;
 		int   z_key;	// Whether the key to move the viewer up or down was
 							// pressed. A value of 1 means move up, a value of -1
 							// means move down. 0 means do nothing.

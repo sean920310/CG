@@ -1,7 +1,5 @@
 #pragma once
 #include "GameHeader.h"
-class Chess;
-#include "Chess.h"
 
 //   0 1 2 3 4 5 6 7 
 //	 _ _ _ _ _ _ _ _
@@ -18,20 +16,15 @@ class Chess;
 class Board
 {
 private:
-	std::vector<std::vector<Chess*>> boardArr;
+	std::vector<std::vector<Team>> boardArr;
 	sf::Texture checkBoardTexture;
 	sf::Sprite checkBoard;
 
 public:
 	Board();
 	Board(const Board& rhs);
-	~Board();
 	Board& operator=(const Board& rhs);
-	//void newBoard();
-	//Chess* getChess(Coord coord) const;
-	//std::vector<sf::Sprite> getAllSprite();
-	//std::vector<Chess*> getAllChess();
-	//void moveChess(const Coord& fromCoord, const Coord& toCoord);
-	//bool oneSideIsCheck(Team& team);
+	void newBoard();
+	Team getChess(Coord coord) const;
 	//bool oneSideIsWin(Team& team);
 };

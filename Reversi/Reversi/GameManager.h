@@ -7,7 +7,6 @@
 class GameManager
 {
 private:
-	std::vector<Chess*> onBoard;
 	Team currentPlayer;		//1:White , 2:Black
 	sf::Time timeLimit;
 	sf::Time whiteTime;
@@ -31,6 +30,5 @@ public:
 	//bool confirmSurrender();
 	//void readFile();
 	//void logFile(Coord from, Coord to);
-	
 };
 

@@ -1,9 +1,12 @@
 #include "Viewer.h"
 
+int Viewer::SCREEN_HEIGHT = 768;
+int Viewer::SCREEN_WIDTH = 1280;
+
 Viewer::Viewer() : ev()
 {
-	this->videoMode.height = 768;
-	this->videoMode.width = 1280;
+	this->videoMode.height = SCREEN_HEIGHT;
+	this->videoMode.width = SCREEN_WIDTH;
 
 	this->window = new sf::RenderWindow(this->videoMode, L"Reversi ¶Â¥Õ´Ñ", sf::Style::Close | sf::Style::Titlebar);
 	this->window->setFramerateLimit(60);
