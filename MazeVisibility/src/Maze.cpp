@@ -691,21 +691,6 @@ LookAt(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, do
 	memcpy(ModelViewMatrix, matrix, 16*sizeof(double));
 }
 
-
-void Maze::
-Draw_Wall(const float start[2], const float end[2], const float color[3])
-{
-	float edge0[3] = { start[Y], 0.0f, start[X] };
-	float edge1[3] = { end[Y], 0.0f, end[X] };
-	glBegin(GL_POLYGON);
-	glColor3fv(color);
-	glVertex3f(edge0[X], 1.0f, edge0[Z]);
-	glVertex3f(edge1[X], 1.0f, edge1[Z]);
-	glVertex3f(edge1[X], -1.0f, edge1[Z]);
-	glVertex3f(edge0[X], -1.0f, edge0[Z]);
-	glEnd();
-}
-
 bool Maze::
 Clip(LineSeg line, float start[4], float end[4])
 {
@@ -774,7 +759,6 @@ Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 		if (!Clip(leftLine, startTop, endTop) || !Clip(rightLine, startTop, endTop)||!Clip(leftLine, startBottom, endBottom) || !Clip(rightLine, startBottom, endBottom))
 			continue;
 		
-		//把切過後的丟回來
 		edgeLine.start[0] = startTop[0];
 		edgeLine.start[1] = startTop[2];
 		edgeLine.end[0] = endTop[0];
@@ -802,6 +786,7 @@ Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 
 				if (startTop[3] < nearZ && endTop[3] < nearZ) 
 					continue;
+
 				//壓縮NDC座標到平面(screen space) 螢幕座標=NDC座標/NDC座標的w值 (screen_coord = NDC/NDC[3])
 				for (int n = 0; n < 4; n++)
 					startTop[n] /= startTop[3];
@@ -843,8 +828,7 @@ Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 			LineSeg newL(LCoord[0], LCoord[1], (LCoord[0] / LCoord[1]) * -farZ, -farZ);
 			LineSeg newR((RCoord[0] / RCoord[1]) * -farZ, -farZ, RCoord[0], RCoord[1]);
 
-
-				Draw_Cell(tc->edges[i]->Neighbor(tc), newL, newR);
+			Draw_Cell(tc->edges[i]->Neighbor(tc), newL, newR);
 			}
 		}
 	}
@@ -866,22 +850,7 @@ Draw_View(const float focal_dist)
 	// TODO
 	// The rest is up to you!
 	//###################################################################
-	//glClear(GL_DEPTH_BUFFER_BIT);
 
-	//glEnable(GL_DEPTH_TEST);
-	//for (int i = 0; i < (int)this->num_edges; i++)
-	//{
-	//	float edge_start[2] = {
-	//		this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
-	//		this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y] };
-	//	float edge_end[2] = {
-	//		this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],
-	//		this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y] };
-
-	//	float color[3] = { this->edges[i]->color[0],this->edges[i]->color[1],this->edges[i]->color[2] };
-	//	if (this->edges[i]->opaque)
-	//		Draw_Wall(edge_start, edge_end, color);
-	//}
 	for (int i = 0; i < num_cells; i++)
 		cells[i]->bFootPrint = false;
 	Draw_Cell(view_cell,
