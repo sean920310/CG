@@ -46,6 +46,9 @@ class CTrack;
 #pragma warning(disable:4312)
 #pragma warning(disable:4311)
 #include <Fl/Fl_Gl_Window.h>
+#include <glm/glm.hpp>
+#include <glm/geometric.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #pragma warning(pop)
 
 // this uses the old ArcBall Code
@@ -82,4 +85,6 @@ class TrainView : public Fl_Gl_Window
 
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
+		const int		DIVIDE_LINE = 40;
+		float			t_time;
 };

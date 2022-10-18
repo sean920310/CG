@@ -808,27 +808,27 @@ Draw_Cell(Cell* tc, LineSeg leftLine, LineSeg rightLine)	//L,R 是視錐的左右射線
 		else if (tc->edges[i]->Neighbor(tc) != NULL)	//是透明 且edge旁還有cell
 		{
 			if (!tc->edges[i]->Neighbor(tc)->bFootPrint) {
-			LineSeg toEdgeMide(0, 0, (edgeLine.start[0] + edgeLine.end[0]) / 2, (edgeLine.start[1] + edgeLine.end[1]) / 2);
-			float LCoord[2], RCoord[2];	//透明edge的左右邊緣座標
-			if (toEdgeMide.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT)
-			{
-				RCoord[0] = edgeLine.start[0];
-				RCoord[1] = edgeLine.start[1];
-				LCoord[0] = edgeLine.end[0];
-				LCoord[1] = edgeLine.end[1];
-			}
-			else
-			{
-				RCoord[0] = edgeLine.end[0];
-				RCoord[1] = edgeLine.end[1];
-				LCoord[0] = edgeLine.start[0];
-				LCoord[1] = edgeLine.start[1];
-			}
+				LineSeg toEdgeMide(0, 0, (edgeLine.start[0] + edgeLine.end[0]) / 2, (edgeLine.start[1] + edgeLine.end[1]) / 2);
+				float LCoord[2], RCoord[2];	//透明edge的左右邊緣座標
+				if (toEdgeMide.Point_Side(edgeLine.start[0], edgeLine.start[1]) == Edge::RIGHT)
+				{
+					RCoord[0] = edgeLine.start[0];
+					RCoord[1] = edgeLine.start[1];
+					LCoord[0] = edgeLine.end[0];
+					LCoord[1] = edgeLine.end[1];
+				}
+				else
+				{
+					RCoord[0] = edgeLine.end[0];
+					RCoord[1] = edgeLine.end[1];
+					LCoord[0] = edgeLine.start[0];
+					LCoord[1] = edgeLine.start[1];
+				}
 
-			LineSeg newL(LCoord[0], LCoord[1], (LCoord[0] / LCoord[1]) * -farZ, -farZ);
-			LineSeg newR((RCoord[0] / RCoord[1]) * -farZ, -farZ, RCoord[0], RCoord[1]);
+				LineSeg newL(LCoord[0], LCoord[1], (LCoord[0] / LCoord[1]) * -farZ, -farZ);
+				LineSeg newR((RCoord[0] / RCoord[1]) * -farZ, -farZ, RCoord[0], RCoord[1]);
 
-			Draw_Cell(tc->edges[i]->Neighbor(tc), newL, newR);
+				Draw_Cell(tc->edges[i]->Neighbor(tc), newL, newR);
 			}
 		}
 	}

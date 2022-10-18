@@ -37,6 +37,8 @@ MazeWindow(int x, int y, int width, int height, const char *label,Maze *m)
 
 	// The mouse button isn't down and there is no key pressed.
 	down = false;
+	x_key = 0;
+	y_key = 0;
 	z_key = 0;
 }
 
@@ -178,22 +180,19 @@ Drag(float dt)
 
 	if (x_key)
 	{
-		float dist = dt * x_key * 2.5f;
+		float dist = dt * x_key * 3.0f;
 		x_move = dist * (float)cos(Maze::To_Radians(maze->viewer_dir - 90));
 		y_move = dist * (float)sin(Maze::To_Radians(maze->viewer_dir - 90));
-		x_key = 0;
 	}
 	if (y_key)
 	{
-		float dist = dt * y_key * 2.5f;
-		x_move = dist * (float)cos(Maze::To_Radians(maze->viewer_dir));
-		y_move = dist * (float)sin(Maze::To_Radians(maze->viewer_dir));
-		y_key = 0;
+		float dist = dt * y_key * 3.0f;
+		x_move += dist * (float)cos(Maze::To_Radians(maze->viewer_dir));
+		y_move += dist * (float)sin(Maze::To_Radians(maze->viewer_dir));
 	}
 	
 	// Update the z posn
 	z_move = z_key * 0.1f;
-	z_key = 0;
 
 	// Tell the maze how much the view has moved. It may restrict the motion
 	// if it tries to go through walls.
@@ -247,7 +246,7 @@ handle(int event)
 		case FL_RELEASE:
 			down = false;
 			return 1;
-		case FL_KEYBOARD:
+		case FL_KEYDOWN:
 			
 			if ( Fl::event_key() == FL_Up )	{
 				z_key = 1;
@@ -273,7 +272,32 @@ handle(int event)
 				x_key = 1;
 				return 1;
 			}
-			
+			return Fl_Gl_Window::handle(event);
+		case FL_KEYUP:
+			if (Fl::event_key() == 'w') {
+				y_key = 0;
+				return 1;
+			}
+			else if (Fl::event_key() == 's') {
+				y_key = 0;
+				return 1;
+			}
+			if (Fl::event_key() == 'a') {
+				x_key = 0;
+				return 1;
+			}
+			else if (Fl::event_key() == 'd') {
+				x_key = 0;
+				return 1;
+			}
+			if (Fl::event_key() == FL_Up) {
+				z_key = 0;
+				return 1;
+			}
+			if (Fl::event_key() == FL_Down) {
+				z_key = 0;
+				return 1;
+			}
 			return Fl_Gl_Window::handle(event);
 		case FL_FOCUS:
 		case FL_UNFOCUS:

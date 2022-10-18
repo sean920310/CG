@@ -213,4 +213,14 @@ advanceTrain(float dir)
 	if (world.trainU > nct) world.trainU -= nct;
 	if (world.trainU < 0) world.trainU += nct;
 #endif
+	trainView-> t_time += (dir / m_Track.points.size() / (trainView->DIVIDE_LINE / 40));
+	if (trainView->t_time > 1.0f)
+		trainView->t_time -= 1.0f;
+
+	float nct = m_Track.points.size();
+	if (m_Track.trainU >= nct) m_Track.trainU -= nct;
+	if (m_Track.trainU < 0) m_Track.trainU += nct;
+
+	printf("%f\n", std::floor(m_Track.trainU));
+	//m_Track.trainPos = m_Track.points[].pos;
 }

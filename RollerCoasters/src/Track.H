@@ -31,6 +31,7 @@ using std::vector; // avoid having to say std::vector all of the time
 
 // make use of other data structures from this project
 #include "ControlPoint.H"
+#include "Utilities/Pnt3f.H"
 
 class CTrack {
 	public:		
@@ -60,4 +61,5 @@ class CTrack {
 		// the state of the train - basically, all I need to remember is where
 		// it is in parameter space
 		float trainU;
+		Pnt3f trainPos;
 };
