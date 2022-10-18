@@ -38,7 +38,6 @@
 #include "TrainWindow.H"
 #include "Utilities/3DUtils.H"
 
-
 #ifdef EXAMPLE_SOLUTION
 #	include "TrainExample/TrainExample.H"
 #endif
@@ -428,8 +427,19 @@ void TrainView::drawStuff(bool doingShadows)
 				glVertex3f(qt0.x - cross_t_R.x, qt0.y - cross_t_R.y, qt0.z - cross_t_R.z);
 				glEnd();
 
+				if (abs((i * DIVIDE_LINE + j) - m_pTrack->trainU) < 0.6)
+				{
+					drawTrain(qt0);
+				}
 			}
 		}
+		//float matrix[16] =
+		//{
+		//	0, 0, 0, 0,
+		//	0, 0, -1, 1,
+		//	0, 0, 1, 0,
+		//	0, 0, 0, 0
+		//};
 		break;
 	}
 	case 2:				//Cardinal Cubic
@@ -504,6 +514,11 @@ void TrainView::drawStuff(bool doingShadows)
 				glVertex3f(qt1.x, qt1.y, qt1.z);
 				glEnd();
 				glLineWidth(1);
+
+				if (abs((i * DIVIDE_LINE + j) - m_pTrack->trainU) < 0.6)
+				{
+					drawTrain(qt0);
+				}
 			}
 		}
 	}
@@ -519,64 +534,69 @@ void TrainView::drawStuff(bool doingShadows)
 		drawTrain(this, doingShadows);
 #endif
 
+	
+}
+
+void TrainView::
+drawTrain(Pnt3f pos)
+{
 	if (!tw->trainCam->value())
 	{
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x - 5, pos.y, pos.z - 5);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x + 5, pos.y, pos.z - 5);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x + 5, pos.y + 10, pos.z - 5);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x - 5, pos.y + 10, pos.z - 5);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x - 5, pos.y, pos.z + 5);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x + 5, pos.y, pos.z + 5);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x + 5, pos.y + 10, pos.z + 5);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x - 5, pos.y + 10, pos.z + 5);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x - 5, pos.y, pos.z - 5);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x + 5, pos.y, pos.z - 5);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x + 5, pos.y, pos.z + 5);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x - 5, pos.y, pos.z + 5);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x - 5, pos.y + 10, pos.z - 5);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x + 5, pos.y + 10, pos.z - 5);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x + 5, pos.y + 10, pos.z + 5);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x - 5, pos.y + 10, pos.z + 5);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x - 5, pos.y, pos.z - 5);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x - 5, pos.y + 10, pos.z - 5);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x - 5, pos.y + 10, pos.z + 5);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x - 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x - 5, pos.y, pos.z + 5);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x + 5, pos.y, pos.z - 5);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z - 5);
+		glVertex3f(pos.x + 5, pos.y + 10, pos.z - 5);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y + 10, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x + 5, pos.y + 10, pos.z + 5);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(m_pTrack->trainPos.x + 5, m_pTrack->trainPos.y, m_pTrack->trainPos.z + 5);
+		glVertex3f(pos.x + 5, pos.y, pos.z + 5);
 		glEnd();
-
 	}
 }
 

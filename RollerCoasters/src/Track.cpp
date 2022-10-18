@@ -56,7 +56,6 @@ resetPoints()
 
 	// we had better put the train back at the start of the track...
 	trainU = 0.0;
-	trainPos = points[0].pos;
 }
 
 //****************************************************************************
@@ -155,7 +154,6 @@ readPoints(const char* filename)
 		fclose(fp);
 	}
 	trainU = 0;
-	trainPos = points[0].pos;
 }
 
 //****************************************************************************

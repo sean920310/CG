@@ -53,6 +53,7 @@ class CTrack;
 
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
+#include "Utilities/Pnt3f.H"
 
 class TrainView : public Fl_Gl_Window
 {
@@ -79,12 +80,14 @@ class TrainView : public Fl_Gl_Window
 		// pick a point (for when the mouse goes down)
 		void doPick();
 
+		void drawTrain(Pnt3f pos);
+
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected
 
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
-		const int		DIVIDE_LINE = 40;
+		const int		DIVIDE_LINE = 100;
 		float			t_time;
 };
