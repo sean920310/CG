@@ -81,7 +81,7 @@ class TrainView : public Fl_Gl_Window
 		void doPick();
 
 		void drawTrack(bool doingShadows = false);
-		void drawTrain(Pnt3f pos, bool doingShadows = false);
+		void drawTrain(bool doingShadows = false);
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
@@ -90,5 +90,6 @@ class TrainView : public Fl_Gl_Window
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
 		const int		DIVIDE_LINE = 100;
+		float			m[16] = { 0 };
 		float			t_time;
 };
