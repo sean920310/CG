@@ -80,7 +80,8 @@ class TrainView : public Fl_Gl_Window
 		// pick a point (for when the mouse goes down)
 		void doPick();
 
-		void drawTrain(Pnt3f pos);
+		void drawTrack(bool doingShadows = false);
+		void drawTrain(Pnt3f pos, bool doingShadows = false);
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
