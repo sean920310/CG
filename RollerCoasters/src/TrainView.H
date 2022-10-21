@@ -91,5 +91,4 @@ class TrainView : public Fl_Gl_Window
 		CTrack*			m_pTrack;		// The track of the entire scene
 		const int		DIVIDE_LINE = 100;
 		float			m[16] = { 0 };
-		float			t_time;
 };

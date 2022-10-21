@@ -55,7 +55,6 @@ TrainView(int x, int y, int w, int h, const char* l)
 	mode(FL_RGB | FL_ALPHA | FL_DOUBLE | FL_STENCIL);
 
 	resetArcball();
-	t_time = 0;
 }
 
 //************************************************************************
@@ -450,6 +449,7 @@ drawTrack(bool doingShadows)
 		break;
 	}
 
+	m_pTrack->arcLength = vector<float>(m_pTrack->points.size());
 
 	for (size_t i = 0; i < m_pTrack->points.size(); ++i) {
 		// pos
@@ -465,6 +465,7 @@ drawTrack(bool doingShadows)
 		float t = 0;
 		Pnt3f qt = cubicSpline(pos, m, t);
 
+		float len = 0;
 		//initialize¡K
 		for (size_t j = 0; j < DIVIDE_LINE; j++) {
 			Pnt3f qt0 = qt;
@@ -479,6 +480,7 @@ drawTrack(bool doingShadows)
 			glVertex3f(qt1.x, qt1.y, qt1.z);
 			glEnd();
 			glLineWidth(1);*/
+			len += sqrt(pow((qt0.x - qt1.x), 2) + pow((qt0.y - qt1.y), 2) + pow((qt0.z - qt1.z), 2));
 
 			// cross
 			Pnt3f orient_t = cubicSpline(orient, m, t);
@@ -511,6 +513,8 @@ drawTrack(bool doingShadows)
 			crossL0[0] = crossL1[0];
 			crossL0[1] = crossL1[1];
 		}
+
+		m_pTrack->arcLength[i] = len;
 	}
 }
 
@@ -534,6 +538,8 @@ drawTrain(bool doingShadows)
 	{
 
 		glBegin(GL_QUADS);
+		if (!doingShadows)
+			glColor3ub(100,100,100);
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(trainPos.x - 5, trainPos.y, trainPos.z - 5);
 		glTexCoord2f(1.0f, 0.0f);

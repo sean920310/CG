@@ -213,8 +213,49 @@ advanceTrain(float dir)
 	if (world.trainU > nct) world.trainU -= nct;
 	if (world.trainU < 0) world.trainU += nct;
 #endif
+	if (arcLength->value()) {
+		int i = m_Track.trainU;
+		float t = m_Track.trainU - i;
+		float vel = dir * ((float)speed->value());
+		if (dir > 0)
+		{
+			while ((t * m_Track.arcLength[i] + vel) > m_Track.arcLength[i])
+			{
+				printf("%d\n", i);
+				vel -= ((1 - t) * m_Track.arcLength[i]);
+				t = 0;
+				i++;
+				if (i >= m_Track.points.size()) i = 0;
+				m_Track.trainU = i;
 
-	m_Track.trainU += dir * ((float)speed->value() * 0.02f);
+				float nct = m_Track.points.size();
+				if (m_Track.trainU >= nct) m_Track.trainU -= nct;
+				if (m_Track.trainU < 0) m_Track.trainU += nct;
+			}
+		}
+		else
+		{
+			while ((t * m_Track.arcLength[i] + vel) < 0)
+			{
+				printf("%d\n", i);
+				vel += (t * m_Track.arcLength[i]);
+				t = 1;
+				i--;
+				if (i < 0) i = m_Track.points.size() - 1;
+				m_Track.trainU = i+1;
+
+				float nct = m_Track.points.size();
+				if (m_Track.trainU >= nct) m_Track.trainU -= nct;
+				if (m_Track.trainU < 0) m_Track.trainU += nct;
+			}
+		}
+
+		m_Track.trainU += (vel / m_Track.arcLength[i]);
+	}
+	else {
+		m_Track.trainU += dir * ((float)speed->value() * 0.02f);
+	}
+
 	float nct = m_Track.points.size();
 	if (m_Track.trainU >= nct) m_Track.trainU -= nct;
 	if (m_Track.trainU < 0) m_Track.trainU += nct;
