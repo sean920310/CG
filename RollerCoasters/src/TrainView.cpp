@@ -169,6 +169,65 @@ int TrainView::handle(int event)
 	return Fl_Gl_Window::handle(event);
 }
 
+
+//Directional Light
+void initDirLight()
+{
+	float noAmbient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	float whiteDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	/*
+	* Directional light soruce (w = 0)
+	* The light source is at an infinite distance,
+	* all the ray are parallel and have the direction (x, y, z).
+	*/
+	float position[] = { 1.0f, 1.0f, 0.0f, 0.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteDiffuse);
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+}
+
+//Point Light
+void initPosLight()
+{
+	float yellowAmbientDiffuse[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	/*
+	* Positional light source (w = 1)
+	* The light source is positioned at (x, y, z).
+	* The ray come from this particular location (x, y, z) and goes towars all directions.
+	*/
+	float position[] = { -2.0f, 2.0f, -5.0f, 1.0f };
+	glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbientDiffuse);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowAmbientDiffuse);
+	glLightfv(GL_LIGHT1, GL_POSITION, position);
+} 
+
+
+//Spot Light
+void initSpotLight()
+{
+	float noAmbient[] = { 0.0f, 0.0f, 0.2f, 1.0f };
+	float whiteDiffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	float position[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+	glLightfv(GL_LIGHT2, GL_AMBIENT, noAmbient);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, whiteDiffuse);
+	glLightfv(GL_LIGHT2, GL_POSITION, position);
+
+	/*
+	* define the spot direction and cut-off
+	*/
+	//updateSpot();
+
+	//exponent propertie defines the concentration of the light
+	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 15.0f);
+
+	//light attenuation (default values used here : no attenuation with the distance) 
+	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.0f);
+	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.0f);
+	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
+}
+
+
 //************************************************************************
 //
 // * this is the code that actually draws the window
@@ -522,10 +581,9 @@ drawTrack(bool doingShadows)
 				headOrient.normalize();
 				headOrient = headOrient * (sleeperWidth / 2);
 
-				Pnt3f heightOrient = orient_t;
+				Pnt3f heightOrient = headOrient * cross_t * -1;
 				heightOrient.normalize();
 				heightOrient = heightOrient * sleeperHeight;
-
 				glBegin(GL_QUADS);
 				if (!doingShadows)
 					glColor3ub(100, 100, 100);
@@ -640,9 +698,12 @@ drawTrain(bool doingShadows)
 	Pnt3f trainCross = trainHead * trainOrient;
 	trainCross.normalize();
 
+	trainOrient = trainHead * trainCross * -1;
+	trainOrient.normalize();
+
 	const float height = 10;
-	const float width = 5;
-	const float lenght = 5;
+	const float width = 4;
+	const float lenght = 8;
 
 	trainHead = trainHead * lenght;
 	trainCross = trainCross * width;
