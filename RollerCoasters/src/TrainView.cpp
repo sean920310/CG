@@ -451,6 +451,7 @@ drawTrack(bool doingShadows)
 
 	m_pTrack->arcLength = vector<float>(m_pTrack->points.size());
 
+	float sleeperSpaceCount = .0f;
 	for (size_t i = 0; i < m_pTrack->points.size(); ++i) {
 		// pos
 		Pnt3f pos[4];
@@ -465,22 +466,17 @@ drawTrack(bool doingShadows)
 		float t = 0;
 		Pnt3f qt = cubicSpline(pos, m, t);
 
-		float len = 0;
+		float arcLen = 0;
 		//initialize¡K
 		for (size_t j = 0; j < DIVIDE_LINE; j++) {
 			Pnt3f qt0 = qt;
 			t += percent;
 			qt = cubicSpline(pos, m, t);
 			Pnt3f qt1 = qt;
-			/*glLineWidth(3);
-			glBegin(GL_LINES);
-			if (!doingShadows)
-				glColor3ub(32, 32, 64);
-			glVertex3f(qt0.x, qt0.y, qt0.z);
-			glVertex3f(qt1.x, qt1.y, qt1.z);
-			glEnd();
-			glLineWidth(1);*/
-			len += sqrt(pow((qt0.x - qt1.x), 2) + pow((qt0.y - qt1.y), 2) + pow((qt0.z - qt1.z), 2));
+
+			double tempLen = sqrt(pow((qt0.x - qt1.x), 2) + pow((qt0.y - qt1.y), 2) + pow((qt0.z - qt1.z), 2));
+			arcLen += tempLen;
+			sleeperSpaceCount += tempLen;
 
 			// cross
 			Pnt3f orient_t = cubicSpline(orient, m, t);
@@ -500,7 +496,7 @@ drawTrack(bool doingShadows)
 			{
 				glBegin(GL_POLYGON);
 				if (!doingShadows)
-					glColor3ub(32, 32, 64);
+					glColor3ub(50, 50, 50);
 				glVertex3f(crossR0[n].x, crossR0[n].y, crossR0[n].z);
 				glVertex3f(crossR1[n].x, crossR1[n].y, crossR1[n].z);
 				glVertex3f(crossL1[n].x, crossL1[n].y, crossL1[n].z);
@@ -512,9 +508,112 @@ drawTrack(bool doingShadows)
 			crossR0[1] = crossR1[1];
 			crossL0[0] = crossL1[0];
 			crossL0[1] = crossL1[1];
+
+
+			const int sleeperSpace = 5;
+			//sleeper
+			if (sleeperSpaceCount >= sleeperSpace)
+			{
+				float sleeperLen = 4.f, sleeperWidth = 2.f, sleeperHeight = 1.0f;
+				cross_t.normalize();
+				cross_t = cross_t * sleeperLen;
+				
+				Pnt3f headOrient = qt1 - qt0;
+				headOrient.normalize();
+				headOrient = headOrient * (sleeperWidth / 2);
+
+				Pnt3f heightOrient = orient_t;
+				heightOrient.normalize();
+				heightOrient = heightOrient * sleeperHeight;
+
+				glBegin(GL_QUADS);
+				if (!doingShadows)
+					glColor3ub(100, 100, 100);
+				glTexCoord3f(0.0f, 0.0f, 1.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x, qt0.y + headOrient.y + cross_t.y, qt0.z + headOrient.z + cross_t.z);
+				glTexCoord3f(1.0f, 0.0f, 1.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x, qt0.y + headOrient.y - cross_t.y, qt0.z + headOrient.z - cross_t.z);
+				glTexCoord3f(1.0f, 1.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x, qt0.y - headOrient.y - cross_t.y, qt0.z - headOrient.z - cross_t.z);
+				glTexCoord3f(0.0f, 1.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x, qt0.y - headOrient.y + cross_t.y, qt0.z - headOrient.z + cross_t.z);
+				glTexCoord3f(0.0f, 0.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x - heightOrient.x, qt0.y + headOrient.y + cross_t.y - heightOrient.y, qt0.z + headOrient.z + cross_t.z - heightOrient.z);
+				glTexCoord3f(1.0f, 0.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x - heightOrient.x, qt0.y + headOrient.y - cross_t.y - heightOrient.y, qt0.z + headOrient.z - cross_t.z - heightOrient.z);
+				glTexCoord3f(1.0f, 1.0f, 0.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x - heightOrient.x, qt0.y - headOrient.y - cross_t.y - heightOrient.y, qt0.z - headOrient.z - cross_t.z - heightOrient.z);
+				glTexCoord3f(0.0f, 1.0f, 0.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x - heightOrient.x, qt0.y - headOrient.y + cross_t.y - heightOrient.y, qt0.z - headOrient.z + cross_t.z - heightOrient.z);
+
+				//top
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x, qt0.y + headOrient.y + cross_t.y, qt0.z + headOrient.z + cross_t.z);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x, qt0.y + headOrient.y - cross_t.y, qt0.z + headOrient.z - cross_t.z);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x, qt0.y - headOrient.y - cross_t.y, qt0.z - headOrient.z - cross_t.z);
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x, qt0.y - headOrient.y + cross_t.y, qt0.z - headOrient.z + cross_t.z);
+				
+				//buttom
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x - heightOrient.x, qt0.y + headOrient.y + cross_t.y - heightOrient.y, qt0.z + headOrient.z + cross_t.z - heightOrient.z);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x - heightOrient.x, qt0.y + headOrient.y - cross_t.y - heightOrient.y, qt0.z + headOrient.z - cross_t.z - heightOrient.z);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x - heightOrient.x, qt0.y - headOrient.y - cross_t.y - heightOrient.y, qt0.z - headOrient.z - cross_t.z - heightOrient.z);
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x - heightOrient.x, qt0.y - headOrient.y + cross_t.y - heightOrient.y, qt0.z - headOrient.z + cross_t.z - heightOrient.z);
+
+				//front
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x, qt0.y + headOrient.y + cross_t.y, qt0.z + headOrient.z + cross_t.z);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x, qt0.y + headOrient.y - cross_t.y, qt0.z + headOrient.z - cross_t.z);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x - heightOrient.x, qt0.y + headOrient.y - cross_t.y - heightOrient.y, qt0.z + headOrient.z - cross_t.z - heightOrient.z);
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x - heightOrient.x, qt0.y + headOrient.y + cross_t.y - heightOrient.y, qt0.z + headOrient.z + cross_t.z - heightOrient.z);
+
+				//back
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x, qt0.y - headOrient.y + cross_t.y, qt0.z - headOrient.z + cross_t.z);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x, qt0.y - headOrient.y - cross_t.y, qt0.z - headOrient.z - cross_t.z);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x - heightOrient.x, qt0.y - headOrient.y - cross_t.y - heightOrient.y, qt0.z - headOrient.z - cross_t.z - heightOrient.z);
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x - heightOrient.x, qt0.y - headOrient.y + cross_t.y - heightOrient.y, qt0.z - headOrient.z + cross_t.z - heightOrient.z);
+
+				//inside
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x, qt0.y + headOrient.y + cross_t.y, qt0.z + headOrient.z + cross_t.z);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x, qt0.y - headOrient.y + cross_t.y, qt0.z - headOrient.z + cross_t.z);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x + cross_t.x - heightOrient.x, qt0.y - headOrient.y + cross_t.y - heightOrient.y, qt0.z - headOrient.z + cross_t.z - heightOrient.z);
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3f(qt0.x + headOrient.x + cross_t.x - heightOrient.x, qt0.y + headOrient.y + cross_t.y - heightOrient.y, qt0.z + headOrient.z + cross_t.z - heightOrient.z);
+
+				//outside
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x, qt0.y + headOrient.y - cross_t.y, qt0.z + headOrient.z - cross_t.z);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x, qt0.y - headOrient.y - cross_t.y, qt0.z - headOrient.z - cross_t.z);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(qt0.x - headOrient.x - cross_t.x - heightOrient.x, qt0.y - headOrient.y - cross_t.y - heightOrient.y, qt0.z - headOrient.z - cross_t.z - heightOrient.z);
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3f(qt0.x + headOrient.x - cross_t.x - heightOrient.x, qt0.y + headOrient.y - cross_t.y - heightOrient.y, qt0.z + headOrient.z - cross_t.z - heightOrient.z);
+
+				glEnd();
+
+				sleeperSpaceCount -= sleeperSpace;
+			}
+
 		}
 
-		m_pTrack->arcLength[i] = len;
+		m_pTrack->arcLength[i] = arcLen;
 	}
 }
 
@@ -528,71 +627,87 @@ drawTrain(bool doingShadows)
 	for (int n = 0; n < 4; n++)
 		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].pos;
 	Pnt3f trainPos = cubicSpline(g, m, t);
+	Pnt3f trainPos1 = cubicSpline(g, m, t + (1.0f / DIVIDE_LINE));
+
 	for (int n = 0; n < 4; n++)
 		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].orient;
 	Pnt3f trainOrient = cubicSpline(g, m, t);
-
 	trainOrient.normalize();
+
+	Pnt3f trainHead = (trainPos1 - trainPos);
+	trainHead.normalize();
+
+	Pnt3f trainCross = trainHead * trainOrient;
+	trainCross.normalize();
+
+	const float height = 10;
+	const float width = 5;
+	const float lenght = 5;
+
+	trainHead = trainHead * lenght;
+	trainCross = trainCross * width;
+	trainOrient = trainOrient * height;
+	
 
 	if (!tw->trainCam->value())
 	{
 
 		glBegin(GL_QUADS);
 		if (!doingShadows)
-			glColor3ub(100,100,100);
+			glColor3ub(32,32,64);
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x - trainCross.x, trainPos.y + trainHead.y - trainCross.y, trainPos.z + trainHead.z - trainCross.z);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x + trainCross.x, trainPos.y + trainHead.y + trainCross.y, trainPos.z + trainHead.z + trainCross.z);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y + 10, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x + trainCross.x + trainOrient.x, trainPos.y + trainHead.y + trainCross.y + trainOrient.y, trainPos.z + trainHead.z + trainCross.z + trainOrient.z);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y + 10, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x - trainCross.x + trainOrient.x, trainPos.y + trainHead.y - trainCross.y + trainOrient.y, trainPos.z + trainHead.z - trainCross.z + trainOrient.z);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x - trainCross.x, trainPos.y - trainHead.y - trainCross.y, trainPos.z - trainHead.z - trainCross.z);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x + trainCross.x, trainPos.y - trainHead.y + trainCross.y, trainPos.z - trainHead.z + trainCross.z);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y + 10, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x + trainCross.x + trainOrient.x, trainPos.y - trainHead.y + trainCross.y + trainOrient.y, trainPos.z - trainHead.z + trainCross.z + trainOrient.z);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y + 10, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x - trainCross.x + trainOrient.x, trainPos.y - trainHead.y - trainCross.y + trainOrient.y, trainPos.z - trainHead.z - trainCross.z + trainOrient.z);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x + trainCross.x, trainPos.y + trainHead.y + trainCross.y, trainPos.z + trainHead.z + trainCross.z);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y, trainPos.z - 5);
+		glVertex3f(trainPos.x - trainHead.x + trainCross.x, trainPos.y - trainHead.y + trainCross.y, trainPos.z - trainHead.z + trainCross.z);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x + trainCross.x + trainOrient.x, trainPos.y - trainHead.y + trainCross.y + trainOrient.y, trainPos.z - trainHead.z + trainCross.z + trainOrient.z);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y, trainPos.z + 5);
+		glVertex3f(trainPos.x + trainHead.x + trainCross.x + trainOrient.x, trainPos.y + trainHead.y + trainCross.y + trainOrient.y, trainPos.z + trainHead.z + trainCross.z + trainOrient.z);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y + 10, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x - trainCross.x, trainPos.y + trainHead.y - trainCross.y, trainPos.z + trainHead.z - trainCross.z);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y + 10, trainPos.z - 5);
+		glVertex3f(trainPos.x - trainHead.x - trainCross.x, trainPos.y - trainHead.y - trainCross.y, trainPos.z - trainHead.z - trainCross.z);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y + 10, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x - trainCross.x + trainOrient.x, trainPos.y - trainHead.y - trainCross.y + trainOrient.y, trainPos.z - trainHead.z - trainCross.z + trainOrient.z);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y + 10, trainPos.z + 5);
+		glVertex3f(trainPos.x + trainHead.x - trainCross.x + trainOrient.x, trainPos.y + trainHead.y - trainCross.y + trainOrient.y, trainPos.z + trainHead.z - trainCross.z + trainOrient.z);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x + trainCross.x, trainPos.y + trainHead.y + trainCross.y, trainPos.z + trainHead.z + trainCross.z);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y + 10, trainPos.z - 5);
+		glVertex3f(trainPos.x - trainHead.x + trainCross.x, trainPos.y - trainHead.y + trainCross.y, trainPos.z - trainHead.z + trainCross.z);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y + 10, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x - trainCross.x, trainPos.y - trainHead.y - trainCross.y, trainPos.z - trainHead.z - trainCross.z);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(trainPos.x - 5, trainPos.y, trainPos.z + 5);
+		glVertex3f(trainPos.x + trainHead.x - trainCross.x, trainPos.y + trainHead.y - trainCross.y, trainPos.z + trainHead.z - trainCross.z);
 
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y, trainPos.z - 5);
+		glVertex3f(trainPos.x + trainHead.x + trainCross.x + trainOrient.x, trainPos.y + trainHead.y + trainCross.y + trainOrient.y, trainPos.z + trainHead.z + trainCross.z + trainOrient.z);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y + 10, trainPos.z - 5);
+		glVertex3f(trainPos.x - trainHead.x + trainCross.x + trainOrient.x, trainPos.y - trainHead.y + trainCross.y + trainOrient.y, trainPos.z - trainHead.z + trainCross.z + trainOrient.z);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y + 10, trainPos.z + 5);
+		glVertex3f(trainPos.x - trainHead.x - trainCross.x + trainOrient.x, trainPos.y - trainHead.y - trainCross.y + trainOrient.y, trainPos.z - trainHead.z - trainCross.z + trainOrient.z);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(trainPos.x + 5, trainPos.y, trainPos.z + 5);
+		glVertex3f(trainPos.x + trainHead.x - trainCross.x + trainOrient.x, trainPos.y + trainHead.y - trainCross.y + trainOrient.y, trainPos.z + trainHead.z - trainCross.z + trainOrient.z);
 		glEnd();
 	}
 }

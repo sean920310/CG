@@ -221,7 +221,7 @@ advanceTrain(float dir)
 		{
 			while ((t * m_Track.arcLength[i] + vel) > m_Track.arcLength[i])
 			{
-				printf("%d\n", i);
+				//printf("%d\n", i);
 				vel -= ((1 - t) * m_Track.arcLength[i]);
 				t = 0;
 				i++;
@@ -237,7 +237,7 @@ advanceTrain(float dir)
 		{
 			while ((t * m_Track.arcLength[i] + vel) < 0)
 			{
-				printf("%d\n", i);
+				//printf("%d\n", i);
 				vel += (t * m_Track.arcLength[i]);
 				t = 1;
 				i--;
