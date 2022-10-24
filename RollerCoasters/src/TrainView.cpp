@@ -174,7 +174,7 @@ int TrainView::handle(int event)
 void initDirLight()
 {
 	float noAmbient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	float whiteDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float whiteDiffuse[] = { 0.5f,  0.5f, 0.5f, 1.0f };
 	/*
 	* Directional light soruce (w = 0)
 	* The light source is at an infinite distance,
@@ -189,13 +189,13 @@ void initDirLight()
 //Point Light
 void initPosLight()
 {
-	float yellowAmbientDiffuse[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	float yellowAmbientDiffuse[] = { 0.5f, 0.5f, 0.0f, 1.0f };
 	/*
 	* Positional light source (w = 1)
 	* The light source is positioned at (x, y, z).
 	* The ray come from this particular location (x, y, z) and goes towars all directions.
 	*/
-	float position[] = { -2.0f, 2.0f, -5.0f, 1.0f };
+	float position[] = { 0.0f, 50.0f, 20.0f, 1.0f };
 	glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbientDiffuse);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowAmbientDiffuse);
 	glLightfv(GL_LIGHT1, GL_POSITION, position);
@@ -205,9 +205,9 @@ void initPosLight()
 //Spot Light
 void initSpotLight()
 {
-	float noAmbient[] = { 0.0f, 0.0f, 0.2f, 1.0f };
-	float whiteDiffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-	float position[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	float noAmbient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	float whiteDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float position[] = { 100.0f, 100.0f, 100.0f, 1.0f };
 
 	glLightfv(GL_LIGHT2, GL_AMBIENT, noAmbient);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, whiteDiffuse);
@@ -216,7 +216,9 @@ void initSpotLight()
 	/*
 	* define the spot direction and cut-off
 	*/
-	//updateSpot();
+	float dir[] = { -1.0f, -1.0f, -1.0f };
+	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, dir);
+	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 30);
 
 	//exponent propertie defines the concentration of the light
 	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 15.0f);
@@ -275,11 +277,6 @@ void TrainView::draw()
 	// we need to set up the lights AFTER setting up the projection
 	//######################################################################
 
-	initDirLight();
-	//initPosLight();
-	initSpotLight();
-
-
 	// enable the lighting
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
@@ -301,24 +298,38 @@ void TrainView::draw()
 	// * set the light parameters
 	//
 	//**********************************************************************
-	GLfloat lightPosition1[] = { 0,1,1,0 }; // {50, 200.0, 50, 1.0};
-	GLfloat lightPosition2[] = { 1, 0, 0, 0 };
-	GLfloat lightPosition3[] = { 0, -1, 0, 0 };
-	GLfloat yellowLight[] = { 0.5f, 0.5f, .1f, 1.0 };
-	GLfloat whiteLight[] = { 1.0f, 1.0f, 1.0f, 1.0 };
-	GLfloat blueLight[] = { .1f,.1f,.3f,1.0 };
-	GLfloat grayLight[] = { .3f, .3f, .3f, 1.0 };
+	//GLfloat lightPosition1[] = { 0,1,1,0 }; // {50, 200.0, 50, 1.0};
+	//GLfloat lightPosition2[] = { 1, 0, 0, 0 };
+	//GLfloat lightPosition3[] = { 0, -1, 0, 0 };
+	//GLfloat yellowLight[] = { 0.5f, 0.5f, .1f, 1.0 };
+	//GLfloat whiteLight[] = { 1.0f, 1.0f, 1.0f, 1.0 };
+	//GLfloat blueLight[] = { .1f,.1f,.3f,1.0 };
+	//GLfloat grayLight[] = { .3f, .3f, .3f, 1.0 };
 
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
+	//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
+	//glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
+	//glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
 
-	glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowLight);
+	//glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
+	//glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowLight);
 
-	glLightfv(GL_LIGHT2, GL_POSITION, lightPosition3);
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, blueLight);
+	//glLightfv(GL_LIGHT2, GL_POSITION, lightPosition3);
+	//glLightfv(GL_LIGHT2, GL_DIFFUSE, blueLight);
 
+	if (tw->dirLight->value())
+		initDirLight();
+	else
+		glDisable(GL_LIGHT0);
+
+	if (tw->posLight->value())
+		initPosLight();
+	else
+		glDisable(GL_LIGHT1);
+
+	if (tw->spotLight->value())
+		initSpotLight();
+	else
+		glDisable(GL_LIGHT2);
 
 
 	//*********************************************************************
@@ -328,7 +339,7 @@ void TrainView::draw()
 	glUseProgram(0);
 
 	setupFloor();
-	glDisable(GL_LIGHTING);
+	//glDisable(GL_LIGHTING);
 	drawFloor(200, 10);
 
 
@@ -464,72 +475,53 @@ void TrainView::drawStuff(bool doingShadows)
 	drawTrain(doingShadows);
 }
 
-void TrainView::drawHexahedron(Pnt3f* point, bool doingShadows, float* color)
+void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
 {
-	glBegin(GL_QUADS);
-	if (!doingShadows && color != nullptr)
-		glColor3ub(color[0], color[1], color[2]);
-	//top
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(point[0].x, point[0].y, point[0].z);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(point[1].x, point[1].y, point[1].z);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(point[2].x, point[2].y, point[2].z);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(point[3].x, point[3].y, point[3].z);
-	
-	//bottom
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(point[4].x, point[4].y, point[4].z);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(point[5].x, point[5].y, point[5].z);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(point[6].x, point[6].y, point[6].z);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(point[7].x, point[7].y, point[7].z);
+	float point[][3] =
+	{
+		{0,1,0},
+		{1,1,0},
+		{1,1,1},
+		{0,1,1},
+		{0,0,0},
+		{1,0,0},
+		{1,0,1},
+		{0,0,1}
+	};
 
-	//front
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(point[0].x, point[0].y, point[0].z);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(point[1].x, point[1].y, point[1].z);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(point[5].x, point[5].y, point[5].z);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(point[4].x, point[4].y, point[4].z);
+	int face[][4] =
+	{
+		{0,1,2,3},
+		{7,6,5,4},
+		{0,4,5,1},
+		{1,5,6,2},
+		{3,2,6,7},
+		{0,3,7,4}
+	};
 
-	//back
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(point[2].x, point[2].y, point[2].z);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(point[3].x, point[3].y, point[3].z);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(point[7].x, point[7].y, point[7].z);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(point[6].x, point[6].y, point[6].z);
+	float cube[][3] =
+	{
+		{0,1,0},
+		{0,-1,0},
+		{1,0,0},
+		{0,1,0},
+		{-1,0,0},
+		{0,-1,0}
+	};
 
-	//left
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(point[0].x, point[0].y, point[0].z);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(point[3].x, point[3].y, point[3].z);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(point[7].x, point[7].y, point[7].z);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(point[4].x, point[4].y, point[4].z);
+	for (int i = 0; i < 6; i++)
+	{
 
-	//right
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(point[1].x, point[1].y, point[1].z);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(point[2].x, point[2].y, point[2].z);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(point[6].x, point[6].y, point[6].z);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(point[5].x, point[5].y, point[5].z);
-
-	glEnd();
+		glBegin(GL_POLYGON);
+		if (!doingShadows)
+			glColor3fv(color[i]);
+		glNormal3fv(cube[i]);
+		glVertex3fv(point[face[i][0]]);
+		glVertex3fv(point[face[i][1]]);
+		glVertex3fv(point[face[i][2]]);
+		glVertex3fv(point[face[i][3]]);
+		glEnd();
+	}
 }
 
 void TrainView::
@@ -625,10 +617,12 @@ drawTrack(bool doingShadows)
 
 			Pnt3f crossR0[2] = { qt0 + cross_t_R, qt0 - cross_t_R }, crossL0[2] = { qt0 + cross_t_L, qt0 - cross_t_L };
 			Pnt3f crossR1[2] = { qt1 + cross_t_R, qt1 - cross_t_R }, crossL1[2] = { qt1 + cross_t_L, qt1 - cross_t_L };
-
+			
+			glNormal3f(0, -1, 0); //我也不知道為甚麼
 			for (int n = 0; n < 2; n++)
 			{
 				glBegin(GL_POLYGON);
+				//glNormal3f(0,-1,0);
 				if (!doingShadows)
 					glColor3ub(50, 50, 50);
 				glVertex3f(crossR0[n].x, crossR0[n].y, crossR0[n].z);
@@ -641,6 +635,7 @@ drawTrack(bool doingShadows)
 				{
 					//補縫隙
 					glBegin(GL_POLYGON);
+					//glNormal3f(0, -1, 0);
 					if (!doingShadows)
 						glColor3ub(50, 50, 50);
 					glVertex3f(preCrossR[n].x, preCrossR[n].y, preCrossR[n].z);
@@ -660,32 +655,42 @@ drawTrack(bool doingShadows)
 			//sleeper
 			if (sleeperSpaceCount >= sleeperSpace)
 			{
-				float sleeperLen = 4.f, sleeperWidth = 2.f, sleeperHeight = 1.0f;
+				float sleeperLen = 8.f, sleeperWidth = 4.f, sleeperHeight = 1.0f;
 				cross_t.normalize();
-				cross_t = cross_t * sleeperLen;
 				
 				Pnt3f headOrient = qt1 - qt0;
 				headOrient.normalize();
-				headOrient = headOrient * (sleeperWidth / 2);
 
-				Pnt3f heightOrient = headOrient * cross_t * -1;
+				Pnt3f heightOrient = headOrient * cross_t;
 				heightOrient.normalize();
-				heightOrient = heightOrient * sleeperHeight;
 
-				Pnt3f point[8] =
-				{
-					qt0 + headOrient + cross_t,
-					qt0 + headOrient - cross_t,
-					qt0 - headOrient - cross_t,
-					qt0 - headOrient + cross_t,
-					qt0 + headOrient + cross_t - heightOrient,
-					qt0 + headOrient - cross_t - heightOrient,
-					qt0 - headOrient - cross_t - heightOrient,
-					qt0 - headOrient + cross_t - heightOrient,
+				float color[][3] = { 
+					{ 0.5f, 0.5f, 0.5f },
+					{ 0.5f, 0.5f, 0.5f },
+					{ 0.5f, 0.5f, 0.5f },
+					{ 0.5f, 0.5f, 0.5f },
+					{ 0.5f, 0.5f, 0.5f },
+					{ 0.5f, 0.5f, 0.5f }
 				};
-				float color[3] = { 100, 100, 100 };
 
-				drawHexahedron(point, doingShadows, color);
+				Pnt3f u = headOrient; u.normalize();
+				Pnt3f w = cross_t; w.normalize();
+				Pnt3f v = heightOrient; v.normalize();
+
+				float rotation[16] = {
+				u.x, u.y, u.z, 0.0,
+				v.x, v.y, v.z, 0.0,
+				w.x, w.y, w.z, 0.0,
+				0.0, 0.0, 0.0, 1.0
+				};
+
+				glPushMatrix();
+				glTranslatef(qt0.x, qt0.y, qt0.z);
+				glMultMatrixf(rotation);
+				glScalef(sleeperWidth, sleeperHeight, sleeperLen);
+				glTranslatef(-0.5f, -1.0f, -0.5f);
+				drawHexahedron(color, doingShadows);
+				glPopMatrix();
 
 				sleeperSpaceCount -= sleeperSpace;
 			}
@@ -723,14 +728,14 @@ drawTrain(bool doingShadows)
 	trainOrient.normalize();
 
 	const float height = 10;
-	const float width = 4;
-	const float lenght = 8;
+	const float width = 8;
+	const float lenght = 16;
 
 	trainHead = trainHead * lenght;
 	trainCross = trainCross * width;
 	trainOrient = trainOrient * height;
 	
-	Pnt3f point[8] = 
+	/*Pnt3f point[8] = 
 	{
 		trainPos + trainHead - trainCross + trainOrient,
 		trainPos + trainHead + trainCross + trainOrient,
@@ -740,12 +745,37 @@ drawTrain(bool doingShadows)
 		trainPos + trainHead + trainCross,
 		trainPos - trainHead + trainCross,
 		trainPos - trainHead - trainCross,
+	};*/
+	float color[6][3] = {
+		{0.5,0.5,1},
+		{0.5,0.5,1},
+		{0.5,0.5,1},
+		{0.5,0.5,1},
+		{0.5,0.5,1},
+		{0.5,0.5,1}
 	};
-	float color[3] = { 32,32,64 };
+
+	Pnt3f u = trainHead; u.normalize();
+	Pnt3f w = trainCross; w.normalize();
+	Pnt3f v = trainOrient; v.normalize();
+
+	float rotation[16] = {
+	u.x, u.y, u.z, 0.0,
+	v.x, v.y, v.z, 0.0,
+	w.x, w.y, w.z, 0.0,
+	0.0, 0.0, 0.0, 1.0
+	};
+
 
 	if (!tw->trainCam->value())
 	{
-		drawHexahedron(point, doingShadows, color);
+		glPushMatrix();
+		glTranslatef(trainPos.x, trainPos.y, trainPos.z);
+		glMultMatrixf(rotation);
+		glScalef(lenght, height, width);
+		glTranslatef(-0.5f, 0.0f, -0.5f);
+		drawHexahedron(color, doingShadows);
+		glPopMatrix();
 	}
 }
 

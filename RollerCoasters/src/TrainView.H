@@ -70,7 +70,7 @@ class TrainView : public Fl_Gl_Window
 		// we're drawing shadows (no colors, for example)
 		void drawStuff(bool doingShadows=false);
 
-		void drawHexahedron(Pnt3f* point, bool doingShadows = false , float* color=nullptr);
+		void drawHexahedron(float color[6][3], bool doingShadows = false);
 
 		// setup the projection - assuming that the projection stack has been
 		// cleared for you
@@ -92,6 +92,6 @@ class TrainView : public Fl_Gl_Window
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
 		const int		DIVIDE_LINE = 100;
-		float			sleeperSpace = 6.f;
+		float			sleeperSpace = 8.f;
 		float			m[16] = { 0 };
 };

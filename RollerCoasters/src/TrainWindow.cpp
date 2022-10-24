@@ -143,6 +143,15 @@ TrainWindow(const int x, const int y)
 		pty+=30;
 
 		// TODO: add widgets for all of your fancier features here
+		dirLight = new Fl_Button(605, pty, 60, 20, "Direct");
+		togglify(dirLight);
+		posLight = new Fl_Button(670, pty, 60, 20, "Point");
+		togglify(posLight);
+		spotLight = new Fl_Button(735, pty, 60, 20, "Spot");
+		togglify(spotLight);
+
+		pty += 30;
+
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);
 #endif
