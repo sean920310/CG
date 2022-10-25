@@ -38,6 +38,10 @@
 #include "TrainWindow.H"
 #include "Utilities/3DUtils.H"
 
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+
 #ifdef EXAMPLE_SOLUTION
 #	include "TrainExample/TrainExample.H"
 #endif

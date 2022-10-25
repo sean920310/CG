@@ -8,6 +8,7 @@ set(LIB_DIR ${PROJECT_SOURCE_DIR}/lib/)
 include_directories(${INCLUDE_DIR})
 include_directories(${INCLUDE_DIR}glad4.6/include/)
 include_directories(${INCLUDE_DIR}glm-0.9.8.5/glm/)
+include_directories(${INCLUDE_DIR}assimp/include/)
 
 add_Definitions("-D_XKEYCHECK_H")
 add_definitions(-DPROJECT_DIR="${PROJECT_SOURCE_DIR}")
@@ -46,7 +47,8 @@ target_link_libraries(RollerCoasters
 
 target_link_libraries(RollerCoasters 
     ${LIB_DIR}OpenGL32.lib
-    ${LIB_DIR}glu32.lib)
+    ${LIB_DIR}glu32.lib
+    ${LIB_DIR}assimp-vc142-mtd.lib)
 
 target_link_libraries(RollerCoasters Utilities)
     
