@@ -8,7 +8,6 @@ set(LIB_DIR ${PROJECT_SOURCE_DIR}/lib/)
 include_directories(${INCLUDE_DIR})
 include_directories(${INCLUDE_DIR}glad4.6/include/)
 include_directories(${INCLUDE_DIR}glm-0.9.8.5/glm/)
-include_directories(${INCLUDE_DIR}assimp/include/)
 
 add_Definitions("-D_XKEYCHECK_H")
 add_definitions(-DPROJECT_DIR="${PROJECT_SOURCE_DIR}")
@@ -26,6 +25,10 @@ add_executable(RollerCoasters
     ${SRC_DIR}TrainView.cpp
     ${SRC_DIR}TrainWindow.h
     ${SRC_DIR}TrainWindow.cpp
+    ${SRC_DIR}Shader.h
+    ${SRC_DIR}Mesh.h
+    ${SRC_DIR}Model.h
+    ${SRC_DIR}stb.cpp
     ${INCLUDE_DIR}glad4.6/src/glad.c)
 
 add_library(Utilities 

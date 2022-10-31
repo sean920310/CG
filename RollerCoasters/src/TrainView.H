@@ -84,6 +84,7 @@ class TrainView : public Fl_Gl_Window
 
 		void drawTrack(bool doingShadows = false);
 		void drawTrain(bool doingShadows = false);
+		void drawTruck(float trainU, bool doingShadows = false);
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI

@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include <math.h>
+#include <string>
 
 #include "TrainWindow.H"
 #include "TrainView.H"
@@ -246,5 +247,24 @@ void rmzCB(Fl_Widget*, TrainWindow* tw)
 //===========================================================================
 {
 	rollz(tw, -1);
+}
+
+void multiCar(TrainWindow* tw, float add)
+{
+	tw->m_Track.carCount += add;
+	if (tw->m_Track.carCount < 1) tw->m_Track.carCount = 1;
+
+	tw->carCount->text(1, std::to_string(tw->m_Track.carCount).c_str());
+	tw->damageMe();
+}
+
+void minCarCB(Fl_Widget*, TrainWindow* tw)
+{
+	multiCar(tw, -1);
+}
+
+void addCarCB(Fl_Widget*, TrainWindow* tw)
+{
+	multiCar(tw, 1);
 }
 

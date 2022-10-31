@@ -58,3 +58,7 @@ void rmxCB(Fl_Widget*, TrainWindow* tw);
 void rpzCB(Fl_Widget*, TrainWindow* tw);
 // Rotate the selected control point  about the z axis one less degree
 void rmzCB(Fl_Widget*, TrainWindow* tw);
+
+void minCarCB(Fl_Widget*, TrainWindow* tw);
+
+void addCarCB(Fl_Widget*, TrainWindow* tw);

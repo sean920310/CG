@@ -144,13 +144,34 @@ TrainWindow(const int x, const int y)
 
 		// TODO: add widgets for all of your fancier features here
 		dirLight = new Fl_Button(605, pty, 60, 20, "Direct");
-		togglify(dirLight);
+		togglify(dirLight,1);
 		posLight = new Fl_Button(670, pty, 60, 20, "Point");
 		togglify(posLight);
 		spotLight = new Fl_Button(735, pty, 60, 20, "Spot");
-		togglify(spotLight);
+		togglify(spotLight,1);
 
 		pty += 30;
+
+		Fl_Button* minCar = new Fl_Button(605, pty, 20, 20, "@<");
+		minCar->callback((Fl_Callback*)minCarCB, this);
+		carCount = new Fl_Browser(625, pty, 50, 20, "cars");
+		carCount->type();
+		carCount->add("2");
+		carCount->align(FL_ALIGN_CENTER);
+		Fl_Button* addCar = new Fl_Button(675, pty, 20, 20, "@>");
+		addCar->callback((Fl_Callback*)addCarCB, this);
+
+		pty += 30;
+
+		tension = new Fl_Value_Slider(655, pty, 140, 20, "tension");
+		tension->range(0, 1);
+		tension->value(0.5);
+		tension->align(FL_ALIGN_LEFT);
+		tension->type(FL_HORIZONTAL);
+		tension->callback((Fl_Callback*)damageCB, this);
+
+		pty += 30;
+
 
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);
@@ -223,43 +244,8 @@ advanceTrain(float dir)
 	if (world.trainU < 0) world.trainU += nct;
 #endif
 	if (arcLength->value()) {
-		int i = m_Track.trainU;
-		float t = m_Track.trainU - i;
 		float vel = dir * ((float)speed->value());
-		if (dir > 0)
-		{
-			while ((t * m_Track.arcLength[i] + vel) > m_Track.arcLength[i])
-			{
-				//printf("%d\n", i);
-				vel -= ((1 - t) * m_Track.arcLength[i]);
-				t = 0;
-				i++;
-				if (i >= m_Track.points.size()) i = 0;
-				m_Track.trainU = i;
-
-				float nct = m_Track.points.size();
-				if (m_Track.trainU >= nct) m_Track.trainU -= nct;
-				if (m_Track.trainU < 0) m_Track.trainU += nct;
-			}
-		}
-		else
-		{
-			while ((t * m_Track.arcLength[i] + vel) < 0)
-			{
-				//printf("%d\n", i);
-				vel += (t * m_Track.arcLength[i]);
-				t = 1;
-				i--;
-				if (i < 0) i = m_Track.points.size() - 1;
-				m_Track.trainU = i+1;
-
-				float nct = m_Track.points.size();
-				if (m_Track.trainU >= nct) m_Track.trainU -= nct;
-				if (m_Track.trainU < 0) m_Track.trainU += nct;
-			}
-		}
-
-		m_Track.trainU += (vel / m_Track.arcLength[i]);
+		m_Track.trainU += addArcLen(vel);
 	}
 	else {
 		m_Track.trainU += dir * ((float)speed->value() * 0.02f);
@@ -268,4 +254,46 @@ advanceTrain(float dir)
 	float nct = m_Track.points.size();
 	if (m_Track.trainU >= nct) m_Track.trainU -= nct;
 	if (m_Track.trainU < 0) m_Track.trainU += nct;
+}
+
+float TrainWindow::addArcLen(float len)
+{
+	float result = m_Track.trainU;
+	int i = m_Track.trainU;
+	float t = m_Track.trainU - i;
+	if (len > 0)
+	{
+		while ((t + (len / m_Track.arcLength[i])) > 1.0f)
+		{
+			//printf("%d\n", i);
+			len -= ((1 - t) * m_Track.arcLength[i]);
+			t = 0;
+			i++;
+			if (i >= m_Track.points.size()) i = 0;
+			result = i;
+
+			float nct = m_Track.points.size();
+			if (result >= nct) result -= nct;
+			if (result < 0) result += nct;
+		}
+	}
+	else
+	{
+		while ((t + (len / m_Track.arcLength[i])) < 0)
+		{
+			//printf("%d\n", i);
+			len += (t * m_Track.arcLength[i]);
+			t = 1;
+			i--;
+			if (i < 0) i = m_Track.points.size() - 1;
+			result = i + 1;
+
+			float nct = m_Track.points.size();
+			if (result >= nct) result -= nct;
+			if (result < 0) result += nct;
+		}
+	}
+
+	result += (len / m_Track.arcLength[i]);
+	return (result - m_Track.trainU);
 }

@@ -32,15 +32,14 @@
 //#include "GL/gl.h"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/geometric.hpp>
 #include "GL/glu.h"
 
 #include "TrainView.H"
 #include "TrainWindow.H"
 #include "Utilities/3DUtils.H"
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
+#include "Model.h"
 
 #ifdef EXAMPLE_SOLUTION
 #	include "TrainExample/TrainExample.H"
@@ -178,7 +177,7 @@ int TrainView::handle(int event)
 void initDirLight()
 {
 	float noAmbient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	float whiteDiffuse[] = { 0.5f,  0.5f, 0.5f, 1.0f };
+	float whiteDiffuse[] = { 0.7f,  0.7f, 0.7f, 1.0f };
 	/*
 	* Directional light soruce (w = 0)
 	* The light source is at an infinite distance,
@@ -193,15 +192,17 @@ void initDirLight()
 //Point Light
 void initPosLight()
 {
-	float yellowAmbientDiffuse[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+	float yellowAmbient[] = { 0.1f, 0.1f, 0.0f, 1.0f };
+	float yellowDiffuse[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+
 	/*
 	* Positional light source (w = 1)
 	* The light source is positioned at (x, y, z).
 	* The ray come from this particular location (x, y, z) and goes towars all directions.
 	*/
-	float position[] = { 0.0f, 50.0f, 20.0f, 1.0f };
-	glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbientDiffuse);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowAmbientDiffuse);
+	float position[] = { 0.0f, 20.0f, 20.0f, 1.0f };
+	glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbient);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowDiffuse);
 	glLightfv(GL_LIGHT1, GL_POSITION, position);
 } 
 
@@ -483,14 +484,14 @@ void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
 {
 	float point[][3] =
 	{
-		{0,1,0},
-		{1,1,0},
-		{1,1,1},
-		{0,1,1},
 		{0,0,0},
 		{1,0,0},
 		{1,0,1},
-		{0,0,1}
+		{0,0,1},
+		{0,1,0},
+		{1,1,0},
+		{1,1,1},
+		{0,1,1}
 	};
 
 	int face[][4] =
@@ -505,12 +506,12 @@ void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
 
 	float cube[][3] =
 	{
-		{0,1,0},
 		{0,-1,0},
-		{1,0,0},
 		{0,1,0},
+		{0,0,-1},
+		{1,0,0},
+		{0,0,1},
 		{-1,0,0},
-		{0,-1,0}
 	};
 
 	for (int i = 0; i < 6; i++)
@@ -518,8 +519,10 @@ void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
 
 		glBegin(GL_POLYGON);
 		if (!doingShadows)
+		{
 			glColor3fv(color[i]);
-		glNormal3fv(cube[i]);
+			glNormal3fv(cube[i]);
+		}
 		glVertex3fv(point[face[i][0]]);
 		glVertex3fv(point[face[i][1]]);
 		glVertex3fv(point[face[i][2]]);
@@ -548,15 +551,23 @@ drawTrack(bool doingShadows)
 	}
 	case 2:				//Cardinal Cubic
 	{
+		float tension = tw->tension->value();
 		float matrix[16] =
-		{
+		/*{
 			-1, 2, -1, 0,
 			3, -5, 0, 2,
 			-3, 4, 1, 0,
 			1, -1, 0, 0
+		};*/
+
+		{
+			-tension, 2 * tension, -tension, 0,
+				2 - tension , tension - 3, 0, 1,
+				tension-2, 3 - 2* tension, tension, 0,
+				tension, -tension, 0, 0
 		};
-		for (int i = 0; i < 16; i++)
-			matrix[i] /= 2;
+		/*for (int i = 0; i < 16; i++)
+			matrix[i] *= tension;*/
 		memcpy(m, matrix, sizeof(float) * 16);
 		break;
 	}
@@ -708,9 +719,22 @@ drawTrack(bool doingShadows)
 void TrainView::
 drawTrain(bool doingShadows)
 {
-	int i = m_pTrack->trainU;
-	float t = m_pTrack->trainU - i;
-	
+	for(int i=0;i< m_pTrack->carCount;i++)
+	{
+		drawTruck(m_pTrack->trainU + tw->addArcLen(-16.f * i), doingShadows);
+	}
+	Model test("");
+}
+
+void TrainView::
+drawTruck(float trainU, bool doingShadows)
+{
+	float nct = m_pTrack->points.size();
+	if (trainU >= nct) trainU -= nct;
+	if (trainU < 0) trainU += nct;
+	int i = trainU;
+	float t = trainU - i;
+
 	Pnt3f g[4];
 	for (int n = 0; n < 4; n++)
 		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].pos;
@@ -731,15 +755,15 @@ drawTrain(bool doingShadows)
 	trainOrient = trainHead * trainCross * -1;
 	trainOrient.normalize();
 
-	const float height = 10;
-	const float width = 8;
-	const float lenght = 16;
+	float height = 10;
+	float width = 8;
+	float lenght = 16;
 
 	trainHead = trainHead * lenght;
 	trainCross = trainCross * width;
 	trainOrient = trainOrient * height;
-	
-	/*Pnt3f point[8] = 
+
+	/*Pnt3f point[8] =
 	{
 		trainPos + trainHead - trainCross + trainOrient,
 		trainPos + trainHead + trainCross + trainOrient,
@@ -751,12 +775,12 @@ drawTrain(bool doingShadows)
 		trainPos - trainHead - trainCross,
 	};*/
 	float color[6][3] = {
-		{0.5,0.5,1},
-		{0.5,0.5,1},
-		{0.5,0.5,1},
-		{0.5,0.5,1},
-		{0.5,0.5,1},
-		{0.5,0.5,1}
+		{1,1,2},
+		{1,1,2},
+		{1,1,2},
+		{1,1,2},
+		{1,1,2},
+		{1,1,2}
 	};
 
 	Pnt3f u = trainHead; u.normalize();
