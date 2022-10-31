@@ -55,6 +55,8 @@ class CTrack;
 #include "Utilities/ArcBallCam.H"
 #include "Utilities/Pnt3f.H"
 
+#include "Model.h"
+
 class TrainView : public Fl_Gl_Window
 {
 	public:
@@ -95,4 +97,6 @@ class TrainView : public Fl_Gl_Window
 		const int		DIVIDE_LINE = 100;
 		float			sleeperSpace = 8.f;
 		float			m[16] = { 0 };
+		Model*			train;
+		Shader*			shader;
 };

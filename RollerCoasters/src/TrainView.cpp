@@ -39,7 +39,6 @@
 #include "TrainWindow.H"
 #include "Utilities/3DUtils.H"
 
-#include "Model.h"
 
 #ifdef EXAMPLE_SOLUTION
 #	include "TrainExample/TrainExample.H"
@@ -252,6 +251,9 @@ void TrainView::draw()
 	if (gladLoadGL())
 	{
 		//initiailize VAO, VBO, Shader...
+
+		shader = new Shader("Shader.vert", "Shader.frag");
+		train = new Model("train v1.obj");
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -478,6 +480,7 @@ void TrainView::drawStuff(bool doingShadows)
 #endif
 
 	drawTrain(doingShadows);
+	train->Draw(*shader);
 }
 
 void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
@@ -723,7 +726,6 @@ drawTrain(bool doingShadows)
 	{
 		drawTruck(m_pTrack->trainU + tw->addArcLen(-16.f * i), doingShadows);
 	}
-	Model test("");
 }
 
 void TrainView::
