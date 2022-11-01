@@ -86,7 +86,10 @@ class TrainView : public Fl_Gl_Window
 
 		void drawTrack(bool doingShadows = false);
 		void drawTrain(bool doingShadows = false);
+		void drawHead(float trainU, bool doingShadows = false);
 		void drawTruck(float trainU, bool doingShadows = false);
+
+		void trainCamView(float trainU);
 
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
@@ -97,6 +100,13 @@ class TrainView : public Fl_Gl_Window
 		const int		DIVIDE_LINE = 100;
 		float			sleeperSpace = 8.f;
 		float			m[16] = { 0 };
-		Model*			train;
-		Shader*			shader;
+
+		Pnt3f			trainPos;
+		Pnt3f			trainHead;
+		Pnt3f			trainOrient;
+
+		Model*			train = NULL;
+		Shader*			shader = NULL;
+		int				windW;
+		int				windH;
 };

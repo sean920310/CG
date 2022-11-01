@@ -55,7 +55,8 @@ TrainView(int x, int y, int w, int h, const char* l)
 	//========================================================================
 {
 	mode(FL_RGB | FL_ALPHA | FL_DOUBLE | FL_STENCIL);
-
+	windW = w;
+	windH = h;
 	resetArcball();
 }
 
@@ -251,9 +252,10 @@ void TrainView::draw()
 	if (gladLoadGL())
 	{
 		//initiailize VAO, VBO, Shader...
-
-		shader = new Shader("Shader.vert", "Shader.frag");
-		train = new Model("train v1.obj");
+		if (!shader)
+			shader = new Shader("Shader.vert", "Shader.frag");
+		if (!train)
+			train = new Model("train v1.obj");
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -412,6 +414,21 @@ setProjection()
 #ifdef EXAMPLE_SOLUTION
 		trainCamView(this, aspect);
 #endif
+		trainCamView(m_pTrack->trainU);
+		float height = 5;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
+		double aspect = ((double)windW) / ((double)windH);
+		gluPerspective(90, aspect, .1, 1000);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		Pnt3f eye = trainPos + (trainOrient * height);
+		Pnt3f center = trainHead + trainPos + (trainOrient * height);
+		gluLookAt(eye.x, eye.y, eye.z,
+			center.x, center.y, center.z,
+			trainOrient.x, trainOrient.y, trainOrient.z);
 	}
 }
 
@@ -478,9 +495,13 @@ void TrainView::drawStuff(bool doingShadows)
 	if (!tw->trainCam->value())
 		drawTrain(this, doingShadows);
 #endif
-
-	drawTrain(doingShadows);
+	if (!tw->trainCam->value())
+	{
+		drawTrain(doingShadows);
+	}
+	//shader->use();
 	train->Draw(*shader);
+	//shader->unUse();
 }
 
 void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
@@ -722,14 +743,14 @@ drawTrack(bool doingShadows)
 void TrainView::
 drawTrain(bool doingShadows)
 {
-	for(int i=0;i< m_pTrack->carCount;i++)
+	drawHead(m_pTrack->trainU , doingShadows);
+	for(int i=1;i< m_pTrack->carCount;i++)
 	{
 		drawTruck(m_pTrack->trainU + tw->addArcLen(-16.f * i), doingShadows);
 	}
 }
 
-void TrainView::
-drawTruck(float trainU, bool doingShadows)
+void TrainView::drawHead(float trainU, bool doingShadows)
 {
 	float nct = m_pTrack->points.size();
 	if (trainU >= nct) trainU -= nct;
@@ -740,7 +761,7 @@ drawTruck(float trainU, bool doingShadows)
 	Pnt3f g[4];
 	for (int n = 0; n < 4; n++)
 		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].pos;
-	Pnt3f trainPos = cubicSpline(g, m, t);
+	Pnt3f trainPos0 = cubicSpline(g, m, t);
 	Pnt3f trainPos1 = cubicSpline(g, m, t + (1.0f / DIVIDE_LINE));
 
 	for (int n = 0; n < 4; n++)
@@ -748,7 +769,7 @@ drawTruck(float trainU, bool doingShadows)
 	Pnt3f trainOrient = cubicSpline(g, m, t);
 	trainOrient.normalize();
 
-	Pnt3f trainHead = (trainPos1 - trainPos);
+	Pnt3f trainHead = (trainPos1 - trainPos0);
 	trainHead.normalize();
 
 	Pnt3f trainCross = trainHead * trainOrient;
@@ -796,17 +817,112 @@ drawTruck(float trainU, bool doingShadows)
 	0.0, 0.0, 0.0, 1.0
 	};
 
+	glPushMatrix();
+	glTranslatef(trainPos0.x, trainPos0.y, trainPos0.z);
+	glMultMatrixf(rotation);
+	glScalef(lenght, height, width);
+	glTranslatef(-0.5f, 0.0f, -0.5f);
+	drawHexahedron(color, doingShadows);
+	glPopMatrix();
+}
 
-	if (!tw->trainCam->value())
-	{
-		glPushMatrix();
-		glTranslatef(trainPos.x, trainPos.y, trainPos.z);
-		glMultMatrixf(rotation);
-		glScalef(lenght, height, width);
-		glTranslatef(-0.5f, 0.0f, -0.5f);
-		drawHexahedron(color, doingShadows);
-		glPopMatrix();
-	}
+void TrainView::
+drawTruck(float trainU, bool doingShadows)
+{
+	float nct = m_pTrack->points.size();
+	if (trainU >= nct) trainU -= nct;
+	if (trainU < 0) trainU += nct;
+	int i = trainU;
+	float t = trainU - i;
+
+	Pnt3f g[4];
+	for (int n = 0; n < 4; n++)
+		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].pos;
+	Pnt3f trainPos0 = cubicSpline(g, m, t);
+	Pnt3f trainPos1 = cubicSpline(g, m, t + (1.0f / DIVIDE_LINE));
+
+	for (int n = 0; n < 4; n++)
+		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].orient;
+	Pnt3f trainOrient = cubicSpline(g, m, t);
+	trainOrient.normalize();
+
+	Pnt3f trainHead = (trainPos1 - trainPos0);
+	trainHead.normalize();
+
+	Pnt3f trainCross = trainHead * trainOrient;
+	trainCross.normalize();
+
+	trainOrient = trainHead * trainCross * -1;
+	trainOrient.normalize();
+
+	float height = 10;
+	float width = 8;
+	float lenght = 16;
+
+	trainHead = trainHead * lenght;
+	trainCross = trainCross * width;
+	trainOrient = trainOrient * height;
+
+	float color[6][3] = {
+		{1,1,2},
+		{1,1,2},
+		{1,1,2},
+		{1,1,2},
+		{1,1,2},
+		{1,1,2}
+	};
+
+	Pnt3f u = trainHead; u.normalize();
+	Pnt3f w = trainCross; w.normalize();
+	Pnt3f v = trainOrient; v.normalize();
+
+	float rotation[16] = {
+	u.x, u.y, u.z, 0.0,
+	v.x, v.y, v.z, 0.0,
+	w.x, w.y, w.z, 0.0,
+	0.0, 0.0, 0.0, 1.0
+	};
+	
+	glPushMatrix();
+	glTranslatef(trainPos0.x, trainPos0.y, trainPos0.z);
+	glMultMatrixf(rotation);
+	glScalef(lenght, height, width);
+	glTranslatef(-0.5f, 0.0f, -0.5f);
+	drawHexahedron(color, doingShadows);
+	glPopMatrix();
+}
+
+void TrainView::trainCamView(float trainU)
+{
+	float nct = m_pTrack->points.size();
+	if (trainU >= nct) trainU -= nct;
+	if (trainU < 0) trainU += nct;
+	int i = trainU;
+	float t = trainU - i;
+
+	Pnt3f g[4];
+	for (int n = 0; n < 4; n++)
+		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].pos;
+	Pnt3f trainPos0 = cubicSpline(g, m, t);
+	Pnt3f trainPos1 = cubicSpline(g, m, t + (1.0f / DIVIDE_LINE));
+
+	for (int n = 0; n < 4; n++)
+		g[n] = m_pTrack->points[(i + n) % m_pTrack->points.size()].orient;
+	Pnt3f trainOrient = cubicSpline(g, m, t);
+	trainOrient.normalize();
+
+	Pnt3f trainHead = (trainPos1 - trainPos0);
+	trainHead.normalize();
+
+	Pnt3f trainCross = trainHead * trainOrient;
+	trainCross.normalize();
+
+	trainOrient = trainHead * trainCross * -1;
+	trainOrient.normalize();
+
+	this->trainPos = trainPos0;
+	this->trainHead = trainHead;
+	this->trainOrient = trainOrient;
 }
 
 // 
