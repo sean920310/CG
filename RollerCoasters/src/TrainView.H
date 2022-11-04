@@ -107,7 +107,8 @@ class TrainView : public Fl_Gl_Window
 		Pnt3f			trainHead;
 		Pnt3f			trainOrient;
 
-		Model*			train = NULL;
+		Model*			trainModel = NULL;
+		Model*			trainHeadModel = NULL;
 		Shader*			shader = NULL;
 		int				windW;
 		int				windH;

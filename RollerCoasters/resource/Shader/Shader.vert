@@ -12,10 +12,12 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+uniform float scale;
+
 
 void main()
 {
-	crntPos = vec3(model * vec4(aPos, 1.0f));
+	crntPos = vec3(model * vec4(aPos * scale, 1.0f));
 	gl_Position = proj * view * vec4(crntPos, 1.0);
 	
 	normal = vec3(model * vec4(aNormal, 0.0f));

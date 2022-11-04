@@ -239,7 +239,7 @@ void initSpotLight()
 void headLight(float position[] , float dir[])
 {
 	float noAmbient[] = { 0.5f, 0.5f, 0.0f, 1.0f };
-	float Diffuse[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+	float Diffuse[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 
 	glLightfv(GL_LIGHT3, GL_AMBIENT, noAmbient);
 	glLightfv(GL_LIGHT3, GL_DIFFUSE, Diffuse);
@@ -279,8 +279,10 @@ void TrainView::draw()
 		//initiailize VAO, VBO, Shader...
 		if (!shader)
 			shader = new Shader("resource/Shader/Shader.vert", "resource/Shader/Shader.frag");
-		if (!train)
-			train = new Model("resource/Model/train v1.obj");
+		if (!trainModel)
+			trainModel = new Model("resource/Model/train v3.obj");
+		if (!trainHeadModel)
+			trainHeadModel = new Model("resource/Model/trainHead v1.obj");
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -745,7 +747,7 @@ drawTrack(bool doingShadows)
 				glTranslatef(qt0.x, qt0.y, qt0.z);
 				glMultMatrixf(rotation);
 				glScalef(sleeperWidth, sleeperHeight, sleeperLen);
-				glTranslatef(-0.5f, -1.0f, -0.5f);
+				glTranslatef(-0.5f, 0.0f, -0.5f);
 				drawHexahedron(color, doingShadows);
 				glPopMatrix();
 
@@ -817,16 +819,44 @@ void TrainView::drawHead(float trainU, bool doingShadows)
 	u.x, u.y, u.z, 0.0,
 	v.x, v.y, v.z, 0.0,
 	w.x, w.y, w.z, 0.0,
-	0.0, 0.0, 0.0, 1.0
+	trainPos0.x, trainPos0.y,trainPos0.z, 1.0
 	};
 
-	glPushMatrix();
-	glTranslatef(trainPos0.x, trainPos0.y, trainPos0.z);
-	glMultMatrixf(rotation);
-	glScalef(lenght, height, width);
-	glTranslatef(-0.5f, 0.0f, -0.5f);
-	drawHexahedron(color, doingShadows);
-	glPopMatrix();
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 rotate = glm::make_mat4(rotation);
+	model = model * rotate;
+
+	GLfloat view[16], proj[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, view);
+	glGetFloatv(GL_PROJECTION_MATRIX, proj);
+
+	shader->use();
+	if (!doingShadows)
+	{
+		GLfloat color[4] = { 0.2f, 0.2f, 0.2f, 1.0f }, lightPos[4];
+		if (tw->dirLight->value())
+			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
+		glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+		glm::vec4 pos = glm::make_vec4(lightPos);
+		glm::mat4 viewMatrix = glm::make_mat4(view);
+		if (tw->dirLight->value())
+			pos = glm::inverse(viewMatrix) * pos;
+		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
+	}
+	else
+	{
+		GLfloat color[4] = { 0.0f,0.0f,0.0f,0.5f };
+		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
+	}
+	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
+	model = glm::rotate(model, glm::radians(180.f), glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, view);
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "proj"), 1, GL_FALSE, proj);
+
+	trainHeadModel->Draw(*shader);
+	shader->unUse();
 }
 
 void TrainView::
@@ -861,10 +891,6 @@ drawTruck(float trainU, bool doingShadows)
 	float height = 10;
 	float width = 8;
 	float lenght = 16;
-
-	trainHead = trainHead * lenght;
-	trainCross = trainCross * width;
-	trainOrient = trainOrient * height;
 
 	float color[6][3] = {
 		{1,1,2},
@@ -913,12 +939,14 @@ drawTruck(float trainU, bool doingShadows)
 		GLfloat color[4] = { 0.0f,0.0f,0.0f,0.5f };
 		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
 	}
-
+	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
+	//model = glm::rotate(model, glm::radians(90.f), glm::vec3(0, 1, 0));
+	//model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, view);
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "proj"), 1, GL_FALSE, proj);
 	
-	train->Draw(*shader);
+	trainModel->Draw(*shader);
 	shader->unUse();
 }
 
@@ -953,6 +981,19 @@ void TrainView::trainCamView(float trainU)
 	this->trainPos = trainPos0;
 	this->trainHead = trainHead;
 	this->trainOrient = trainOrient;
+}
+
+void TrainView::drawHeadLight()
+{
+	trainCamView(m_pTrack->trainU);
+
+	if (tw->headLight->value())
+	{
+		Pnt3f tempPos = trainPos + 2 * trainHead + 5 * trainOrient;
+		float pos[4] = { tempPos.x, tempPos.y, tempPos.z, 1.0f };
+		float dir[4] = { trainHead.x, trainHead.y, trainHead.z, 0.0f };
+		headLight(pos, dir);
+	}
 }
 
 // 
@@ -1021,15 +1062,3 @@ doPick()
 	printf("Selected Cube %d\n", selectedCube);
 }
 
-void TrainView::drawHeadLight()
-{
-	trainCamView(m_pTrack->trainU);
-
-	if (tw->headLight->value())
-	{
-		Pnt3f tempPos = trainPos + 8 * trainHead + 2 * trainOrient;
-		float pos[4] = { tempPos.x, tempPos.y, tempPos.z, 1.0f };
-		float dir[4] = { trainHead.x, trainHead.y, trainHead.z, 0.0f };
-		headLight(pos, dir);
-	}
-}
