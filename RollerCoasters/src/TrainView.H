@@ -84,6 +84,8 @@ class TrainView : public Fl_Gl_Window
 		// pick a point (for when the mouse goes down)
 		void doPick();
 
+		void drawHeadLight();
+
 		void drawTrack(bool doingShadows = false);
 		void drawTrain(bool doingShadows = false);
 		void drawHead(float trainU, bool doingShadows = false);

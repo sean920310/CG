@@ -95,6 +95,7 @@ class TrainWindow : public Fl_Double_Window {
 		Fl_Button*			dirLight;
 		Fl_Button*			posLight;
 		Fl_Button*			spotLight;
+		Fl_Button*			headLight;
 
 		Fl_Browser*			carCount;
 

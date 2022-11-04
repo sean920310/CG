@@ -12,6 +12,10 @@ include_directories(${INCLUDE_DIR}glm-0.9.8.5/glm/)
 add_Definitions("-D_XKEYCHECK_H")
 add_definitions(-DPROJECT_DIR="${PROJECT_SOURCE_DIR}")
 
+#copy dll file and shader file
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/resource DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+file( COPY ${LIB_DIR}assimp-vc142-mtd.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+
 add_executable(RollerCoasters
     ${SRC_DIR}CallBacks.h
     ${SRC_DIR}CallBacks.cpp

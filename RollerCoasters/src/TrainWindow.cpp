@@ -154,14 +154,16 @@ TrainWindow(const int x, const int y)
 
 		Fl_Button* minCar = new Fl_Button(605, pty, 20, 20, "@<");
 		minCar->callback((Fl_Callback*)minCarCB, this);
+		Fl_Button* addCar = new Fl_Button(675, pty, 20, 20, "@>");
+		addCar->callback((Fl_Callback*)addCarCB, this);
 		carCount = new Fl_Browser(625, pty, 50, 20, "cars");
 		carCount->type();
 		carCount->add("2");
-		carCount->align(FL_ALIGN_CENTER);
-		Fl_Button* addCar = new Fl_Button(675, pty, 20, 20, "@>");
-		addCar->callback((Fl_Callback*)addCarCB, this);
 
-		pty += 30;
+		headLight = new Fl_Button(715, pty, 80, 20, "HeadLight");
+		togglify(headLight);
+
+		pty += 40;
 
 		tension = new Fl_Value_Slider(655, pty, 140, 20, "tension");
 		tension->range(0, 1);

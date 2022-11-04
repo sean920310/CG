@@ -224,6 +224,7 @@ getMouseNDC(float& x, float& y)
 	y = (my / hd) * 2.0f - 1.f;
 }
 
+
 //**************************************************************************
 //
 // * When the mouse goes down, remember where. also, clear out the now

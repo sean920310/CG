@@ -33,6 +33,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/geometric.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "GL/glu.h"
 
 #include "TrainView.H"
@@ -183,7 +185,7 @@ void initDirLight()
 	* The light source is at an infinite distance,
 	* all the ray are parallel and have the direction (x, y, z).
 	*/
-	float position[] = { 1.0f, 1.0f, 0.0f, 0.0f };
+	float position[] = { 100.0f, 100.0f, 100.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteDiffuse);
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
@@ -212,7 +214,7 @@ void initSpotLight()
 {
 	float noAmbient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 	float whiteDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float position[] = { 100.0f, 100.0f, 100.0f, 1.0f };
+	float position[] = { 0.0f, 100.0f, 0.0f, 1.0f };
 
 	glLightfv(GL_LIGHT2, GL_AMBIENT, noAmbient);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, whiteDiffuse);
@@ -221,7 +223,7 @@ void initSpotLight()
 	/*
 	* define the spot direction and cut-off
 	*/
-	float dir[] = { -1.0f, -1.0f, -1.0f };
+	float dir[] = { 0.0f, -1.0f, 0.0f };
 	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, dir);
 	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 30);
 
@@ -234,6 +236,29 @@ void initSpotLight()
 	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
 }
 
+void headLight(float position[] , float dir[])
+{
+	float noAmbient[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+	float Diffuse[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+
+	glLightfv(GL_LIGHT3, GL_AMBIENT, noAmbient);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, Diffuse);
+	glLightfv(GL_LIGHT3, GL_POSITION, position);
+
+	/*
+	* define the spot direction and cut-off
+	*/
+	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, dir);
+	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 20);
+
+	//exponent propertie defines the concentration of the light
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 15.0f);
+
+	//light attenuation (default values used here : no attenuation with the distance) 
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 1.0f);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.01f);
+	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0.0f);
+}
 
 //************************************************************************
 //
@@ -253,9 +278,9 @@ void TrainView::draw()
 	{
 		//initiailize VAO, VBO, Shader...
 		if (!shader)
-			shader = new Shader("Shader.vert", "Shader.frag");
+			shader = new Shader("resource/Shader/Shader.vert", "resource/Shader/Shader.frag");
 		if (!train)
-			train = new Model("train v1.obj");
+			train = new Model("resource/Model/train v1.obj");
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -291,6 +316,7 @@ void TrainView::draw()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT3);
 
 	// top view only needs one light
 	if (tw->topCam->value()) {
@@ -340,6 +366,10 @@ void TrainView::draw()
 	else
 		glDisable(GL_LIGHT2);
 
+	if (tw->headLight->value())
+		drawHeadLight();
+	else
+		glDisable(GL_LIGHT3);
 
 	//*********************************************************************
 	// now draw the ground plane
@@ -499,9 +529,6 @@ void TrainView::drawStuff(bool doingShadows)
 	{
 		drawTrain(doingShadows);
 	}
-	//shader->use();
-	train->Draw(*shader);
-	//shader->unUse();
 }
 
 void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
@@ -577,21 +604,12 @@ drawTrack(bool doingShadows)
 	{
 		float tension = tw->tension->value();
 		float matrix[16] =
-		/*{
-			-1, 2, -1, 0,
-			3, -5, 0, 2,
-			-3, 4, 1, 0,
-			1, -1, 0, 0
-		};*/
-
 		{
 			-tension, 2 * tension, -tension, 0,
 				2 - tension , tension - 3, 0, 1,
 				tension-2, 3 - 2* tension, tension, 0,
 				tension, -tension, 0, 0
 		};
-		/*for (int i = 0; i < 16; i++)
-			matrix[i] *= tension;*/
 		memcpy(m, matrix, sizeof(float) * 16);
 		break;
 	}
@@ -782,21 +800,6 @@ void TrainView::drawHead(float trainU, bool doingShadows)
 	float width = 8;
 	float lenght = 16;
 
-	trainHead = trainHead * lenght;
-	trainCross = trainCross * width;
-	trainOrient = trainOrient * height;
-
-	/*Pnt3f point[8] =
-	{
-		trainPos + trainHead - trainCross + trainOrient,
-		trainPos + trainHead + trainCross + trainOrient,
-		trainPos - trainHead + trainCross + trainOrient,
-		trainPos - trainHead - trainCross + trainOrient,
-		trainPos + trainHead - trainCross,
-		trainPos + trainHead + trainCross,
-		trainPos - trainHead + trainCross,
-		trainPos - trainHead - trainCross,
-	};*/
 	float color[6][3] = {
 		{1,1,2},
 		{1,1,2},
@@ -880,16 +883,43 @@ drawTruck(float trainU, bool doingShadows)
 	u.x, u.y, u.z, 0.0,
 	v.x, v.y, v.z, 0.0,
 	w.x, w.y, w.z, 0.0,
-	0.0, 0.0, 0.0, 1.0
+	trainPos0.x, trainPos0.y,trainPos0.z, 1.0
 	};
+
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 rotate = glm::make_mat4(rotation);
+	model = model * rotate;
+
+	GLfloat view[16], proj[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, view);
+	glGetFloatv(GL_PROJECTION_MATRIX, proj);
+
+	shader->use();
+	if (!doingShadows)
+	{
+		GLfloat color[4] = { 0.2f, 0.2f, 0.2f, 1.0f }, lightPos[4];
+		if (tw->dirLight->value())
+			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
+		glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+		glm::vec4 pos = glm::make_vec4(lightPos);
+		glm::mat4 viewMatrix = glm::make_mat4(view);
+		if (tw->dirLight->value())
+			pos = glm::inverse(viewMatrix) * pos;
+		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
+	}
+	else
+	{
+		GLfloat color[4] = { 0.0f,0.0f,0.0f,0.5f };
+		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
+	}
+
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, view);
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "proj"), 1, GL_FALSE, proj);
 	
-	glPushMatrix();
-	glTranslatef(trainPos0.x, trainPos0.y, trainPos0.z);
-	glMultMatrixf(rotation);
-	glScalef(lenght, height, width);
-	glTranslatef(-0.5f, 0.0f, -0.5f);
-	drawHexahedron(color, doingShadows);
-	glPopMatrix();
+	train->Draw(*shader);
+	shader->unUse();
 }
 
 void TrainView::trainCamView(float trainU)
@@ -989,4 +1019,17 @@ doPick()
 		selectedCube = -1;
 
 	printf("Selected Cube %d\n", selectedCube);
+}
+
+void TrainView::drawHeadLight()
+{
+	trainCamView(m_pTrack->trainU);
+
+	if (tw->headLight->value())
+	{
+		Pnt3f tempPos = trainPos + 8 * trainHead + 2 * trainOrient;
+		float pos[4] = { tempPos.x, tempPos.y, tempPos.z, 1.0f };
+		float dir[4] = { trainHead.x, trainHead.y, trainHead.z, 0.0f };
+		headLight(pos, dir);
+	}
 }
