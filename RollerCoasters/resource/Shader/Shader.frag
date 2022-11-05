@@ -7,9 +7,10 @@ in vec3 crntPos;
 
 uniform sampler2D tex0;
 uniform vec4 color;
-
+uniform vec4 lightColor;
 uniform vec3 lightPos;
 
+uniform bool doingShadows;
 
 void main()
 {
@@ -18,7 +19,9 @@ void main()
 	vec3 lightDir = normalize(lightPos - crntPos);
 
 	float diffuse = max(dot(norm, lightDir), ambient);
-
-	FragColor = color * diffuse;
-	//FragColor = texture(tex0, texCoord) * color * (diffuse + ambient);
+	if(!doingShadows)
+		FragColor = color * lightColor * diffuse;
+	else
+		FragColor = vec4(0.0f,0.0f,0.0f,0.5f);
+	//FragColor = texture(tex0, texCoord) * color * lightColor * (diffuse + ambient);
 } 

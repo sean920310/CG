@@ -236,7 +236,7 @@ void initSpotLight()
 	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
 }
 
-void headLight(float position[] , float dir[])
+void initheadLight(float position[] , float dir[])
 {
 	float noAmbient[] = { 0.5f, 0.5f, 0.0f, 1.0f };
 	float Diffuse[] = { 1.0f, 1.0f, 0.0f, 1.0f };
@@ -282,7 +282,9 @@ void TrainView::draw()
 		if (!trainModel)
 			trainModel = new Model("resource/Model/train v3.obj");
 		if (!trainHeadModel)
-			trainHeadModel = new Model("resource/Model/trainHead v1.obj");
+			trainHeadModel = new Model("resource/Model/trainHead v3.obj");
+		if (!trainHeadLightModel)
+			trainHeadLightModel = new Model("resource/Model/trainHeadLight v2.obj");
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -533,7 +535,8 @@ void TrainView::drawStuff(bool doingShadows)
 	}
 }
 
-void TrainView::drawHexahedron(float color[6][3], bool doingShadows)
+void TrainView::
+drawHexahedron(float color[6][3], bool doingShadows)
 {
 	float point[][3] =
 	{
@@ -770,7 +773,8 @@ drawTrain(bool doingShadows)
 	}
 }
 
-void TrainView::drawHead(float trainU, bool doingShadows)
+void TrainView::
+drawHead(float trainU, bool doingShadows)
 {
 	float nct = m_pTrack->points.size();
 	if (trainU >= nct) trainU -= nct;
@@ -798,19 +802,6 @@ void TrainView::drawHead(float trainU, bool doingShadows)
 	trainOrient = trainHead * trainCross * -1;
 	trainOrient.normalize();
 
-	float height = 10;
-	float width = 8;
-	float lenght = 16;
-
-	float color[6][3] = {
-		{1,1,2},
-		{1,1,2},
-		{1,1,2},
-		{1,1,2},
-		{1,1,2},
-		{1,1,2}
-	};
-
 	Pnt3f u = trainHead; u.normalize();
 	Pnt3f w = trainCross; w.normalize();
 	Pnt3f v = trainOrient; v.normalize();
@@ -830,12 +821,17 @@ void TrainView::drawHead(float trainU, bool doingShadows)
 	glGetFloatv(GL_MODELVIEW_MATRIX, view);
 	glGetFloatv(GL_PROJECTION_MATRIX, proj);
 
+	//head
 	shader->use();
+	glEnable(GL_BLEND);
+	shader->setBool("doingShadows", doingShadows);
 	if (!doingShadows)
 	{
-		GLfloat color[4] = { 0.2f, 0.2f, 0.2f, 1.0f }, lightPos[4];
+		glDisable(GL_BLEND);
+		GLfloat color[4] = { 0.6f, 0.6f, 0.6f, 1.0f }, lightColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, lightPos[4];
 		if (tw->dirLight->value())
-			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+		glUniform4fv(glGetUniformLocation(shader->ID, "lightColor"), 1, lightColor);
 		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
 		glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 		glm::vec4 pos = glm::make_vec4(lightPos);
@@ -844,11 +840,6 @@ void TrainView::drawHead(float trainU, bool doingShadows)
 			pos = glm::inverse(viewMatrix) * pos;
 		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
 	}
-	else
-	{
-		GLfloat color[4] = { 0.0f,0.0f,0.0f,0.5f };
-		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
-	}
 	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
 	model = glm::rotate(model, glm::radians(180.f), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -856,6 +847,50 @@ void TrainView::drawHead(float trainU, bool doingShadows)
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "proj"), 1, GL_FALSE, proj);
 
 	trainHeadModel->Draw(*shader);
+	shader->unUse();
+
+
+	//head light
+	shader->use();
+	glEnable(GL_BLEND);	//這樣才會顯示半透明
+	shader->setBool("doingShadows", doingShadows);
+	if (!doingShadows)
+	{
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		GLfloat color[4] = { 1.0f, 1.0f, 1.0f, 0.5f }, lightColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, lightPos[4];
+		if (tw->headLight->value())
+			glGetLightfv(GL_LIGHT3, GL_DIFFUSE, lightColor);
+		glUniform4fv(glGetUniformLocation(shader->ID, "lightColor"), 1, lightColor);
+		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
+		glGetLightfv(GL_LIGHT3, GL_POSITION, lightPos);
+		glm::vec4 pos = glm::make_vec4(lightPos);
+		glm::mat4 viewMatrix = glm::make_mat4(view);
+		if (tw->headLight->value())
+			pos = glm::inverse(viewMatrix) * pos;
+		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
+	}
+
+	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
+	
+	Pnt3f trans = trainPos0 +  15.5 * 0.6 * trainHead + 12 * 0.6025 * trainOrient;
+
+	float lightRotation[16] = {
+	-w.x, -w.y, -w.z, 0.0,
+	v.x, v.y, v.z, 0.0,
+	u.x, u.y, u.z, 0.0,
+	trans.x, trans.y,trans.z, 1.0
+	};
+
+	model = glm::mat4(1.0f);
+	model = model * glm::make_mat4(lightRotation);
+
+	//model = glm::rotate(model, glm::radians(-90.f), glm::vec3(trainOrient.x, trainOrient.y, trainOrient.z));
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, view);
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "proj"), 1, GL_FALSE, proj);
+
+	trainHeadLightModel->Draw(*shader);
+
 	shader->unUse();
 }
 
@@ -888,19 +923,6 @@ drawTruck(float trainU, bool doingShadows)
 	trainOrient = trainHead * trainCross * -1;
 	trainOrient.normalize();
 
-	float height = 10;
-	float width = 8;
-	float lenght = 16;
-
-	float color[6][3] = {
-		{1,1,2},
-		{1,1,2},
-		{1,1,2},
-		{1,1,2},
-		{1,1,2},
-		{1,1,2}
-	};
-
 	Pnt3f u = trainHead; u.normalize();
 	Pnt3f w = trainCross; w.normalize();
 	Pnt3f v = trainOrient; v.normalize();
@@ -921,11 +943,15 @@ drawTruck(float trainU, bool doingShadows)
 	glGetFloatv(GL_PROJECTION_MATRIX, proj);
 
 	shader->use();
+	glEnable(GL_BLEND);
+	shader->setBool("doingShadows", doingShadows);
 	if (!doingShadows)
 	{
-		GLfloat color[4] = { 0.2f, 0.2f, 0.2f, 1.0f }, lightPos[4];
+		glDisable(GL_BLEND);
+		GLfloat color[4] = { 0.6f, 0.6f, 0.6f, 1.0f }, lightColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, lightPos[4];
 		if (tw->dirLight->value())
-			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+		glUniform4fv(glGetUniformLocation(shader->ID, "lightColor"), 1, lightColor);
 		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
 		glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 		glm::vec4 pos = glm::make_vec4(lightPos);
@@ -934,14 +960,7 @@ drawTruck(float trainU, bool doingShadows)
 			pos = glm::inverse(viewMatrix) * pos;
 		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
 	}
-	else
-	{
-		GLfloat color[4] = { 0.0f,0.0f,0.0f,0.5f };
-		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
-	}
 	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
-	//model = glm::rotate(model, glm::radians(90.f), glm::vec3(0, 1, 0));
-	//model = glm::rotate(model, glm::radians(-90.f), glm::vec3(1, 0, 0));
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, view);
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "proj"), 1, GL_FALSE, proj);
@@ -950,7 +969,8 @@ drawTruck(float trainU, bool doingShadows)
 	shader->unUse();
 }
 
-void TrainView::trainCamView(float trainU)
+void TrainView::
+trainCamView(float trainU)
 {
 	float nct = m_pTrack->points.size();
 	if (trainU >= nct) trainU -= nct;
@@ -983,16 +1003,32 @@ void TrainView::trainCamView(float trainU)
 	this->trainOrient = trainOrient;
 }
 
-void TrainView::drawHeadLight()
+void TrainView::
+drawHeadLight()
 {
 	trainCamView(m_pTrack->trainU);
-
 	if (tw->headLight->value())
 	{
-		Pnt3f tempPos = trainPos + 2 * trainHead + 5 * trainOrient;
+		float color[6][3] =
+		{
+			1.0f,1.0f,0.0f,
+			1.0f,1.0f,0.0f,
+			1.0f,1.0f,0.0f,
+			1.0f,1.0f,0.0f,
+			1.0f,1.0f,0.0f,
+			1.0f,1.0f,0.0f
+		};
+		Pnt3f tempPos = trainPos + 15.5 * 0.6 * trainHead + 12 * 0.6025 * trainOrient;
+		//glPushMatrix();
+		//glTranslatef(tempPos.x, tempPos.y, tempPos.z);
+		////glScalef(2, 2, 2);
+		////glTranslatef(-0.5f, -0.5f, -0.5f);
+		//drawHexahedron(color, false);
+		//glPopMatrix();
+
 		float pos[4] = { tempPos.x, tempPos.y, tempPos.z, 1.0f };
 		float dir[4] = { trainHead.x, trainHead.y, trainHead.z, 0.0f };
-		headLight(pos, dir);
+		initheadLight(pos, dir);
 	}
 }
 
