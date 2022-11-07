@@ -637,6 +637,7 @@ drawTrack(bool doingShadows)
 	}
 
 	m_pTrack->arcLength = vector<float>(m_pTrack->points.size());
+	m_pTrack->length = vector<vector<float>>(m_pTrack->points.size(), vector<float>(DIVIDE_LINE));
 
 	float sleeperSpaceCount = .0f;
 	for (size_t i = 0; i < m_pTrack->points.size(); ++i) {
@@ -664,6 +665,7 @@ drawTrack(bool doingShadows)
 
 			double tempLen = sqrt(pow((qt0.x - qt1.x), 2) + pow((qt0.y - qt1.y), 2) + pow((qt0.z - qt1.z), 2));
 			arcLen += tempLen;
+			m_pTrack->length[i][j] = tempLen;
 			sleeperSpaceCount += tempLen;
 
 			// cross

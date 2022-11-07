@@ -62,4 +62,5 @@ class CTrack {
 		float trainU;
 		int carCount;
 		vector<float> arcLength;
+		vector<vector<float>> length;
 };

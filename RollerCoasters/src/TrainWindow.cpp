@@ -260,9 +260,12 @@ advanceTrain(float dir)
 
 float TrainWindow::addArcLen(float len)
 {
+	float nct = m_Track.points.size();
 	float result = m_Track.trainU;
 	int i = m_Track.trainU;
 	float t = m_Track.trainU - i;
+	const int DIVIDTIME = m_Track.length[0].size();
+	int j = 0;
 	if (len > 0)
 	{
 		while ((t + (len / m_Track.arcLength[i])) > 1.0f)
@@ -274,10 +277,16 @@ float TrainWindow::addArcLen(float len)
 			if (i >= m_Track.points.size()) i = 0;
 			result = i;
 
-			float nct = m_Track.points.size();
 			if (result >= nct) result -= nct;
 			if (result < 0) result += nct;
 		}
+		/*while (len > m_Track.length[i][j])
+		{
+			len -= m_Track.length[i][j];
+			j++;
+		}
+		j--;
+		result += ((float)j / m_Track.length[i].size());*/
 	}
 	else
 	{
@@ -290,11 +299,25 @@ float TrainWindow::addArcLen(float len)
 			if (i < 0) i = m_Track.points.size() - 1;
 			result = i + 1;
 
-			float nct = m_Track.points.size();
 			if (result >= nct) result -= nct;
 			if (result < 0) result += nct;
 		}
+		j = DIVIDTIME;
+
+
+		/*while (len < 0)
+		{
+			j--;
+			len += m_Track.length[i][j];
+		}
+		result -= ((float)(DIVIDTIME - j) / m_Track.length[i].size());*/
 	}
+
+	
+	/*if (result >= nct) result -= nct;
+	if (result < 0) result += nct;*/
+
+	//result += (len / m_Track.length[i][j]);
 
 	result += (len / m_Track.arcLength[i]);
 	return (result - m_Track.trainU);
