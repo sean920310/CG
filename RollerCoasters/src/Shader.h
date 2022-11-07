@@ -95,7 +95,117 @@ public:
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
+    // ------------------------------------------------------------------------
+    void setVec3(const std::string& name, const glm::vec3& value) const
+    {
+        glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+    }
+    void setVec3(const std::string& name, float x, float y, float z) const
+    {
+        glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
+    }
+    // ------------------------------------------------------------------------
+    void setVec4(const std::string& name, const glm::vec4& value) const
+    {
+        glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+    }
+    void setVec4(const std::string& name, float x, float y, float z, float w) const
+    {
+        glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+    }
 
+
+    void setDirLight(bool enable)
+    {
+        GLfloat diffuse[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, ambient[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, lightPos[4];
+        if (enable)
+        {
+            glGetLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+            glGetLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+        }
+
+        glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+        GLfloat view[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, view);
+        glm::vec4 pos = glm::make_vec4(lightPos);
+        glm::mat4 viewMatrix = glm::make_mat4(view);
+        if (enable)
+            pos = glm::inverse(viewMatrix) * pos;
+        glUniform3fv(glGetUniformLocation(ID, "dirLight.position"), 1, glm::value_ptr(pos));
+        glUniform4fv(glGetUniformLocation(ID, "dirLight.ambient"), 1, ambient);
+        glUniform4fv(glGetUniformLocation(ID, "dirLight.diffuse"), 1, diffuse);
+    }
+
+    void setSpotLight(bool enable)
+    {
+        GLfloat diffuse[4] = { 0.0f, 0.0f, 0.0f, 1.0f }, ambient[4] = { 0.0f, 0.0f, 0.0f, 1.0f }, lightPos[4], lightDir[3];
+        GLfloat constant, linear, quadratic,cutOff;
+        if (enable)
+        {
+            glGetLightfv(GL_LIGHT2, GL_DIFFUSE, diffuse);
+            glGetLightfv(GL_LIGHT2, GL_AMBIENT, ambient);
+        }
+
+        glGetLightfv(GL_LIGHT2, GL_POSITION, lightPos);
+        glGetLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, lightDir);
+        glGetLightfv(GL_LIGHT2, GL_CONSTANT_ATTENUATION, &constant);
+        glGetLightfv(GL_LIGHT2, GL_LINEAR_ATTENUATION, &linear);
+        glGetLightfv(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, &quadratic);
+        glGetLightfv(GL_LIGHT2, GL_SPOT_CUTOFF, &cutOff);
+        GLfloat view[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, view);
+        glm::vec4 pos = glm::make_vec4(lightPos);
+        glm::vec3 dir = glm::make_vec3(lightDir);
+        glm::mat4 viewMatrix = glm::make_mat4(view);
+        pos = glm::inverse(viewMatrix) * pos;
+        dir = glm::inverse(viewMatrix) * glm::vec4(dir,0.0f);
+
+        glUniform3fv(glGetUniformLocation(ID, "spotLight.position"), 1, glm::value_ptr(pos));
+        glUniform3fv(glGetUniformLocation(ID, "spotLight.direction"), 1, glm::value_ptr(dir));
+        glUniform4fv(glGetUniformLocation(ID, "spotLight.ambient"), 1, ambient);
+        glUniform4fv(glGetUniformLocation(ID, "spotLight.diffuse"), 1, diffuse);
+        glUniform1f(glGetUniformLocation(ID, "spotLight.constant"), constant);
+        glUniform1f(glGetUniformLocation(ID, "spotLight.linear"), linear);
+        glUniform1f(glGetUniformLocation(ID, "spotLight.quadratic"), quadratic);
+        glUniform1f(glGetUniformLocation(ID, "spotLight.cutOff"), glm::cos(glm::radians(cutOff-5)));
+        glUniform1f(glGetUniformLocation(ID, "spotLight.outerCutOff"), glm::cos(glm::radians(cutOff)));
+    }
+    void setHeadLight(bool enable)
+    {
+        GLfloat diffuse[4] = { 0.0f, 0.0f, 0.0f, 1.0f }, ambient[4] = { 0.0f, 0.0f, 0.0f, 1.0f }, lightPos[4], lightDir[3];
+        GLfloat constant, linear, quadratic, cutOff;
+        if (enable)
+        {
+            glGetLightfv(GL_LIGHT3, GL_DIFFUSE, diffuse);
+            glGetLightfv(GL_LIGHT3, GL_AMBIENT, ambient);
+        }
+
+        glGetLightfv(GL_LIGHT3, GL_POSITION, lightPos);
+        glGetLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, lightDir);
+        glGetLightfv(GL_LIGHT3, GL_CONSTANT_ATTENUATION, &constant);
+        glGetLightfv(GL_LIGHT3, GL_LINEAR_ATTENUATION, &linear);
+        glGetLightfv(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, &quadratic);
+        glGetLightfv(GL_LIGHT3, GL_SPOT_CUTOFF, &cutOff);
+        GLfloat view[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, view);
+        glm::vec4 pos = glm::make_vec4(lightPos);
+        glm::vec3 dir = glm::make_vec3(lightDir);
+        glm::mat4 viewMatrix = glm::make_mat4(view);
+        pos = glm::inverse(viewMatrix) * pos;
+        dir = glm::inverse(viewMatrix) * glm::vec4(dir, 0.0f);
+
+        glUniform3fv(glGetUniformLocation(ID, "headLight.position"), 1, glm::value_ptr(pos));
+        glUniform3fv(glGetUniformLocation(ID, "headLight.direction"), 1, glm::value_ptr(dir));
+        glUniform4fv(glGetUniformLocation(ID, "headLight.ambient"), 1, ambient);
+        glUniform4fv(glGetUniformLocation(ID, "headLight.diffuse"), 1, diffuse);
+        glUniform1f(glGetUniformLocation(ID, "headLight.constant"), constant);
+        glUniform1f(glGetUniformLocation(ID, "headLight.linear"), linear);
+        glUniform1f(glGetUniformLocation(ID, "headLight.quadratic"), quadratic);
+        glUniform1f(glGetUniformLocation(ID, "headLight.cutOff"), glm::cos(glm::radians(cutOff - 5)));
+        glUniform1f(glGetUniformLocation(ID, "headLight.outerCutOff"), glm::cos(glm::radians(cutOff)));
+    }
+
+     
 private:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------

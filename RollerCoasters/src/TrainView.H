@@ -99,7 +99,7 @@ class TrainView : public Fl_Gl_Window
 
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
-		const int		DIVIDE_LINE = 100;
+		const int		DIVIDE_LINE = 500;
 		float			sleeperSpace = 8.f;
 		float			m[16] = { 0 };
 
@@ -110,7 +110,10 @@ class TrainView : public Fl_Gl_Window
 		Model*			trainModel = NULL;
 		Model*			trainHeadModel = NULL;
 		Model*			trainHeadLightModel = NULL;
+		Model*			tree = NULL;
+		Model*			moutain = NULL;
 		Shader*			shader = NULL;
+		Shader*			treeShader = NULL;
 		int				windW;
 		int				windH;
 };

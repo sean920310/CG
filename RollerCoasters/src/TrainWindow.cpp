@@ -260,65 +260,47 @@ advanceTrain(float dir)
 
 float TrainWindow::addArcLen(float len)
 {
-	float nct = m_Track.points.size();
+	const float nct = m_Track.points.size();
 	float result = m_Track.trainU;
 	int i = m_Track.trainU;
 	float t = m_Track.trainU - i;
 	const int DIVIDTIME = m_Track.length[0].size();
-	int j = 0;
-	if (len > 0)
+	const float percent = ((float)1 / DIVIDTIME);
+	int j = t * DIVIDTIME;
+	if (len >= 0)
 	{
-		while ((t + (len / m_Track.arcLength[i])) > 1.0f)
-		{
-			//printf("%d\n", i);
-			len -= ((1 - t) * m_Track.arcLength[i]);
-			t = 0;
-			i++;
-			if (i >= m_Track.points.size()) i = 0;
-			result = i;
-
-			if (result >= nct) result -= nct;
-			if (result < 0) result += nct;
-		}
-		/*while (len > m_Track.length[i][j])
+		while (len >= m_Track.length[i][j])
 		{
 			len -= m_Track.length[i][j];
 			j++;
+			if (j >= DIVIDTIME)
+			{
+				j = 0;
+				i++;
+				if (i >= nct)i = 0;
+			}
+			result += percent;
 		}
-		j--;
-		result += ((float)j / m_Track.length[i].size());*/
 	}
 	else
 	{
-		while ((t + (len / m_Track.arcLength[i])) < 0)
+		while (len < 0)
 		{
-			//printf("%d\n", i);
-			len += (t * m_Track.arcLength[i]);
-			t = 1;
-			i--;
-			if (i < 0) i = m_Track.points.size() - 1;
-			result = i + 1;
-
-			if (result >= nct) result -= nct;
-			if (result < 0) result += nct;
-		}
-		j = DIVIDTIME;
-
-
-		/*while (len < 0)
-		{
-			j--;
 			len += m_Track.length[i][j];
+			j--;
+			if (j < 0)
+			{
+				j = DIVIDTIME - 1;
+				i--;
+				if (i < 0)i = nct - 1;
+			}
+			result -= percent;
 		}
-		result -= ((float)(DIVIDTIME - j) / m_Track.length[i].size());*/
 	}
 
-	
-	/*if (result >= nct) result -= nct;
-	if (result < 0) result += nct;*/
-
-	//result += (len / m_Track.length[i][j]);
-
 	result += (len / m_Track.arcLength[i]);
+	if (result >= nct) result -= nct;
+	if (result < 0) result += nct;
+
 	return (result - m_Track.trainU);
 }

@@ -178,14 +178,14 @@ int TrainView::handle(int event)
 //Directional Light
 void initDirLight()
 {
-	float noAmbient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	float whiteDiffuse[] = { 0.7f,  0.7f, 0.7f, 1.0f };
+	float noAmbient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	float whiteDiffuse[] = { 0.8f,  0.8f, 0.8f, 1.0f };
 	/*
 	* Directional light soruce (w = 0)
 	* The light source is at an infinite distance,
 	* all the ray are parallel and have the direction (x, y, z).
 	*/
-	float position[] = { 100.0f, 100.0f, 100.0f, 1.0f };
+	float position[] = { 0.0f, 100.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, noAmbient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteDiffuse);
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
@@ -194,15 +194,15 @@ void initDirLight()
 //Point Light
 void initPosLight()
 {
-	float yellowAmbient[] = { 0.1f, 0.1f, 0.0f, 1.0f };
-	float yellowDiffuse[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+	float yellowAmbient[] = { 0.01f, 0.01f, 0.0f, 1.0f };
+	float yellowDiffuse[] = { 0.7f, 0.7f, 0.0f, 1.0f };
 
 	/*
 	* Positional light source (w = 1)
 	* The light source is positioned at (x, y, z).
 	* The ray come from this particular location (x, y, z) and goes towars all directions.
 	*/
-	float position[] = { 0.0f, 20.0f, 20.0f, 1.0f };
+	float position[] = { 0.0f, 10.0f, 20.0f, 1.0f };
 	glLightfv(GL_LIGHT1, GL_AMBIENT, yellowAmbient);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowDiffuse);
 	glLightfv(GL_LIGHT1, GL_POSITION, position);
@@ -285,6 +285,12 @@ void TrainView::draw()
 			trainHeadModel = new Model("resource/Model/trainHead v3.obj");
 		if (!trainHeadLightModel)
 			trainHeadLightModel = new Model("resource/Model/trainHeadLight v2.obj");
+		if(!treeShader)
+			treeShader = new Shader("resource/Shader/TreeShader.vert", "resource/Shader/TreeShader.frag");
+		if (!tree)
+			tree = new Model("resource/Model/Low poly tree 2.obj");
+		if(!moutain)
+			moutain = new Model("resource/Model/moutain.obj");
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -381,9 +387,9 @@ void TrainView::draw()
 	// set to opengl fixed pipeline(use opengl 1.x draw function)
 	glUseProgram(0);
 
-	setupFloor();
+	//setupFloor();
 	//glDisable(GL_LIGHTING);
-	drawFloor(200, 10);
+	//drawFloor(200, 10);
 
 
 	//*********************************************************************
@@ -533,6 +539,54 @@ void TrainView::drawStuff(bool doingShadows)
 	{
 		drawTrain(doingShadows);
 	}
+
+
+	treeShader->use();
+	glEnable(GL_BLEND);
+	treeShader->setBool("doingShadows", doingShadows);
+	if (!doingShadows)
+	{
+		glDisable(GL_BLEND);
+		treeShader->setDirLight(tw->dirLight->value());
+		treeShader->setSpotLight(tw->spotLight->value());
+		treeShader->setHeadLight(tw->headLight->value());
+	}
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(50,0,50));
+	GLfloat view[16], proj[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, view);
+	glGetFloatv(GL_PROJECTION_MATRIX, proj);
+
+	glUniform1f(glGetUniformLocation(treeShader->ID, "scale"), 1.5f);
+	glUniformMatrix4fv(glGetUniformLocation(treeShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(treeShader->ID, "view"), 1, GL_FALSE, view);
+	glUniformMatrix4fv(glGetUniformLocation(treeShader->ID, "proj"), 1, GL_FALSE, proj);
+
+	tree->Draw(*treeShader);
+	treeShader->unUse();
+
+	treeShader->use();
+	glEnable(GL_BLEND);
+	treeShader->setBool("doingShadows", doingShadows);
+	if (!doingShadows)
+	{
+		glDisable(GL_BLEND);
+		treeShader->setDirLight(tw->dirLight->value());
+		treeShader->setSpotLight(tw->spotLight->value());
+		treeShader->setHeadLight(tw->headLight->value());
+	}
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0, 0, 0));
+	glGetFloatv(GL_MODELVIEW_MATRIX, view);
+	glGetFloatv(GL_PROJECTION_MATRIX, proj);
+
+	glUniform1f(glGetUniformLocation(treeShader->ID, "scale"), 1.5f);
+	glUniformMatrix4fv(glGetUniformLocation(treeShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(treeShader->ID, "view"), 1, GL_FALSE, view);
+	glUniformMatrix4fv(glGetUniformLocation(treeShader->ID, "proj"), 1, GL_FALSE, proj);
+
+	moutain->Draw(*treeShader);
+	treeShader->unUse();
 }
 
 void TrainView::
@@ -688,7 +742,7 @@ drawTrack(bool doingShadows)
 				glBegin(GL_POLYGON);
 				//glNormal3f(0,-1,0);
 				if (!doingShadows)
-					glColor3ub(50, 50, 50);
+					glColor3f(0.5f, 0.3f, 0.1f);
 				glVertex3f(crossR0[n].x, crossR0[n].y, crossR0[n].z);
 				glVertex3f(crossR1[n].x, crossR1[n].y, crossR1[n].z);
 				glVertex3f(crossL1[n].x, crossL1[n].y, crossL1[n].z);
@@ -701,7 +755,7 @@ drawTrack(bool doingShadows)
 					glBegin(GL_POLYGON);
 					//glNormal3f(0, -1, 0);
 					if (!doingShadows)
-						glColor3ub(50, 50, 50);
+						glColor3f(0.5f, 0.3f, 0.1f);
 					glVertex3f(preCrossR[n].x, preCrossR[n].y, preCrossR[n].z);
 					glVertex3f(crossR0[n].x, crossR0[n].y, crossR0[n].z);
 					glVertex3f(crossL0[n].x, crossL0[n].y, crossL0[n].z);
@@ -729,12 +783,12 @@ drawTrack(bool doingShadows)
 				heightOrient.normalize();
 
 				float color[][3] = { 
-					{ 0.5f, 0.5f, 0.5f },
-					{ 0.5f, 0.5f, 0.5f },
-					{ 0.5f, 0.5f, 0.5f },
-					{ 0.5f, 0.5f, 0.5f },
-					{ 0.5f, 0.5f, 0.5f },
-					{ 0.5f, 0.5f, 0.5f }
+					{ 0.58f, 0.5f, 0.3f },
+					{ 0.58f, 0.5f, 0.3f },
+					{ 0.58f, 0.5f, 0.3f },
+					{ 0.58f, 0.5f, 0.3f },
+					{ 0.58f, 0.5f, 0.3f },
+					{ 0.58f, 0.5f, 0.3f }
 				};
 
 				Pnt3f u = headOrient; u.normalize();
@@ -769,10 +823,10 @@ void TrainView::
 drawTrain(bool doingShadows)
 {
 	drawHead(m_pTrack->trainU , doingShadows);
+	
+
 	for(int i=1;i< m_pTrack->carCount;i++)
-	{
-		drawTruck(m_pTrack->trainU + tw->addArcLen(-16.f * i), doingShadows);
-	}
+		drawTruck(m_pTrack->trainU + tw->addArcLen(-16.f + (-14.f) * (i-1)), doingShadows);
 }
 
 void TrainView::
@@ -830,17 +884,11 @@ drawHead(float trainU, bool doingShadows)
 	if (!doingShadows)
 	{
 		glDisable(GL_BLEND);
-		GLfloat color[4] = { 0.6f, 0.6f, 0.6f, 1.0f }, lightColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, lightPos[4];
-		if (tw->dirLight->value())
-			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
-		glUniform4fv(glGetUniformLocation(shader->ID, "lightColor"), 1, lightColor);
+		GLfloat color[] = { 0.5f, 0.5f, 0.5f ,1.0f };
 		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
-		glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-		glm::vec4 pos = glm::make_vec4(lightPos);
-		glm::mat4 viewMatrix = glm::make_mat4(view);
-		if (tw->dirLight->value())
-			pos = glm::inverse(viewMatrix) * pos;
-		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
+		shader->setDirLight(tw->dirLight->value());
+		shader->setSpotLight(tw->spotLight->value());
+		shader->setHeadLight(tw->headLight->value());
 	}
 	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
 	model = glm::rotate(model, glm::radians(180.f), glm::vec3(0, 1, 0));
@@ -859,17 +907,11 @@ drawHead(float trainU, bool doingShadows)
 	if (!doingShadows)
 	{
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		GLfloat color[4] = { 1.0f, 1.0f, 1.0f, 0.5f }, lightColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, lightPos[4];
-		if (tw->headLight->value())
-			glGetLightfv(GL_LIGHT3, GL_DIFFUSE, lightColor);
-		glUniform4fv(glGetUniformLocation(shader->ID, "lightColor"), 1, lightColor);
+		GLfloat color[4] = { 1.0f, 1.0f, 1.0f, 0.5f };
 		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
-		glGetLightfv(GL_LIGHT3, GL_POSITION, lightPos);
-		glm::vec4 pos = glm::make_vec4(lightPos);
-		glm::mat4 viewMatrix = glm::make_mat4(view);
-		if (tw->headLight->value())
-			pos = glm::inverse(viewMatrix) * pos;
-		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
+		shader->setDirLight(tw->dirLight->value());
+		shader->setSpotLight(tw->spotLight->value());
+		shader->setHeadLight(tw->headLight->value());
 	}
 
 	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
@@ -950,17 +992,11 @@ drawTruck(float trainU, bool doingShadows)
 	if (!doingShadows)
 	{
 		glDisable(GL_BLEND);
-		GLfloat color[4] = { 0.6f, 0.6f, 0.6f, 1.0f }, lightColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f }, lightPos[4];
-		if (tw->dirLight->value())
-			glGetLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
-		glUniform4fv(glGetUniformLocation(shader->ID, "lightColor"), 1, lightColor);
+		GLfloat color[] = { 0.5f, 0.5f, 0.5f ,1.0f};
 		glUniform4fv(glGetUniformLocation(shader->ID, "color"), 1, color);
-		glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-		glm::vec4 pos = glm::make_vec4(lightPos);
-		glm::mat4 viewMatrix = glm::make_mat4(view);
-		if (tw->dirLight->value())
-			pos = glm::inverse(viewMatrix) * pos;
-		glUniform3fv(glGetUniformLocation(shader->ID, "lightPos"), 1, glm::value_ptr(pos));
+		shader->setDirLight(tw->dirLight->value());
+		shader->setSpotLight(tw->spotLight->value());
+		shader->setHeadLight(tw->headLight->value());
 	}
 	glUniform1f(glGetUniformLocation(shader->ID, "scale"), 0.6f);
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1011,22 +1047,7 @@ drawHeadLight()
 	trainCamView(m_pTrack->trainU);
 	if (tw->headLight->value())
 	{
-		float color[6][3] =
-		{
-			1.0f,1.0f,0.0f,
-			1.0f,1.0f,0.0f,
-			1.0f,1.0f,0.0f,
-			1.0f,1.0f,0.0f,
-			1.0f,1.0f,0.0f,
-			1.0f,1.0f,0.0f
-		};
 		Pnt3f tempPos = trainPos + 15.5 * 0.6 * trainHead + 12 * 0.6025 * trainOrient;
-		//glPushMatrix();
-		//glTranslatef(tempPos.x, tempPos.y, tempPos.z);
-		////glScalef(2, 2, 2);
-		////glTranslatef(-0.5f, -0.5f, -0.5f);
-		//drawHexahedron(color, false);
-		//glPopMatrix();
 
 		float pos[4] = { tempPos.x, tempPos.y, tempPos.z, 1.0f };
 		float dir[4] = { trainHead.x, trainHead.y, trainHead.z, 0.0f };
