@@ -112,8 +112,10 @@ class TrainView : public Fl_Gl_Window
 		Model*			trainHeadLightModel = NULL;
 		Model*			tree = NULL;
 		Model*			moutain = NULL;
+		Model*			tunnel = NULL;
+		Model*			people = NULL;
 		Shader*			shader = NULL;
-		Shader*			treeShader = NULL;
+		Shader*			textureShader = NULL;
 		int				windW;
 		int				windH;
 };

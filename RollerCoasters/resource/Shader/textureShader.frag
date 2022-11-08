@@ -1,3 +1,4 @@
+//refrence https://learnopengl.com/Lighting/Multiple-lights
 #version 330 core
 
 out vec4 FragColor;
@@ -41,14 +42,14 @@ vec4 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos);
 
 void main()
 {
-	vec3 norm = normalize(normal);
-    vec4 result = CalcDirLight(dirLight, norm);
-    result += CalcSpotLight(spotLight, norm, crntPos);
-    result += CalcSpotLight(headLight, norm, crntPos);
-
-
 	if(!doingShadows)
+	{
+        vec3 norm = normalize(normal);
+        vec4 result = CalcDirLight(dirLight, norm);
+        result += CalcSpotLight(spotLight, norm, crntPos);
+        result += CalcSpotLight(headLight, norm, crntPos);
 		FragColor = result;
+    }
 	else
 		FragColor = vec4(0.0f,0.0f,0.0f,0.5f);
 }
@@ -58,7 +59,7 @@ void main()
 // calculates the color when using a directional light.
 vec4 CalcDirLight(DirLight light, vec3 normal)
 {
-    vec3 lightDir = normalize(light.position - crntPos);
+    vec3 lightDir = normalize(light.position);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // combine results

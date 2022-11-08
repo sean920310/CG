@@ -112,8 +112,17 @@ TrainWindow(const int x, const int y)
 		splineBrowser->add("Cubic B-Spline");
 		splineBrowser->select(2);
 
-		pty += 110;
+		pty += 100;
 
+		//tension control bar
+		tension = new Fl_Value_Slider(655, pty, 140, 20, "tension");
+		tension->range(0, 1);
+		tension->value(0.5);
+		tension->align(FL_ALIGN_LEFT);
+		tension->type(FL_HORIZONTAL);
+		tension->callback((Fl_Callback*)damageCB, this);
+
+		pty += 40;
 		// add and delete points
 		Fl_Button* ap = new Fl_Button(605,pty,80,20,"Add Point");
 		ap->callback((Fl_Callback*)addPointCB,this);
@@ -143,12 +152,12 @@ TrainWindow(const int x, const int y)
 		pty+=30;
 
 		// TODO: add widgets for all of your fancier features here
-		dirLight = new Fl_Button(605, pty, 60, 20, "Direct");
+		dirLight = new Fl_Button(605, pty, 55, 20, "Direct");
 		togglify(dirLight,1);
-		posLight = new Fl_Button(670, pty, 60, 20, "Point");
-		togglify(posLight);
-		spotLight = new Fl_Button(735, pty, 60, 20, "Spot");
-		togglify(spotLight,1);
+		spotLight = new Fl_Button(665, pty, 45, 20, "Spot");
+		togglify(spotLight);
+		headLight = new Fl_Button(715, pty, 80, 20, "HeadLight");
+		togglify(headLight);
 
 		pty += 30;
 
@@ -159,20 +168,11 @@ TrainWindow(const int x, const int y)
 		carCount = new Fl_Browser(625, pty, 50, 20, "cars");
 		carCount->type();
 		carCount->add("2");
-
-		headLight = new Fl_Button(715, pty, 80, 20, "HeadLight");
-		togglify(headLight);
+		physics = new Fl_Button(715, pty, 80, 20, "physics");
+		togglify(physics);
 
 		pty += 40;
 
-		tension = new Fl_Value_Slider(655, pty, 140, 20, "tension");
-		tension->range(0, 1);
-		tension->value(0.5);
-		tension->align(FL_ALIGN_LEFT);
-		tension->type(FL_HORIZONTAL);
-		tension->callback((Fl_Callback*)damageCB, this);
-
-		pty += 30;
 
 
 #ifdef EXAMPLE_SOLUTION
@@ -247,6 +247,8 @@ advanceTrain(float dir)
 #endif
 	if (arcLength->value()) {
 		float vel = dir * ((float)speed->value());
+		if(physics->value())
+			vel += vel * addPhysics();
 		m_Track.trainU += addArcLen(vel);
 	}
 	else {
@@ -258,6 +260,8 @@ advanceTrain(float dir)
 	if (m_Track.trainU < 0) m_Track.trainU += nct;
 }
 
+
+//加arcLength
 float TrainWindow::addArcLen(float len)
 {
 	const float nct = m_Track.points.size();
@@ -303,4 +307,23 @@ float TrainWindow::addArcLen(float len)
 	if (result < 0) result += nct;
 
 	return (result - m_Track.trainU);
+}
+
+//加上物理倍數
+float TrainWindow::addPhysics()
+{
+	static float preLen = 0.0f;
+	const float MINSPEED = -0.5f;
+	trainView->trainCamView(m_Track.trainU); 
+	Pnt3f head = trainView->trainHead;
+	head.normalize();
+	float len = std::sqrt((head.x * head.x) + (head.z * head.z));
+	len -= 1;
+	if (head.y < 0) len *= -1;
+
+	float result = len + 0.95 * preLen;
+	//std::cout << result << std::endl;
+	if (result < MINSPEED) result = MINSPEED;
+	preLen = result;
+	return result;
 }

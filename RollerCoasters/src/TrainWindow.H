@@ -62,6 +62,7 @@ class TrainWindow : public Fl_Double_Window {
 		void advanceTrain(float dir = 1);
 
 		float addArcLen(float len);
+		float addPhysics();
 
 		// simple helper function to set up a button
 		void togglify(Fl_Button*, int state=0);
@@ -93,13 +94,15 @@ class TrainWindow : public Fl_Double_Window {
 		Fl_Button*			arcLength;		// do we use arc length for speed?
 
 		Fl_Button*			dirLight;
-		Fl_Button*			posLight;
 		Fl_Button*			spotLight;
 		Fl_Button*			headLight;
 
 		Fl_Browser*			carCount;
 
 		Fl_Value_Slider*	tension;
+
+		Fl_Button*			physics;
+
 
 		// we have other widgets as part of the sample solution
 		// this is not for 559 students to know about

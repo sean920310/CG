@@ -1,3 +1,8 @@
+/*
+*
+* refrence https://learnopengl.com/Model-Loading/Mesh
+*
+*/
 #ifndef MESH_H
 #define MESH_H
 
