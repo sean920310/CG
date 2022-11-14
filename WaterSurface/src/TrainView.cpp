@@ -446,8 +446,9 @@ void TrainView::draw()
 	this->texture->bind(0);
 	glUniform1i(glGetUniformLocation(this->shader->Program, "u_texture"), 0);
 
-	Pnt3f eyePos = arcball.getEyePos();
-	glUniform3f(glGetUniformLocation(this->shader->Program, "eyePosition"), eyePos.x, eyePos.y, eyePos.z);
+	glm::vec3 eyePos = arcball.getEyePos();
+	std::cout << eyePos.x << " " << eyePos.y << " " << eyePos.z << "\n";
+	glUniform3f(glGetUniformLocation(this->shader->Program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
 	this->shader->SetDirLight();
 	
 	//bind VAO

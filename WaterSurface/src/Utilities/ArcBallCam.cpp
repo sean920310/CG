@@ -68,6 +68,7 @@
 #pragma warning(pop)
 
 #include "stdio.h"
+#include <iostream>
 
 //**************************************************************************
 //
@@ -225,9 +226,23 @@ getMouseNDC(float& x, float& y)
 	y = (my / hd) * 2.0f - 1.f;
 }
 
-Pnt3f ArcBallCam::getEyePos()
+glm::vec3 ArcBallCam::getEyePos()
 {
-	return Pnt3f(isx, isy, isz);
+	HMatrix m;
+	getMatrix(m);
+	glm::mat4 transMatrix(1.0);
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			transMatrix[i][j]  =  m[i][j];
+		}
+	}
+
+	glm::vec4 eye(eyeX, eyeY, eyeZ, 1.0f);
+	glm::vec3 pos = glm::vec3(eye * transMatrix);
+	//glm::vec3 pos(1.0);
+	return pos;
 }
 
 //**************************************************************************
