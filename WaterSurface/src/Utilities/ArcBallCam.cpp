@@ -1,3 +1,4 @@
+#include "ArcBallCam.H"
 /************************************************************************
      File:        ArcBallCam.h
 
@@ -222,6 +223,11 @@ getMouseNDC(float& x, float& y)
 
 	x = (mx / wd) * 2.0f - 1.f;
 	y = (my / hd) * 2.0f - 1.f;
+}
+
+Pnt3f ArcBallCam::getEyePos()
+{
+	return Pnt3f(isx, isy, isz);
 }
 
 //**************************************************************************

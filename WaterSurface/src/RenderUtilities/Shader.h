@@ -2,6 +2,10 @@
 #define SHADER_H
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/geometric.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <string>
 #include <fstream>
@@ -79,6 +83,27 @@ public:
 	void Use()
 	{
 		glUseProgram(this->Program);
+	}
+
+	//Set Direction Light
+	void SetDirLight()
+	{
+		GLfloat diffuse[4], ambient[4],specular[4], lightPos[4];
+		
+		glGetLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+		glGetLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+		glGetLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+
+		glGetLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+		GLfloat view[16];
+		glGetFloatv(GL_MODELVIEW_MATRIX, view);
+		glm::vec4 pos = glm::make_vec4(lightPos);
+		glm::mat4 viewMatrix = glm::make_mat4(view);
+		pos = glm::inverse(viewMatrix) * pos;
+		glUniform3fv(glGetUniformLocation(Program, "dirLight.position"), 1, glm::value_ptr(pos));
+		glUniform3fv(glGetUniformLocation(Program, "dirLight.ambient"), 1, ambient);
+		glUniform3fv(glGetUniformLocation(Program, "dirLight.diffuse"), 1, diffuse);
+		glUniform3fv(glGetUniformLocation(Program, "dirLight.specular"), 1, specular);
 	}
 private:
 	std::string readCode(const GLchar* path)

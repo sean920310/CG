@@ -379,6 +379,7 @@ void TrainView::draw()
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, whiteLight);
 
 	glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowLight);
@@ -444,6 +445,10 @@ void TrainView::draw()
 		&glm::vec3(0.0f, 1.0f, 0.0f)[0]);
 	this->texture->bind(0);
 	glUniform1i(glGetUniformLocation(this->shader->Program, "u_texture"), 0);
+
+	Pnt3f eyePos = arcball.getEyePos();
+	glUniform3f(glGetUniformLocation(this->shader->Program, "eyePosition"), eyePos.x, eyePos.y, eyePos.z);
+	this->shader->SetDirLight();
 	
 	//bind VAO
 	glBindVertexArray(this->plane->vao);

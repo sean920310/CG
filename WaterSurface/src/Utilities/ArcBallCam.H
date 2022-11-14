@@ -51,6 +51,7 @@
 #pragma once
 
 #include "3DUtils.H"
+#include "Pnt3f.H"
 
 //***************************************************************************
 //
@@ -172,6 +173,7 @@ class ArcBallCam {
 		// assume the window does it
 		void getMouseNDC(float& x, float& y);
 
+		Pnt3f getEyePos();
 	private:
 		// This keeps track of the rotation - the current rotation is
 		// start*now
