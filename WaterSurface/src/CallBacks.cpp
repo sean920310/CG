@@ -135,7 +135,7 @@ void runButtonCB(TrainWindow* tw)
 //===========================================================================
 {
 	if (tw->runButton->value()) {	// only advance time if appropriate
-		if (clock() - lastRedraw > CLOCKS_PER_SEC/30) {
+		if (clock() - lastRedraw > CLOCKS_PER_SEC/144) {
 			lastRedraw = clock();
 			tw->advanceTrain();
 			tw->damageMe();

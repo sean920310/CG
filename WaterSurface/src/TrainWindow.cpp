@@ -61,7 +61,7 @@ TrainWindow(const int x, const int y)
 		widgets->begin();
 
 		runButton = new Fl_Button(605,pty,60,20,"Run");
-		togglify(runButton);
+		togglify(runButton, 1);
 
 		Fl_Button* fb = new Fl_Button(700,pty,25,20,"@>>");
 		fb->callback((Fl_Callback*)forwCB,this);
@@ -74,7 +74,7 @@ TrainWindow(const int x, const int y)
 		pty+=25;
 		speed = new Fl_Value_Slider(655,pty,140,20,"speed");
 		speed->range(0,10);
-		speed->value(2);
+		speed->value(1);
 		speed->align(FL_ALIGN_LEFT);
 		speed->type(FL_HORIZONTAL);
 
@@ -141,6 +141,25 @@ TrainWindow(const int x, const int y)
 		rzp->callback((Fl_Callback*)rmzCB,this);
 
 		pty+=30;
+
+		amplitude = new Fl_Value_Slider(655, pty, 140, 20, "Amplitude");
+		amplitude->range(0, 10);
+		amplitude->value(5);
+		amplitude->align(FL_ALIGN_LEFT);
+		amplitude->type(FL_HORIZONTAL);
+		amplitude->callback((Fl_Callback*)damageCB, this);
+
+		pty += 30;
+
+		wavelength = new Fl_Value_Slider(655, pty, 140, 20, "Wavelength");
+		wavelength->range(10, 100);
+		wavelength->value(50);
+		wavelength->align(FL_ALIGN_LEFT);
+		wavelength->type(FL_HORIZONTAL);
+		wavelength->callback((Fl_Callback*)damageCB, this);
+
+		pty += 40;
+
 
 		// TODO: add widgets for all of your fancier features here
 #ifdef EXAMPLE_SOLUTION

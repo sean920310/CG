@@ -34,12 +34,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <GL/glu.h>
+#include <time.h>
+#include <math.h>
 
 #include "TrainView.H"
 #include "TrainWindow.H"
 #include "Utilities/3DUtils.H"
 
-
+#define PI 3.14159265
 
 #ifdef EXAMPLE_SOLUTION
 #	include "TrainExample/TrainExample.H"
@@ -206,6 +208,43 @@ void TrainView::draw()
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		if (!this->plane) {
+			#define widthDivid 101
+			#define heighDivid 101
+
+			GLuint	waterElement[(widthDivid - 1) * (heighDivid - 1) * 2 * 3];
+			GLfloat  waterTextureCoordinate[(widthDivid * heighDivid) * 2];
+			waterVertices = new GLfloat[widthDivid * heighDivid * 3];
+			waterNormal = new GLfloat[widthDivid * heighDivid * 3];
+
+			for (int i = 0; i < heighDivid; i++)
+			{
+				for (int j = 0; j < widthDivid; j++)
+				{
+					waterVertices[(i * widthDivid + j) * 3 + 0] = (float)j - (widthDivid / 2);
+					waterVertices[(i * widthDivid + j) * 3 + 1] = 0.0f;
+					waterVertices[(i * widthDivid + j) * 3 + 2] = (float)i - (heighDivid / 2);
+
+					waterNormal[(i * widthDivid + j) * 3 + 0] = 0.0f;
+					waterNormal[(i * widthDivid + j) * 3 + 1] = 1.0f;
+					waterNormal[(i * widthDivid + j) * 3 + 2] = 0.0f;
+
+					waterTextureCoordinate[(i * widthDivid + j) * 2 + 0] = (1.0f / heighDivid) * i;
+					waterTextureCoordinate[(i * widthDivid + j) * 2 + 1] = (1.0f / widthDivid) * j;
+					
+					if (i + 1 != heighDivid && j + 1 != widthDivid)
+					{
+						waterElement[(i * (widthDivid - 1) + j) * 3 + 0] = i * widthDivid + j;
+						waterElement[(i * (widthDivid - 1) + j) * 3 + 1] = i * widthDivid + j + 1;
+						waterElement[(i * (widthDivid - 1) + j) * 3 + 2] = (i + 1) * widthDivid + j;
+
+						waterElement[((widthDivid - 1) * (heighDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 0] = (i + 1) * widthDivid + j + 1;
+						waterElement[((widthDivid - 1) * (heighDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 1] = (i + 1) * widthDivid + j;
+						waterElement[((widthDivid - 1) * (heighDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 2] = i * widthDivid + j + 1;
+					}
+				}
+			}
+
+
 			GLfloat  vertices[] = {
 				-0.5f ,0.0f , -0.5f,
 				-0.5f ,0.0f , 0.5f ,
@@ -226,7 +265,7 @@ void TrainView::draw()
 				0, 2, 3, };
 
 			this->plane = new VAO;
-			this->plane->element_amount = sizeof(element) / sizeof(GLuint);
+			this->plane->element_amount = sizeof(waterElement) / sizeof(GLuint);
 			glGenVertexArrays(1, &this->plane->vao);
 			glGenBuffers(3, this->plane->vbo);
 			glGenBuffers(1, &this->plane->ebo);
@@ -235,25 +274,25 @@ void TrainView::draw()
 
 			// Position attribute
 			glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterVertices, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 			glEnableVertexAttribArray(0);
 
 			// Normal attribute
 			glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[1]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(normal), normal, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterNormal, GL_STATIC_DRAW);
 			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 			glEnableVertexAttribArray(1);
 
 			// Texture Coordinate attribute
 			glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[2]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(texture_coordinate), texture_coordinate, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(waterTextureCoordinate), waterTextureCoordinate, GL_STATIC_DRAW);
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 			glEnableVertexAttribArray(2);
 
 			//Element attribute
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->plane->ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(element), element, GL_STATIC_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(waterElement), waterElement, GL_STATIC_DRAW);
 
 			// Unbind VAO
 			glBindVertexArray(0);
@@ -309,7 +348,7 @@ void TrainView::draw()
 			else if (format == AL_FORMAT_MONO16 || format == AL_FORMAT_MONO8)
 				puts("TYPE::MONO");
 
-			alSourcePlay(this->source);
+			//alSourcePlay(this->source);
 
 			// cleanup context
 			//alDeleteSources(1, &source);
@@ -368,7 +407,7 @@ void TrainView::draw()
 	// * set the light parameters
 	//
 	//**********************************************************************
-	GLfloat lightPosition1[]	= {0,1,1,0}; // {50, 200.0, 50, 1.0};
+	GLfloat lightPosition1[]	= {0,1,-1,0}; // {50, 200.0, 50, 1.0};
 	GLfloat lightPosition2[]	= {1, 0, 0, 0};
 	GLfloat lightPosition3[]	= {0, -1, 0, 0};
 	GLfloat yellowLight[]		= {0.5f, 0.5f, .1f, 1.0};
@@ -406,9 +445,9 @@ void TrainView::draw()
 	// set to opengl fixed pipeline(use opengl 1.x draw function)
 	glUseProgram(0);
 
-	setupFloor();
-	glDisable(GL_LIGHTING);
-	drawFloor(200,10);
+	//setupFloor();
+	//glDisable(GL_LIGHTING);
+	//drawFloor(200,10);
 
 
 	//*********************************************************************
@@ -427,6 +466,20 @@ void TrainView::draw()
 		unsetupShadows();
 	}
 
+
+	//setup sin wave
+	static unsigned long lastClock = 0;
+	static float t = 0;
+
+	//每過1/144秒就會更新
+	if (clock() - lastClock > CLOCKS_PER_SEC / 144) {
+		lastClock = clock();
+		t += 0.2 * tw->speed->value();
+		if (t > tw->wavelength->value())t = 0;
+		setSinWave(t);
+	}
+
+
 	setUBO();
 	glBindBufferRange(
 		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
@@ -436,7 +489,7 @@ void TrainView::draw()
 
 	glm::mat4 model_matrix = glm::mat4();
 	model_matrix = glm::translate(model_matrix, this->source_pos);
-	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
+	//model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
 	glUniformMatrix4fv(
 		glGetUniformLocation(this->shader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
 	glUniform3fv(
@@ -447,7 +500,6 @@ void TrainView::draw()
 	glUniform1i(glGetUniformLocation(this->shader->Program, "u_texture"), 0);
 
 	glm::vec3 eyePos = arcball.getEyePos();
-	std::cout << eyePos.x << " " << eyePos.y << " " << eyePos.z << "\n";
 	glUniform3f(glGetUniformLocation(this->shader->Program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
 	this->shader->SetDirLight();
 	
@@ -461,6 +513,44 @@ void TrainView::draw()
 
 	//unbind shader(switch to fixed pipeline)
 	glUseProgram(0);
+}
+
+void TrainView::
+setSinWave(const float& t)
+{
+	//float k = 2 * UNITY_PI / _Wavelength;
+	//p.y = _Amplitude * sin(k * (p.x - _Speed * _Time.y)); 
+	float k = 2 * PI / tw->wavelength->value();
+	for (int i = 0; i < heighDivid; i++)
+	{
+		for (int j = 0; j < widthDivid; j++)
+		{
+			waterVertices[(i * widthDivid + j) * 3 + 1] = tw->amplitude->value() * sin(k * (waterVertices[(i * widthDivid + j) * 3] - t));		//y
+
+			glm::vec3 tangent = glm::normalize(glm::vec3(1, k * tw->amplitude->value() * cos(k * (waterVertices[(i * widthDivid + j) * 3] - t)), 0));
+			glm::vec3 normal = glm::vec3(-tangent.y, tangent.x, 0);
+
+			waterNormal[(i * widthDivid + j) * 3 + 0] = normal.x;
+			waterNormal[(i * widthDivid + j) * 3 + 1] = normal.y;
+			waterNormal[(i * widthDivid + j) * 3 + 2] = normal.z;
+		}
+	}
+
+	glBindVertexArray(this->plane->vao);
+
+	// Position attribute
+	glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterVertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	// Normal attribute
+	glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterNormal, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(1);
+
+	glBindVertexArray(0);
 }
 
 //************************************************************************
