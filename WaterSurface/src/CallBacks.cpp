@@ -44,6 +44,9 @@ void resetCB(Fl_Widget*, TrainWindow* tw)
 	tw->m_Track.resetPoints();
 	tw->trainView->selectedCube = -1;
 	tw->m_Track.trainU = 0;
+	tw->amplitude->value(5);
+	tw->wavelength->value(50);
+	tw->waveDir->value(45);
 	tw->damageMe();
 }
 

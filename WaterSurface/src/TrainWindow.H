@@ -91,6 +91,9 @@ class TrainWindow : public Fl_Double_Window {
 		Fl_Value_Slider*	amplitude;
 		Fl_Value_Slider*	wavelength;
 
+		Fl_Value_Slider*	waveDir;
+
+
 		Fl_Button*			arcLength;		// do we use arc length for speed?
 
 		// we have other widgets as part of the sample solution

@@ -160,6 +160,15 @@ TrainWindow(const int x, const int y)
 
 		pty += 40;
 
+		waveDir = new Fl_Value_Slider(655, pty, 140, 20, "Direction");
+		waveDir->range(0, 360);
+		waveDir->value(45);
+		waveDir->align(FL_ALIGN_LEFT);
+		waveDir->type(FL_HORIZONTAL);
+		waveDir->callback((Fl_Callback*)damageCB, this);
+
+		pty += 40;
+
 
 		// TODO: add widgets for all of your fancier features here
 #ifdef EXAMPLE_SOLUTION
