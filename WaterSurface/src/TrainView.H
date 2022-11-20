@@ -114,6 +114,6 @@ public:
 
 		const int widthDivid = 501;
 		const int heightDivid = 501;
-		const int widthLong = 101;
-		const int heightLong = 101;
+		const int widthLong = 100;
+		const int heightLong = 100;
 };

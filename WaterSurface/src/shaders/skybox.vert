@@ -13,5 +13,6 @@ void main()
 {
     TexCoords = position;
     mat4 view = mat4(mat3(u_view));
-    gl_Position = u_projection * view * vec4(position, 1.0f);
+    vec4 pos = u_projection * view * vec4(position, 1.0f);
+    gl_Position = pos.xyww;
 }

@@ -530,33 +530,6 @@ void TrainView::draw()
 	//	unsetupShadows();
 	//}
 
-
-	//*********************************************************************
-	// 
-	// draw skybox
-	// 
-	//*********************************************************************
-
-	setUBO();
-	glBindBufferRange(
-		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
-	
-	glDepthMask(GL_FALSE);
-
-	this->skyboxShader->Use();
-
-	glBindVertexArray(this->skybox->vao);
-	this->skyboxTex->bind(0);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	//unbind VAO
-	glBindVertexArray(0);
-
-	//unbind shader(switch to fixed pipeline)
-	glUseProgram(0);
-	glDepthMask(GL_TRUE);
-
 	//*********************************************************************
 	// 
 	// draw wave and animate
@@ -581,9 +554,9 @@ void TrainView::draw()
 	glUniform2f(glGetUniformLocation(this->waterShader->Program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
 	glUseProgram(0);
 
-	//setUBO();
-	//glBindBufferRange(
-	//	GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
+	setUBO();
+	glBindBufferRange(
+		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
 
 	//bind shader
 	this->waterShader->Use();
@@ -599,6 +572,8 @@ void TrainView::draw()
 		&glm::vec3(0.5f, 0.5f, 0.5f)[0]);
 	this->waterTex->bind(0);
 	glUniform1i(glGetUniformLocation(this->waterShader->Program, "u_texture"), 0);
+	this->skyboxTex->bind(0); 
+	glUniform1i(glGetUniformLocation(this->waterShader->Program, "skyboxTex"), 0);
 
 	glm::vec3 eyePos = arcball.getEyePos();
 	glUniform3f(glGetUniformLocation(this->waterShader->Program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
@@ -614,6 +589,29 @@ void TrainView::draw()
 
 	//unbind shader(switch to fixed pipeline)
 	glUseProgram(0);
+
+	//*********************************************************************
+	// 
+	// draw skybox
+	// 
+	//*********************************************************************
+
+	glDepthFunc(GL_LEQUAL);
+
+	this->skyboxShader->Use();
+
+	glBindVertexArray(this->skybox->vao);
+	this->skyboxTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->waterShader->Program, "skybox"), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//unbind VAO
+	glBindVertexArray(0);
+
+	//unbind shader(switch to fixed pipeline)
+	glUseProgram(0);
+	glDepthFunc(GL_LESS);
 
 }
 
