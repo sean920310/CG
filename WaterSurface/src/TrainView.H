@@ -86,7 +86,6 @@ class TrainView : public Fl_Gl_Window
 
 		//set ubo
 		void setUBO();
-		void setSinWave(const float& t);
 public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube = -1;  // simple - just remember which cube is selected
@@ -94,10 +93,13 @@ public:
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
 
-		Shader* shader		= nullptr;
-		Texture2D* texture	= nullptr;
-		VAO* plane			= nullptr;
-		UBO* commom_matrices= nullptr;
+		Shader* waterShader		= nullptr;
+		Texture2D* waterTex		= nullptr;
+		VAO* waterSurface		= nullptr;
+		Shader* skyboxShader	= nullptr;
+		Texture3D* skyboxTex	= nullptr;
+		VAO* skybox				= nullptr;
+		UBO* commom_matrices	= nullptr;
 
 		//OpenAL
 		glm::vec3 source_pos;
@@ -109,4 +111,9 @@ public:
 
 		GLfloat* waterVertices = nullptr;
 		GLfloat* waterNormal = nullptr;
+
+		const int widthDivid = 501;
+		const int heightDivid = 501;
+		const int widthLong = 101;
+		const int heightLong = 101;
 };

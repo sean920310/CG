@@ -7,7 +7,11 @@ set(LIB_DIR ${PROJECT_SOURCE_DIR}/lib/)
 
 set(SRC_SHADER 
     ${SRC_DIR}shaders/simple.vert
-    ${SRC_DIR}shaders/simple.frag)
+    ${SRC_DIR}shaders/simple.frag
+    ${SRC_DIR}shaders/water.vert
+    ${SRC_DIR}shaders/water.frag
+    ${SRC_DIR}shaders/skybox.vert
+    ${SRC_DIR}shaders/skybox.frag)
 
 set(SRC_RENDER_UTILITIES
     ${SRC_DIR}RenderUtilities/BufferObject.h

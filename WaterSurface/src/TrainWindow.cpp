@@ -107,8 +107,8 @@ TrainWindow(const int x, const int y)
 		splineBrowser = new Fl_Browser(605,pty,120,75,"Spline Type");
 		splineBrowser->type(2);		// select
 		splineBrowser->callback((Fl_Callback*)damageCB,this);
-		splineBrowser->add("Linear");
-		splineBrowser->add("Cardinal Cubic");
+		splineBrowser->add("Sin Wave");
+		splineBrowser->add("Height map");
 		splineBrowser->add("Cubic B-Spline");
 		splineBrowser->select(2);
 
@@ -151,7 +151,7 @@ TrainWindow(const int x, const int y)
 
 		pty += 30;
 
-		wavelength = new Fl_Value_Slider(655, pty, 140, 20, "Wavelength");
+		wavelength = new Fl_Value_Slider(655, pty, 140, 20, "Length");
 		wavelength->range(10, 100);
 		wavelength->value(50);
 		wavelength->align(FL_ALIGN_LEFT);

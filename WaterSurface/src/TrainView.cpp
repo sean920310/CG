@@ -193,12 +193,12 @@ void TrainView::draw()
 	{
 		//initiailize VAO, VBO, Shader...
 
-		if (!this->shader)
-			this->shader = new
+		if (!this->waterShader)
+			this->waterShader = new
 			Shader(
-				PROJECT_DIR "/src/shaders/simple.vert",
+				PROJECT_DIR "/src/shaders/water.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/simple.frag");
+				PROJECT_DIR "/src/shaders/water.frag");
 
 		if (!this->commom_matrices)
 			this->commom_matrices = new UBO();
@@ -208,99 +208,161 @@ void TrainView::draw()
 		glBufferData(GL_UNIFORM_BUFFER, this->commom_matrices->size, NULL, GL_STATIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-		if (!this->plane) {
-#define widthDivid 101
-#define heighDivid 101
+		if (!this->waterSurface) {
 
-			std::vector<GLuint>	waterElement((widthDivid - 1) * (heighDivid - 1) * 2 * 3);
-			std::vector<GLfloat>  waterTextureCoordinate((widthDivid * heighDivid) * 2);
-			waterVertices = new GLfloat[widthDivid * heighDivid * 3];
-			waterNormal = new GLfloat[widthDivid * heighDivid * 3];
+			std::vector<GLuint>	waterElement((widthDivid - 1) * (heightDivid - 1) * 2 * 3);
+			std::vector<GLfloat>  waterTextureCoordinate((widthDivid * heightDivid) * 2);
+			waterVertices = new GLfloat[widthDivid * heightDivid * 3];
+			waterNormal = new GLfloat[widthDivid * heightDivid * 3];
 
-			for (int i = 0; i < heighDivid; i++)
+			for (int i = 0; i < heightDivid; i++)
 			{
 				for (int j = 0; j < widthDivid; j++)
 				{
-					waterVertices[(i * widthDivid + j) * 3 + 0] = (float)j - (widthDivid / 2);
+					waterVertices[(i * widthDivid + j) * 3 + 0] = (float)j * widthLong / widthDivid - (widthLong / 2);
 					waterVertices[(i * widthDivid + j) * 3 + 1] = 0.0f;
-					waterVertices[(i * widthDivid + j) * 3 + 2] = (float)i - (heighDivid / 2);
+					waterVertices[(i * widthDivid + j) * 3 + 2] = (float)i * heightLong / heightDivid - (heightLong / 2);
 
 					waterNormal[(i * widthDivid + j) * 3 + 0] = 0.0f;
 					waterNormal[(i * widthDivid + j) * 3 + 1] = 1.0f;
 					waterNormal[(i * widthDivid + j) * 3 + 2] = 0.0f;
 
-					waterTextureCoordinate[(i * widthDivid + j) * 2 + 0] = (1.0f / heighDivid) * i;
+					waterTextureCoordinate[(i * widthDivid + j) * 2 + 0] = (1.0f / heightDivid) * i;
 					waterTextureCoordinate[(i * widthDivid + j) * 2 + 1] = (1.0f / widthDivid) * j;
 
-					if (i + 1 != heighDivid && j + 1 != widthDivid)
+					if (i + 1 != heightDivid && j + 1 != widthDivid)
 					{
 						waterElement[(i * (widthDivid - 1) + j) * 3 + 0] = i * widthDivid + j;
 						waterElement[(i * (widthDivid - 1) + j) * 3 + 1] = i * widthDivid + j + 1;
 						waterElement[(i * (widthDivid - 1) + j) * 3 + 2] = (i + 1) * widthDivid + j;
 
-						waterElement[((widthDivid - 1) * (heighDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 0] = (i + 1) * widthDivid + j + 1;
-						waterElement[((widthDivid - 1) * (heighDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 1] = (i + 1) * widthDivid + j;
-						waterElement[((widthDivid - 1) * (heighDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 2] = i * widthDivid + j + 1;
+						waterElement[((widthDivid - 1) * (heightDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 0] = (i + 1) * widthDivid + j + 1;
+						waterElement[((widthDivid - 1) * (heightDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 1] = (i + 1) * widthDivid + j;
+						waterElement[((widthDivid - 1) * (heightDivid - 1) * 3) + (i * (widthDivid - 1) + j) * 3 + 2] = i * widthDivid + j + 1;
 					}
 				}
 			}
 
+			this->waterSurface = new VAO;
+			this->waterSurface->element_amount = waterElement.size();
+			glGenVertexArrays(1, &this->waterSurface->vao);
+			glGenBuffers(3, this->waterSurface->vbo);
+			glGenBuffers(1, &this->waterSurface->ebo);
 
-			GLfloat  vertices[] = {
-				-0.5f ,0.0f , -0.5f,
-				-0.5f ,0.0f , 0.5f ,
-				0.5f ,0.0f ,0.5f ,
-				0.5f ,0.0f ,-0.5f };
-			GLfloat  normal[] = {
-				0.0f, 1.0f, 0.0f,
-				0.0f, 1.0f, 0.0f,
-				0.0f, 1.0f, 0.0f,
-				0.0f, 1.0f, 0.0f };
-			GLfloat  texture_coordinate[] = {
-				0.0f, 0.0f,
-				1.0f, 0.0f,
-				1.0f, 1.0f,
-				0.0f, 1.0f };
-			GLuint element[] = {
-				0, 1, 2,
-				0, 2, 3, };
-
-			this->plane = new VAO;
-			this->plane->element_amount = waterElement.size();
-			glGenVertexArrays(1, &this->plane->vao);
-			glGenBuffers(3, this->plane->vbo);
-			glGenBuffers(1, &this->plane->ebo);
-
-			glBindVertexArray(this->plane->vao);
+			glBindVertexArray(this->waterSurface->vao);
 
 			// Position attribute
-			glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterVertices, GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, this->waterSurface->vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, widthDivid * heightDivid * 3 * sizeof(float), waterVertices, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 			glEnableVertexAttribArray(0);
 
 			// Normal attribute
-			glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[1]);
-			glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterNormal, GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, this->waterSurface->vbo[1]);
+			glBufferData(GL_ARRAY_BUFFER, widthDivid * heightDivid * 3 * sizeof(float), waterNormal, GL_STATIC_DRAW);
 			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 			glEnableVertexAttribArray(1);
 
-			//// Texture Coordinate attribute
-			//glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[2]);
-			//glBufferData(GL_ARRAY_BUFFER, (waterTextureCoordinate.size() * sizeof(float)), &waterTextureCoordinate[0], GL_STATIC_DRAW);
-			//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-			//glEnableVertexAttribArray(2);
+			// Texture Coordinate attribute
+			glBindBuffer(GL_ARRAY_BUFFER, this->waterSurface->vbo[2]);
+			glBufferData(GL_ARRAY_BUFFER, (waterTextureCoordinate.size() * sizeof(float)), &waterTextureCoordinate[0], GL_STATIC_DRAW);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(2);
 
 			//Element attribute
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->plane->ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->waterSurface->ebo);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, (waterElement.size() * sizeof(int)), &waterElement[0], GL_STATIC_DRAW);
 
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
 
-		if (!this->texture)
-			this->texture = new Texture2D(PROJECT_DIR "/Images/church.png");
+		if (!this->waterTex)
+			this->waterTex = new Texture2D(PROJECT_DIR "/Images/church.png");
+
+		if (!this->skyboxShader)
+			this->skyboxShader = new Shader(
+				PROJECT_DIR "/src/shaders/skybox.vert",
+				nullptr, nullptr, nullptr,
+				PROJECT_DIR "/src/shaders/skybox.frag");
+
+		if (!this->skybox)
+		{
+			float skyboxVertices[] = {
+				// positions          
+				-1.0f,  1.0f, -1.0f,
+				-1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+				 1.0f,  1.0f, -1.0f,
+				-1.0f,  1.0f, -1.0f,
+
+				-1.0f, -1.0f,  1.0f,
+				-1.0f, -1.0f, -1.0f,
+				-1.0f,  1.0f, -1.0f,
+				-1.0f,  1.0f, -1.0f,
+				-1.0f,  1.0f,  1.0f,
+				-1.0f, -1.0f,  1.0f,
+
+				 1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+
+				-1.0f, -1.0f,  1.0f,
+				-1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f, -1.0f,  1.0f,
+				-1.0f, -1.0f,  1.0f,
+
+				-1.0f,  1.0f, -1.0f,
+				 1.0f,  1.0f, -1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				-1.0f,  1.0f,  1.0f,
+				-1.0f,  1.0f, -1.0f,
+
+				-1.0f, -1.0f, -1.0f,
+				-1.0f, -1.0f,  1.0f,
+				 1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+				-1.0f, -1.0f,  1.0f,
+				 1.0f, -1.0f,  1.0f
+			};
+
+
+			this->skybox = new VAO;
+			glGenVertexArrays(1, &this->skybox->vao);
+			glGenBuffers(1, this->skybox->vbo);
+
+			glBindVertexArray(this->skybox->vao);
+
+			// Position attribute
+			glBindBuffer(GL_ARRAY_BUFFER, this->skybox->vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, 36 * 3 * sizeof(float), skyboxVertices, GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(0);
+
+			// Unbind VAO
+			glBindVertexArray(0);
+		}
+
+		if (!this->skyboxTex)
+		{
+			std::vector<std::string> faces
+			{
+				PROJECT_DIR "/Images/skybox/right.jpg",
+				PROJECT_DIR "/Images/skybox/left.jpg",
+				PROJECT_DIR "/Images/skybox/top.jpg",
+				PROJECT_DIR "/Images/skybox/bottom.jpg",
+				PROJECT_DIR "/Images/skybox/front.jpg",
+				PROJECT_DIR "/Images/skybox/back.jpg"
+			};
+			this->skyboxTex = new Texture3D(faces);
+		}
 
 		if (!this->device) {
 			//Tutorial: https://ffainelli.github.io/openal-example/
@@ -409,7 +471,7 @@ void TrainView::draw()
 	// * set the light parameters
 	//
 	//**********************************************************************
-	GLfloat lightPosition1[] = { 0,1,-1,0 }; // {50, 200.0, 50, 1.0};
+	GLfloat lightPosition1[] = { -1,1,-1,0 }; // {50, 200.0, 50, 1.0};
 	GLfloat lightPosition2[] = { 1, 0, 0, 0 };
 	GLfloat lightPosition3[] = { 0, -1, 0, 0 };
 	GLfloat yellowLight[] = { 0.5f, 0.5f, .1f, 1.0 };
@@ -469,104 +531,90 @@ void TrainView::draw()
 	//}
 
 
-	//setup sin wave
-	static unsigned long lastClock = 0;
-	static float t = 0;
-
-	//每過1/144秒就會更新
-	if (clock() - lastClock > CLOCKS_PER_SEC / 144 && tw->runButton->value()) {
-		lastClock = clock();
-		t += 0.2 * tw->speed->value();
-		if (t > tw->wavelength->value())t = 0;
-	}
-	setSinWave(t);
-
+	//*********************************************************************
+	// 
+	// draw skybox
+	// 
+	//*********************************************************************
 
 	setUBO();
 	glBindBufferRange(
 		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
+	
+	glDepthMask(GL_FALSE);
 
-	//bind shader
-	this->shader->Use();
+	this->skyboxShader->Use();
 
-	glm::mat4 model_matrix = glm::mat4();
-	model_matrix = glm::translate(model_matrix, this->source_pos);
-	//model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
-	glUniformMatrix4fv(
-		glGetUniformLocation(this->shader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
-	glUniform3fv(
-		glGetUniformLocation(this->shader->Program, "u_color"),
-		1,
-		&glm::vec3(0.0f, 1.0f, 0.0f)[0]);
-	this->texture->bind(0);
-	glUniform1i(glGetUniformLocation(this->shader->Program, "u_texture"), 0);
+	glBindVertexArray(this->skybox->vao);
+	this->skyboxTex->bind(0);
 
-	glm::vec3 eyePos = arcball.getEyePos();
-	glUniform3f(glGetUniformLocation(this->shader->Program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
-	this->shader->SetDirLight();
-
-	//bind VAO
-	glBindVertexArray(this->plane->vao);
-
-	glDrawElements(GL_TRIANGLES, this->plane->element_amount, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	//unbind VAO
 	glBindVertexArray(0);
 
 	//unbind shader(switch to fixed pipeline)
 	glUseProgram(0);
-}
+	glDepthMask(GL_TRUE);
 
-void TrainView::
-setSinWave(const float& t)
-{
-	glm::vec2 dir(cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
-	dir = glm::normalize(dir);
+	//*********************************************************************
+	// 
+	// draw wave and animate
+	// 
+	//*********************************************************************
 
+	//setup sin wave
+	static unsigned long lastClock = 0;
+	static float t = 0;
 
-	float k = 2 * PI / tw->wavelength->value();
-	for (int i = 0; i < heighDivid; i++)
-	{
-		for (int j = 0; j < widthDivid; j++)
-		{
-			long index = (i * widthDivid + j) * 3;
-			glm::vec2 xz(waterVertices[index], waterVertices[index + 2]);
-			float f = k * (glm::dot(xz, dir) - t);
-			waterVertices[index + 1] = tw->amplitude->value() * sin(f);		//y
-
-			glm::vec3 tangent(
-				1,
-				tw->amplitude->value() * k * dir.x * cos(f),
-				0
-			);
-			glm::vec3 binormal(
-				0,
-				tw->amplitude->value() * k * dir.y * cos(f),
-				1
-			);
-			glm::vec3 normal = glm::normalize(glm::cross(binormal, tangent));
-
-			waterNormal[index + 0] = normal.x;
-			waterNormal[index + 1] = normal.y;
-			waterNormal[index + 2] = normal.z;
-		}
+	
+	if (clock() - lastClock > CLOCKS_PER_SEC / 144 && tw->runButton->value()) {
+		lastClock = clock();
+		t += 0.2 * tw->speed->value();
+		if (t > tw->wavelength->value())t = 0;
 	}
+	//set wave attribute;
+	this->waterShader->Use();
+	glUniform1f(glGetUniformLocation(this->waterShader->Program, "t"), t);
+	glUniform1f(glGetUniformLocation(this->waterShader->Program, "k"), 2 * PI / tw->wavelength->value());
+	glUniform1f(glGetUniformLocation(this->waterShader->Program, "amplitude"), tw->amplitude->value());
+	glUniform2f(glGetUniformLocation(this->waterShader->Program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
+	glUseProgram(0);
 
-	glBindVertexArray(this->plane->vao);
+	//setUBO();
+	//glBindBufferRange(
+	//	GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
 
-	// Position attribute
-	glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
+	//bind shader
+	this->waterShader->Use();
 
-	// Normal attribute
-	glBindBuffer(GL_ARRAY_BUFFER, this->plane->vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, widthDivid * heighDivid * 3 * sizeof(float), waterNormal, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(1);
+	glm::mat4 model_matrix = glm::mat4();
+	model_matrix = glm::translate(model_matrix, this->source_pos);
+	//model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
+	glUniformMatrix4fv(
+		glGetUniformLocation(this->waterShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+	glUniform3fv(
+		glGetUniformLocation(this->waterShader->Program, "u_color"),
+		1,
+		&glm::vec3(0.5f, 0.5f, 0.5f)[0]);
+	this->waterTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->waterShader->Program, "u_texture"), 0);
 
+	glm::vec3 eyePos = arcball.getEyePos();
+	glUniform3f(glGetUniformLocation(this->waterShader->Program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
+	this->waterShader->SetDirLight();
+
+	//bind VAO
+	glBindVertexArray(this->waterSurface->vao);
+
+	glDrawElements(GL_TRIANGLES, this->waterSurface->element_amount, GL_UNSIGNED_INT, 0);
+
+	//unbind VAO
 	glBindVertexArray(0);
+
+	//unbind shader(switch to fixed pipeline)
+	glUseProgram(0);
+
 }
 
 //************************************************************************
