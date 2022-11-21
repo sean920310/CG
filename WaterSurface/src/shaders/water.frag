@@ -32,12 +32,23 @@ void main()
     //reflection
 
     vec3 I = normalize(f_in.position - u_eyePosition);
-    vec3 R = reflect(I, normalize(f_in.normal));
-    vec3 reflexColor = vec3(texture(skyboxTex, R));
+    vec3 reflectR = reflect(I, normalize(f_in.normal));
+    vec3 reflectColor = vec3(texture(skyboxTex, reflectR));
+
+    //refraction
+
+    float ratio = 1.00 / 1.33;
+    vec3 refractR = refract(I, normalize(f_in.normal), ratio);
+    vec3 refractColor = vec3(texture(skyboxTex, refractR));
 
     //set lighting
 
-    vec3 result = addDirLight(dirLight, reflexColor);
+    vec3 result, mixColor;
+
+    mixColor = mix(reflectColor, refractColor, 0.8);
+    result = addDirLight(dirLight, mixColor);
+    //result = addDirLight(dirLight, u_color);
+
     f_color = vec4(result, 1.0f);
 }
 

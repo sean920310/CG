@@ -29,6 +29,7 @@
 #include "RenderUtilities/BufferObject.h"
 #include "RenderUtilities/Shader.h"
 #include "RenderUtilities/Texture.h"
+#include <vector>
 
 // Preclarify for preventing the compiler error
 class TrainWindow;
@@ -95,6 +96,7 @@ public:
 
 		Shader* waterShader		= nullptr;
 		Texture2D* waterTex		= nullptr;
+		std::vector<Texture2D*>* heightMapTex = nullptr;
 		VAO* waterSurface		= nullptr;
 		Shader* skyboxShader	= nullptr;
 		Texture3D* skyboxTex	= nullptr;
@@ -112,8 +114,8 @@ public:
 		GLfloat* waterVertices = nullptr;
 		GLfloat* waterNormal = nullptr;
 
-		const int widthDivid = 501;
-		const int heightDivid = 501;
+		const int widthDivid = 512;
+		const int heightDivid = 512;
 		const int widthLong = 100;
 		const int heightLong = 100;
 };

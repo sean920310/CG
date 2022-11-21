@@ -36,7 +36,6 @@
 #include <GL/glu.h>
 #include <time.h>
 #include <math.h>
-#include <vector>
 
 #include "TrainView.H"
 #include "TrainWindow.H"
@@ -279,6 +278,20 @@ void TrainView::draw()
 
 		if (!this->waterTex)
 			this->waterTex = new Texture2D(PROJECT_DIR "/Images/church.png");
+
+		if (!this->heightMapTex)
+		{
+			this->heightMapTex = new std::vector<Texture2D*>(200);
+			for (int i = 0; i < 200; i++)
+			{
+				std::string num = std::to_string(i);
+				if (num.size() == 1) num = "00" + num;
+				else if (num.size() == 2) num = "0" + num;
+				std::string path = std::string(PROJECT_DIR "/Images/waves5/");
+				path = path + num + ".png";
+				this->heightMapTex->at(i) = new Texture2D(path.c_str(),Texture2D::TEXTURE_HEIGHT);
+			}
+		}
 
 		if (!this->skyboxShader)
 			this->skyboxShader = new Shader(
@@ -535,23 +548,35 @@ void TrainView::draw()
 	// draw wave and animate
 	// 
 	//*********************************************************************
+	
+	int waveType = tw->waveBrowser->value();
 
 	//setup sin wave
 	static unsigned long lastClock = 0;
 	static float t = 0;
 
-	
 	if (clock() - lastClock > CLOCKS_PER_SEC / 144 && tw->runButton->value()) {
 		lastClock = clock();
-		t += 0.2 * tw->speed->value();
-		if (t > tw->wavelength->value())t = 0;
+		if (waveType == 1)	//sin wave
+		{
+			t += 0.2 * tw->speed->value();
+			if (t > tw->wavelength->value())t = 0;
+		}
+		else if (waveType == 2)	//height map
+		{
+			t += 0.2 * tw->speed->value();
+			if (t >= 200) t = 0;
+		}
 	}
+
 	//set wave attribute;
 	this->waterShader->Use();
 	glUniform1f(glGetUniformLocation(this->waterShader->Program, "t"), t);
 	glUniform1f(glGetUniformLocation(this->waterShader->Program, "k"), 2 * PI / tw->wavelength->value());
 	glUniform1f(glGetUniformLocation(this->waterShader->Program, "amplitude"), tw->amplitude->value());
 	glUniform2f(glGetUniformLocation(this->waterShader->Program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
+	glUniform1i(glGetUniformLocation(this->waterShader->Program, "waveType"), waveType);
+
 	glUseProgram(0);
 
 	setUBO();
@@ -561,8 +586,10 @@ void TrainView::draw()
 	//bind shader
 	this->waterShader->Use();
 
-	glm::mat4 model_matrix = glm::mat4();
-	model_matrix = glm::translate(model_matrix, this->source_pos);
+	glm::mat4 model_matrix = glm::mat4(1);
+	//model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 50.0f, 0.0f));
+	//model_matrix = glm::rotate(model_matrix, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//model_matrix = glm::translate(model_matrix, this->source_pos);
 	//model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
 	glUniformMatrix4fv(
 		glGetUniformLocation(this->waterShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
@@ -572,12 +599,15 @@ void TrainView::draw()
 		&glm::vec3(0.5f, 0.5f, 0.5f)[0]);
 	this->waterTex->bind(0);
 	glUniform1i(glGetUniformLocation(this->waterShader->Program, "u_texture"), 0);
+	this->heightMapTex->at((int)t)->bind(1);
+	glUniform1i(glGetUniformLocation(this->waterShader->Program, "heightMap"), 1);
 	this->skyboxTex->bind(0); 
 	glUniform1i(glGetUniformLocation(this->waterShader->Program, "skyboxTex"), 0);
 
 	glm::vec3 eyePos = arcball.getEyePos();
 	glUniform3f(glGetUniformLocation(this->waterShader->Program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
 	this->waterShader->SetDirLight();
+
 
 	//bind VAO
 	glBindVertexArray(this->waterSurface->vao);
