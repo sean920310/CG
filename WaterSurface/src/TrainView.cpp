@@ -104,6 +104,7 @@ int TrainView::handle(int event)
 		// if the left button be pushed is left mouse button
 		if (last_push == FL_LEFT_MOUSE) {
 			doPick();
+			pickSurface();
 			damage(1);
 			return 1;
 		};
@@ -192,20 +193,135 @@ void TrainView::draw()
 	{
 		//initiailize VAO, VBO, Shader...
 
-		if (!this->waterShader)
-			this->waterShader = new
+		if (!this->framebuffer)
+		{
+			this->framebuffer = new FBO;
+			//gen framebuffer
+			glGenFramebuffers(1, &this->framebuffer->fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
+			//gen texture
+			glGenTextures(4, this->framebuffer->textures);
+			glBindTexture(GL_TEXTURE_2D, this->framebuffer->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->framebuffer->textures[0], 0);
+			//gen rbo
+			glGenRenderbuffers(1, &this->framebuffer->rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, this->framebuffer->rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w(), h());
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->framebuffer->rbo);
+
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "FBO complite\n";
+			else
+				std::cout << "FBO uncomplite\n";
+			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+		//use frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
+		//update w & h
+		glBindTexture(GL_TEXTURE_2D, this->framebuffer->textures[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glBindRenderbuffer(GL_RENDERBUFFER, this->framebuffer->rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w(), h());
+
+		if (!this->frame)
+		{
+			GLfloat frameVertices[12] =
+			{
+				1.0f, -1.0f,
+				-1.0f, -1.0f,
+				-1.0f, 1.0f,
+
+				1.0f, 1.0f,
+				1.0f, -1.0f,
+				-1.0f, 1.0f
+			};
+			GLfloat frameTexCoord[12] =
+			{
+				1.0f, 0.0f,
+				0.0f, 0.0f,
+				0.0f, 1.0f,
+
+				1.0f, 1.0f,
+				1.0f, 0.0f,
+				0.0f, 1.0f
+			};
+			this->frame = new VAO;
+			glGenVertexArrays(1, &this->frame->vao);
+			glGenBuffers(2, this->frame->vbo);
+
+			glBindVertexArray(this->frame->vao);
+			glBindBuffer(GL_ARRAY_BUFFER,this->frame->vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(frameVertices), frameVertices, GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(0);
+
+			glBindBuffer(GL_ARRAY_BUFFER, this->frame->vbo[1]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(frameTexCoord), frameTexCoord, GL_STATIC_DRAW);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(1);
+
+			glBindVertexArray(0);
+		}
+
+		if (!this->frameShader)
+		{
+			this->frameShader = new
+				Shader(
+					PROJECT_DIR "/src/shaders/frame.vert",
+					nullptr, nullptr, nullptr,
+					PROJECT_DIR "/src/shaders/frame.frag");
+
+			this->frameShader->Use();
+			glUniform1i(glGetUniformLocation(frameShader->Program, "tex"), 0);
+			Shader::Unuse();
+		}
+
+		if (!this->pixelation)
+		{
+			this->pixelation = new
+				Shader(
+					PROJECT_DIR "/src/shaders/pixelation.vert",
+					nullptr, nullptr, nullptr,
+					PROJECT_DIR "/src/shaders/pixelation.frag");
+
+			this->pixelation->Use();
+			glUniform1i(glGetUniformLocation(pixelation->Program, "tex"), 0);
+			Shader::Unuse();
+		}
+
+		if (!this->waterSinShader)
+			this->waterSinShader = new
 			Shader(
-				PROJECT_DIR "/src/shaders/water.vert",
+				PROJECT_DIR "/src/shaders/waterSinWave.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/water.frag");
+				PROJECT_DIR "/src/shaders/waterSinWave.frag");
+		if (!this->waterHeightShader)
+			this->waterHeightShader = new
+			Shader(
+				PROJECT_DIR "/src/shaders/waterHeightMap.vert",
+				nullptr, nullptr, nullptr,
+				PROJECT_DIR "/src/shaders/waterHeightMap.frag");
+		if (!this->waterSimShader)
+			this->waterSimShader = new
+			Shader(
+				PROJECT_DIR "/src/shaders/waterSimulate.vert",
+				nullptr, nullptr, nullptr,
+				PROJECT_DIR "/src/shaders/waterSimulate.frag");
 
 		if (!this->commom_matrices)
+		{
 			this->commom_matrices = new UBO();
-		this->commom_matrices->size = 2 * sizeof(glm::mat4);
-		glGenBuffers(1, &this->commom_matrices->ubo);
-		glBindBuffer(GL_UNIFORM_BUFFER, this->commom_matrices->ubo);
-		glBufferData(GL_UNIFORM_BUFFER, this->commom_matrices->size, NULL, GL_STATIC_DRAW);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			this->commom_matrices->size = 2 * sizeof(glm::mat4);
+			glGenBuffers(1, &this->commom_matrices->ubo);
+			glBindBuffer(GL_UNIFORM_BUFFER, this->commom_matrices->ubo);
+			glBufferData(GL_UNIFORM_BUFFER, this->commom_matrices->size, NULL, GL_STATIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
 
 		if (!this->waterSurface) {
 
@@ -569,22 +685,38 @@ void TrainView::draw()
 		}
 	}
 
-	//set wave attribute;
-	this->waterShader->Use();
-	glUniform1f(glGetUniformLocation(this->waterShader->Program, "t"), t);
-	glUniform1f(glGetUniformLocation(this->waterShader->Program, "k"), 2 * PI / tw->wavelength->value());
-	glUniform1f(glGetUniformLocation(this->waterShader->Program, "amplitude"), tw->amplitude->value());
-	glUniform2f(glGetUniformLocation(this->waterShader->Program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
-	glUniform1i(glGetUniformLocation(this->waterShader->Program, "waveType"), waveType);
-
-	glUseProgram(0);
-
 	setUBO();
 	glBindBufferRange(
 		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
 
 	//bind shader
-	this->waterShader->Use();
+	GLuint program;
+	switch (waveType)
+	{
+	case 1:
+		this->waterSinShader->Use();
+		program = this->waterSinShader->Program;
+		break;
+	case 2:
+		this->waterHeightShader->Use();
+		program = this->waterHeightShader->Program;
+		break;
+	case 3:
+		this->waterSimShader->Use();
+		program = this->waterSimShader->Program;
+		break;
+	default:
+		this->waterSinShader->Use();
+		program = this->waterSinShader->Program;
+		break;
+	}
+
+	//set wave attribute;
+	glUniform1f(glGetUniformLocation(program, "t"), t);
+	glUniform1f(glGetUniformLocation(program, "k"), 2 * PI / tw->wavelength->value());
+	glUniform1f(glGetUniformLocation(program, "amplitude"), tw->amplitude->value());
+	glUniform2f(glGetUniformLocation(program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
+	glUniform1i(glGetUniformLocation(program, "waveType"), waveType);
 
 	glm::mat4 model_matrix = glm::mat4(1);
 	//model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 50.0f, 0.0f));
@@ -592,21 +724,21 @@ void TrainView::draw()
 	//model_matrix = glm::translate(model_matrix, this->source_pos);
 	//model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
 	glUniformMatrix4fv(
-		glGetUniformLocation(this->waterShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+		glGetUniformLocation(program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
 	glUniform3fv(
-		glGetUniformLocation(this->waterShader->Program, "u_color"),
+		glGetUniformLocation(program, "u_color"),
 		1,
 		&glm::vec3(0.5f, 0.5f, 0.5f)[0]);
 	this->waterTex->bind(0);
-	glUniform1i(glGetUniformLocation(this->waterShader->Program, "u_texture"), 0);
+	glUniform1i(glGetUniformLocation(program, "u_texture"), 0);
 	this->heightMapTex->at((int)t)->bind(1);
-	glUniform1i(glGetUniformLocation(this->waterShader->Program, "heightMap"), 1);
+	glUniform1i(glGetUniformLocation(program, "heightMap"), 1);
 	this->skyboxTex->bind(0); 
-	glUniform1i(glGetUniformLocation(this->waterShader->Program, "skyboxTex"), 0);
+	glUniform1i(glGetUniformLocation(program, "skyboxTex"), 0);
 
 	glm::vec3 eyePos = arcball.getEyePos();
-	glUniform3f(glGetUniformLocation(this->waterShader->Program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
-	this->waterShader->SetDirLight();
+	glUniform3f(glGetUniformLocation(program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
+	Shader::SetDirLight(program);
 
 
 	//bind VAO
@@ -618,7 +750,7 @@ void TrainView::draw()
 	glBindVertexArray(0);
 
 	//unbind shader(switch to fixed pipeline)
-	glUseProgram(0);
+	Shader::Unuse();
 
 	//*********************************************************************
 	// 
@@ -632,9 +764,40 @@ void TrainView::draw()
 
 	glBindVertexArray(this->skybox->vao);
 	this->skyboxTex->bind(0);
-	glUniform1i(glGetUniformLocation(this->waterShader->Program, "skybox"), 0);
+	glUniform1i(glGetUniformLocation(this->skyboxShader->Program, "skybox"), 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//unbind VAO
+	glBindVertexArray(0);
+
+	//*********************************************************************
+	// 
+	// draw frame buffer
+	// 
+	//*********************************************************************
+
+	//bind to default frame buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	if (tw->pixelation->value())
+	{
+		this->pixelation->Use();
+		glUniform1f(glGetUniformLocation(this->pixelation->Program, "rt_w"), w());
+		glUniform1f(glGetUniformLocation(this->pixelation->Program, "rt_h"), h());
+	}
+	else
+	{
+		this->frameShader->Use();
+	}
+	glBindVertexArray(this->frame->vao);
+	glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, this->framebuffer->textures[0]);
+
+	// Draw the framebuffer rectangle
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glEnable(GL_DEPTH_TEST);
 
 	//unbind VAO
 	glBindVertexArray(0);
@@ -827,4 +990,34 @@ void TrainView::setUBO()
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection_matrix[0][0]);
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &view_matrix[0][0]);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void TrainView::pickSurface()
+{
+	// since we'll need to do some GL stuff so we make this window as 
+	// active window
+	make_current();
+
+	// where is the mouse?
+	int mx = Fl::event_x();
+	int my = Fl::event_y();
+
+	// get the viewport - most reliable way to turn mouse coords into GL coords
+	int viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	my = viewport[3] - my - 1;
+
+	std::cout << "x: " << mx << std::endl << "y: " << my << std::endl;
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferPick);
+	//glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+	//glm::vec3 uv;
+	//glReadPixels(mx, my, 1, 1, GL_RGB, GL_FLOAT, &uv[0]);
+
+	//glReadBuffer(GL_NONE);
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+	//if (uv.z != 0.0)
+		//addDrop(glm::vec2(uv), 0.03f, 0.01f);
 }

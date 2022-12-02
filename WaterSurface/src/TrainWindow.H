@@ -92,9 +92,7 @@ class TrainWindow : public Fl_Double_Window {
 		Fl_Value_Slider*	wavelength;
 		Fl_Value_Slider*	waveDir;
 
-		Fl_Button* noneEffect;
-		Fl_Button* reflection;
-		Fl_Button* refraction;
+		Fl_Button*			pixelation;
 
 
 		Fl_Button*			arcLength;		// do we use arc length for speed?

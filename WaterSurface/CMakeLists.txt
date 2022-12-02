@@ -8,8 +8,16 @@ set(LIB_DIR ${PROJECT_SOURCE_DIR}/lib/)
 set(SRC_SHADER 
     ${SRC_DIR}shaders/simple.vert
     ${SRC_DIR}shaders/simple.frag
-    ${SRC_DIR}shaders/water.vert
-    ${SRC_DIR}shaders/water.frag
+    ${SRC_DIR}shaders/frame.vert
+    ${SRC_DIR}shaders/frame.frag
+    ${SRC_DIR}shaders/pixelation.vert
+    ${SRC_DIR}shaders/pixelation.frag
+    ${SRC_DIR}shaders/waterSinWave.vert
+    ${SRC_DIR}shaders/waterSinWave.frag
+    ${SRC_DIR}shaders/waterHeightMap.vert
+    ${SRC_DIR}shaders/waterHeightMap.frag
+    ${SRC_DIR}shaders/waterSimulate.vert
+    ${SRC_DIR}shaders/waterSimulate.frag
     ${SRC_DIR}shaders/skybox.vert
     ${SRC_DIR}shaders/skybox.frag)
 

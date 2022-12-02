@@ -109,6 +109,7 @@ TrainWindow(const int x, const int y)
 		waveBrowser->callback((Fl_Callback*)damageCB,this);
 		waveBrowser->add("Sin Wave");
 		waveBrowser->add("Height map");
+		waveBrowser->add("Simulate");
 		waveBrowser->select(1);
 
 		pty += 110;
@@ -167,25 +168,8 @@ TrainWindow(const int x, const int y)
 		waveDir->callback((Fl_Callback*)damageCB, this);
 
 		pty += 40;
-		Fl_Group* effectGroup = new Fl_Group(600, pty, 195, 20);
-		effectGroup->begin();
-		noneEffect = new Fl_Button(605, pty, 60, 20, "None");
-		noneEffect->type(FL_RADIO_BUTTON);		// radio button
-		noneEffect->value(1);			// turned on
-		noneEffect->selection_color((Fl_Color)3); // yellow when pressed
-		noneEffect->callback((Fl_Callback*)damageCB, this);
-		reflection = new Fl_Button(670, pty, 60, 20, "Reflect");
-		reflection->type(FL_RADIO_BUTTON);
-		reflection->value(0);
-		reflection->selection_color((Fl_Color)3);
-		reflection->callback((Fl_Callback*)damageCB, this);
-		refraction = new Fl_Button(735, pty, 60, 20, "Refract");
-		refraction->type(FL_RADIO_BUTTON);
-		refraction->value(0);
-		refraction->selection_color((Fl_Color)3);
-		refraction->callback((Fl_Callback*)damageCB, this);
-		effectGroup->end();
-
+		pixelation = new Fl_Button(605, pty, 80, 20, "Pixelation");
+		togglify(pixelation, 0);
 
 
 		// TODO: add widgets for all of your fancier features here

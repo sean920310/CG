@@ -85,8 +85,13 @@ public:
 		glUseProgram(this->Program);
 	}
 
+	static void Unuse()
+	{
+		glUseProgram(0);
+	}
+
 	//Set Direction Light
-	void SetDirLight()
+	static void SetDirLight(GLuint program)
 	{
 		GLfloat diffuse[4], ambient[4],specular[4], lightPos[4];
 		
@@ -100,10 +105,10 @@ public:
 		glm::vec4 pos = glm::make_vec4(lightPos);
 		glm::mat4 viewMatrix = glm::make_mat4(view);
 		pos = glm::inverse(viewMatrix) * pos;
-		glUniform3fv(glGetUniformLocation(Program, "dirLight.position"), 1, glm::value_ptr(pos));
-		glUniform3fv(glGetUniformLocation(Program, "dirLight.ambient"), 1, ambient);
-		glUniform3fv(glGetUniformLocation(Program, "dirLight.diffuse"), 1, diffuse);
-		glUniform3fv(glGetUniformLocation(Program, "dirLight.specular"), 1, specular);
+		glUniform3fv(glGetUniformLocation(program, "dirLight.position"), 1, glm::value_ptr(pos));
+		glUniform3fv(glGetUniformLocation(program, "dirLight.ambient"), 1, ambient);
+		glUniform3fv(glGetUniformLocation(program, "dirLight.diffuse"), 1, diffuse);
+		glUniform3fv(glGetUniformLocation(program, "dirLight.specular"), 1, specular);
 	}
 private:
 	std::string readCode(const GLchar* path)
