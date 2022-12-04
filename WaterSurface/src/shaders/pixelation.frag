@@ -13,8 +13,6 @@ void main()
 {
     vec2 uv = texCoord;
 
-    vec3 tc = vec3(1.0, 0.0, 0.0);
-
     float dx = pixel_w * (1.0/rt_w);
     float dy = pixel_h * (1.0/rt_h);
 

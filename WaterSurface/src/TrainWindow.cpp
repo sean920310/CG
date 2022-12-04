@@ -171,6 +171,9 @@ TrainWindow(const int x, const int y)
 		pixelation = new Fl_Button(605, pty, 80, 20, "Pixelation");
 		togglify(pixelation, 0);
 
+		pty += 30;
+		fboTest = new Fl_Button(605, pty, 80, 20, "fboTest");
+		togglify(fboTest, 0);
 
 		// TODO: add widgets for all of your fancier features here
 #ifdef EXAMPLE_SOLUTION

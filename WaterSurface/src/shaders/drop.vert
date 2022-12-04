@@ -1,9 +1,6 @@
 #version 430 core
 layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texture_coordinate;
-
-uniform mat4 u_model;
 
 layout (std140, binding = 0) uniform commom_matrices
 {
@@ -18,11 +15,10 @@ out V_OUT
    vec2 texture_coordinate;
 } v_out;
 
+
 void main()
 {
-    vec3 pos = position;
+    gl_Position = vec4(position.z / 50.0f, position.x / 50.0f, 0.0f, 1.0f);
 
-    gl_Position = u_projection * u_view * u_model * vec4(pos, 1.0f);
-
-    v_out.texture_coordinate = vec2(texture_coordinate.x, 1.0f - texture_coordinate.y);
+    v_out.texture_coordinate = texture_coordinate;
 }

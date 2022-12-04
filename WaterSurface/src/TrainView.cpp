@@ -200,7 +200,7 @@ void TrainView::draw()
 			glGenFramebuffers(1, &this->framebuffer->fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
 			//gen texture
-			glGenTextures(4, this->framebuffer->textures);
+			glGenTextures(1, this->framebuffer->textures);
 			glBindTexture(GL_TEXTURE_2D, this->framebuffer->textures[0]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -240,16 +240,6 @@ void TrainView::draw()
 				1.0f, -1.0f,
 				-1.0f, 1.0f
 			};
-			GLfloat frameTexCoord[12] =
-			{
-				1.0f, 0.0f,
-				0.0f, 0.0f,
-				0.0f, 1.0f,
-
-				1.0f, 1.0f,
-				1.0f, 0.0f,
-				0.0f, 1.0f
-			};
 			this->frame = new VAO;
 			glGenVertexArrays(1, &this->frame->vao);
 			glGenBuffers(2, this->frame->vbo);
@@ -259,11 +249,6 @@ void TrainView::draw()
 			glBufferData(GL_ARRAY_BUFFER, sizeof(frameVertices), frameVertices, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 			glEnableVertexAttribArray(0);
-
-			glBindBuffer(GL_ARRAY_BUFFER, this->frame->vbo[1]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(frameTexCoord), frameTexCoord, GL_STATIC_DRAW);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-			glEnableVertexAttribArray(1);
 
 			glBindVertexArray(0);
 		}
@@ -334,16 +319,16 @@ void TrainView::draw()
 			{
 				for (int j = 0; j < widthDivid; j++)
 				{
-					waterVertices[(i * widthDivid + j) * 3 + 0] = (float)j * widthLong / widthDivid - (widthLong / 2);
+					waterVertices[(i * widthDivid + j) * 3 + 0] = (float)j * widthLong / (widthDivid - 1) - (widthLong / 2);
 					waterVertices[(i * widthDivid + j) * 3 + 1] = 0.0f;
-					waterVertices[(i * widthDivid + j) * 3 + 2] = (float)i * heightLong / heightDivid - (heightLong / 2);
+					waterVertices[(i * widthDivid + j) * 3 + 2] = (float)i * heightLong / (heightDivid - 1) - (heightLong / 2);
 
 					waterNormal[(i * widthDivid + j) * 3 + 0] = 0.0f;
 					waterNormal[(i * widthDivid + j) * 3 + 1] = 1.0f;
 					waterNormal[(i * widthDivid + j) * 3 + 2] = 0.0f;
 
-					waterTextureCoordinate[(i * widthDivid + j) * 2 + 0] = (1.0f / heightDivid) * i;
-					waterTextureCoordinate[(i * widthDivid + j) * 2 + 1] = (1.0f / widthDivid) * j;
+					waterTextureCoordinate[(i * widthDivid + j) * 2 + 0] = (1.0f / (heightDivid - 1)) * i;
+					waterTextureCoordinate[(i * widthDivid + j) * 2 + 1] = (1.0f / (widthDivid - 1)) * j;
 
 					if (i + 1 != heightDivid && j + 1 != widthDivid)
 					{
@@ -408,6 +393,125 @@ void TrainView::draw()
 				this->heightMapTex->at(i) = new Texture2D(path.c_str(),Texture2D::TEXTURE_HEIGHT);
 			}
 		}
+
+		if (!this->waterFBO0)
+		{
+			this->waterFBO0 = new FBO;
+			//gen framebuffer
+			glGenFramebuffers(1, &this->waterFBO0->fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, this->waterFBO0->fbo);
+			//gen texture
+			glGenTextures(1, this->waterFBO0->textures);
+			glBindTexture(GL_TEXTURE_2D, this->waterFBO0->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthDivid, heightDivid, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->waterFBO0->textures[0], 0);
+			//gen rbo
+			//glGenRenderbuffers(1, &this->waterFBO0->rbo);
+			//glBindRenderbuffer(GL_RENDERBUFFER, this->waterFBO0->rbo);
+			//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthDivid, heightDivid);
+			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->waterFBO0->rbo);
+
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "water FBO0 complite\n";
+			else
+				std::cout << "water FBO0 uncomplite\n";
+
+			glClearColor(0, 0, 0, 0);		// background should be black
+			glClear(GL_COLOR_BUFFER_BIT);
+
+		}
+
+
+		if (!this->waterFBO1)
+		{
+			this->waterFBO1 = new FBO;
+			//gen framebuffer
+			glGenFramebuffers(1, &this->waterFBO1->fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, this->waterFBO1->fbo);
+			//gen texture
+			glGenTextures(1, this->waterFBO1->textures);
+			glBindTexture(GL_TEXTURE_2D, this->waterFBO1->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthDivid, heightDivid, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->waterFBO1->textures[0], 0);
+			//gen rbo
+			//glGenRenderbuffers(1, &this->waterFBO1->rbo);
+			//glBindRenderbuffer(GL_RENDERBUFFER, this->waterFBO1->rbo);
+			//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthDivid, heightDivid);
+			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->waterFBO1->rbo);
+
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "water FBO1 complite\n";
+			else
+				std::cout << "water FBO1 uncomplite\n";
+
+			glClearColor(0, 0, 0, 0);		// background should be black
+			glClear(GL_COLOR_BUFFER_BIT);
+
+		}
+
+		if (!this->waterUpdateShader)
+		{
+			this->waterUpdateShader = new Shader(
+				PROJECT_DIR "/src/shaders/update.vert",
+				nullptr, nullptr, nullptr,
+				PROJECT_DIR "/src/shaders/update.frag");
+		}
+
+		if (!this->waterDropShader)
+		{
+			this->waterDropShader = new Shader(
+				PROJECT_DIR "/src/shaders/drop.vert",
+				nullptr, nullptr, nullptr,
+				PROJECT_DIR "/src/shaders/drop.frag");
+		}
+
+		if (!this->waterPickFBO)
+		{
+			this->waterPickFBO = new FBO;
+			//gen framebuffer
+			glGenFramebuffers(1, &this->waterPickFBO->fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, this->waterPickFBO->fbo);
+			//gen texture
+			glGenTextures(1, this->waterPickFBO->textures);
+			glBindTexture(GL_TEXTURE_2D, this->waterPickFBO->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->waterPickFBO->textures[0], 0);
+			//gen rbo
+			glGenRenderbuffers(1, &this->waterPickFBO->rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, this->waterPickFBO->rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthDivid, heightDivid);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->waterPickFBO->rbo);
+
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "pick FBO complite\n";
+			else
+				std::cout << "pick FBO uncomplite\n";
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, this->waterPickFBO->fbo);
+		//update w & h
+		glBindTexture(GL_TEXTURE_2D, this->waterPickFBO->textures[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glBindRenderbuffer(GL_RENDERBUFFER, this->waterPickFBO->rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w(), h()); 
+		//clear
+		glClearColor(0, 0, 0, 0);		// background should be black
+		glClearStencil(0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glEnable(GL_DEPTH);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		if (!this->skyboxShader)
 			this->skyboxShader = new Shader(
@@ -554,11 +658,15 @@ void TrainView::draw()
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
 
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
+
 	// Set up the view port
 	glViewport(0, 0, w(), h());
 
 	// clear the window, be sure to clear the Z-Buffer too
-	glClearColor(0, 0, .3f, 0);		// background should be blue
+	//glClearColor(0, 0, .3f, 0);		// background should be blue
+	glClearColor(0, 0, 0, 0);		// background should be black
 
 	// we need to clear out the stencil buffer since we'll use
 	// it for shadows
@@ -683,6 +791,10 @@ void TrainView::draw()
 			t += 0.2 * tw->speed->value();
 			if (t >= 200) t = 0;
 		}
+		else if (waveType == 3)
+		{
+			t += 0.2 * tw->speed->value();
+		}
 	}
 
 	setUBO();
@@ -696,27 +808,60 @@ void TrainView::draw()
 	case 1:
 		this->waterSinShader->Use();
 		program = this->waterSinShader->Program;
+		glUniform1f(glGetUniformLocation(program, "t"), t);
+		glUniform1f(glGetUniformLocation(program, "k"), 2 * PI / tw->wavelength->value()); 
+		glUniform2f(glGetUniformLocation(program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
 		break;
 	case 2:
 		this->waterHeightShader->Use();
 		program = this->waterHeightShader->Program;
+		this->heightMapTex->at((int)t)->bind(0);
+		glUniform1i(glGetUniformLocation(program, "heightMap"), 0);
 		break;
 	case 3:
+	{
+		//draw pick
+		glBindFramebuffer(GL_FRAMEBUFFER, this->waterPickFBO->fbo);
 		this->waterSimShader->Use();
-		program = this->waterSimShader->Program;
+		glm::mat4 model_matrix = glm::mat4(1);
+		glUniformMatrix4fv(
+			glGetUniformLocation(this->waterSimShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+
+		glBindVertexArray(this->waterSurface->vao);
+		glDrawElements(GL_TRIANGLES, this->waterSurface->element_amount, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		if (t >= 1)
+		{
+			t = 0;
+			this->updateSurface();
+			//addDrop(0.5, 0.5);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
+		this->waterHeightShader->Use();
+		program = this->waterHeightShader->Program;
+		if (waterFBOTex)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, this->waterFBO1->textures[0]);
+			glUniform1i(glGetUniformLocation(program, "heightMap"), 0);
+		}
+		else
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, this->waterFBO0->textures[0]);
+			glUniform1i(glGetUniformLocation(program, "heightMap"), 0);
+		}
 		break;
+	}
 	default:
 		this->waterSinShader->Use();
 		program = this->waterSinShader->Program;
 		break;
 	}
 
-	//set wave attribute;
-	glUniform1f(glGetUniformLocation(program, "t"), t);
-	glUniform1f(glGetUniformLocation(program, "k"), 2 * PI / tw->wavelength->value());
 	glUniform1f(glGetUniformLocation(program, "amplitude"), tw->amplitude->value());
-	glUniform2f(glGetUniformLocation(program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
-	glUniform1i(glGetUniformLocation(program, "waveType"), waveType);
+
 
 	glm::mat4 model_matrix = glm::mat4(1);
 	//model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 50.0f, 0.0f));
@@ -729,12 +874,10 @@ void TrainView::draw()
 		glGetUniformLocation(program, "u_color"),
 		1,
 		&glm::vec3(0.5f, 0.5f, 0.5f)[0]);
-	this->waterTex->bind(0);
-	glUniform1i(glGetUniformLocation(program, "u_texture"), 0);
-	this->heightMapTex->at((int)t)->bind(1);
-	glUniform1i(glGetUniformLocation(program, "heightMap"), 1);
-	this->skyboxTex->bind(0); 
-	glUniform1i(glGetUniformLocation(program, "skyboxTex"), 0);
+	this->waterTex->bind(1);
+	glUniform1i(glGetUniformLocation(program, "u_texture"), 1);
+	this->skyboxTex->bind(2); 
+	glUniform1i(glGetUniformLocation(program, "skyboxTex"), 2);
 
 	glm::vec3 eyePos = arcball.getEyePos();
 	glUniform3f(glGetUniformLocation(program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
@@ -751,6 +894,8 @@ void TrainView::draw()
 
 	//unbind shader(switch to fixed pipeline)
 	Shader::Unuse();
+
+
 
 	//*********************************************************************
 	// 
@@ -794,6 +939,13 @@ void TrainView::draw()
 	glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, this->framebuffer->textures[0]);
+	if (tw->fboTest->value())
+	{
+		if(waterFBOTex)
+			glBindTexture(GL_TEXTURE_2D, this->waterFBO1->textures[0]);
+		else
+			glBindTexture(GL_TEXTURE_2D, this->waterFBO0->textures[0]);
+	}
 
 	// Draw the framebuffer rectangle
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1008,16 +1160,91 @@ void TrainView::pickSurface()
 
 	my = viewport[3] - my - 1;
 
-	std::cout << "x: " << mx << std::endl << "y: " << my << std::endl;
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferPick);
-	//glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->waterPickFBO->fbo);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-	//glm::vec3 uv;
-	//glReadPixels(mx, my, 1, 1, GL_RGB, GL_FLOAT, &uv[0]);
+	glm::vec3 uv;
+	glReadPixels(mx, my, 1, 1, GL_RGB, GL_FLOAT, &uv[0]);
 
-	//glReadBuffer(GL_NONE);
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-	//if (uv.z != 0.0)
-		//addDrop(glm::vec2(uv), 0.03f, 0.01f);
+	if (uv.z != 0.0)
+	{
+		std::cout << uv.x << ' ' << uv.y << ' ' <<uv.z<< std::endl;
+		addDrop(uv.x, uv.y);
+	}
+}
+
+void TrainView::updateSurface()
+{
+	//use fbo
+	if(waterFBOTex)
+		glBindFramebuffer(GL_FRAMEBUFFER, this->waterFBO0->fbo);
+	else
+		glBindFramebuffer(GL_FRAMEBUFFER, this->waterFBO1->fbo);
+
+
+	this->waterUpdateShader->Use();
+
+	if (waterFBOTex)
+	{
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->waterFBO0->textures[0], 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, this->waterFBO1->textures[0]);
+		glUniform1i(glGetUniformLocation(this->waterUpdateShader->Program, "lastTex"), 0);
+	}
+	else
+	{
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->waterFBO1->textures[0], 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, this->waterFBO0->textures[0]);
+		glUniform1i(glGetUniformLocation(this->waterUpdateShader->Program, "lastTex"), 0);
+	}
+
+	glBindVertexArray(this->waterSurface->vao);
+	glDrawElements(GL_TRIANGLES, this->waterSurface->element_amount, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	waterFBOTex = !waterFBOTex;
+}
+
+
+void TrainView::addDrop(float x, float y)
+{
+	//use fbo
+	if (waterFBOTex)
+		glBindFramebuffer(GL_FRAMEBUFFER, this->waterFBO0->fbo);
+	else
+		glBindFramebuffer(GL_FRAMEBUFFER, this->waterFBO1->fbo);
+
+	this->waterDropShader->Use();
+
+	glUniform2f(glGetUniformLocation(this->waterDropShader->Program, "u_center"), x, y);
+	glUniform1f(glGetUniformLocation(this->waterDropShader->Program, "u_radius"), tw->wavelength->value()/1000 );
+	glUniform1f(glGetUniformLocation(this->waterDropShader->Program, "u_strength"), tw->amplitude->value() / 10);
+
+
+	if (waterFBOTex)
+	{
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->waterFBO0->textures[0], 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, this->waterFBO1->textures[0]);
+		glUniform1i(glGetUniformLocation(this->waterDropShader->Program, "lastTex"), 0);
+	}
+	else
+	{
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->waterFBO1->textures[0], 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, this->waterFBO0->textures[0]);
+		glUniform1i(glGetUniformLocation(this->waterDropShader->Program, "lastTex"), 0);
+	}
+
+	glBindVertexArray(this->waterSurface->vao);
+	glDrawElements(GL_TRIANGLES, this->waterSurface->element_amount, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	waterFBOTex = !waterFBOTex;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
 }

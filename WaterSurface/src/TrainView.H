@@ -90,6 +90,10 @@ class TrainView : public Fl_Gl_Window
 
 		//pick water surface
 		void pickSurface();
+
+		void updateSurface();
+
+		void addDrop(float x, float y);
 public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube = -1;  // simple - just remember which cube is selected
@@ -97,12 +101,17 @@ public:
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
 
-		Shader* waterSinShader		= nullptr;
+		Shader* waterSinShader	= nullptr;
 		Shader* waterHeightShader = nullptr;
-		Shader* waterSimShader = nullptr;
+		Shader* waterSimShader	= nullptr;
+		Shader* waterUpdateShader	= nullptr;
+		Shader* waterDropShader = nullptr;
 		Texture2D* waterTex		= nullptr;
 		std::vector<Texture2D*>* heightMapTex = nullptr;
 		VAO* waterSurface		= nullptr;
+		FBO* waterFBO0			= nullptr;
+		FBO* waterFBO1			= nullptr;
+		FBO* waterPickFBO		= nullptr;
 		Shader* skyboxShader	= nullptr;
 		Texture3D* skyboxTex	= nullptr;
 		VAO* skybox				= nullptr;
@@ -127,4 +136,6 @@ public:
 		const int heightDivid = 512;
 		const int widthLong = 100;
 		const int heightLong = 100;
+
+		bool waterFBOTex = false; //Tex0 & Tex1
 };

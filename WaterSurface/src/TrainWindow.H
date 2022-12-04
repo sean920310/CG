@@ -94,6 +94,9 @@ class TrainWindow : public Fl_Double_Window {
 
 		Fl_Button*			pixelation;
 
+		Fl_Button*			fboTest;
+
+
 
 		Fl_Button*			arcLength;		// do we use arc length for speed?
 

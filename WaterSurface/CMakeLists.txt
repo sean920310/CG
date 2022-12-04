@@ -8,6 +8,10 @@ set(LIB_DIR ${PROJECT_SOURCE_DIR}/lib/)
 set(SRC_SHADER 
     ${SRC_DIR}shaders/simple.vert
     ${SRC_DIR}shaders/simple.frag
+    ${SRC_DIR}shaders/update.vert
+    ${SRC_DIR}shaders/update.frag
+    ${SRC_DIR}shaders/drop.vert
+    ${SRC_DIR}shaders/drop.frag
     ${SRC_DIR}shaders/frame.vert
     ${SRC_DIR}shaders/frame.frag
     ${SRC_DIR}shaders/pixelation.vert

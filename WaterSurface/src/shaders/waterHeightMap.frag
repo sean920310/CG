@@ -50,6 +50,7 @@ void main()
     //result = addDirLight(dirLight, u_color);
 
     f_color = vec4(result, 1.0f);
+    //f_color = vec4(f_in.texture_coordinate.x,f_in.texture_coordinate.y,0.1, 1.0);
 }
 
 vec3 addDirLight(DirLight dirLight, vec3 color)

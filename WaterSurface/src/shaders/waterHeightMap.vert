@@ -5,7 +5,6 @@ layout (location = 2) in vec2 texture_coordinate;
 
 uniform mat4 u_model;
 uniform sampler2D heightMap;
-uniform float t;
 uniform float amplitude;
 
 layout (std140, binding = 0) uniform commom_matrices
@@ -41,18 +40,20 @@ void main()
 
 void setHeightMap(inout vec3 position,inout vec3 normal)
 {
-    position.y = amplitude * (texture(heightMap, texture_coordinate).r - 0.5f);
+    float amp = 2 * amplitude;
+    vec2 coord = vec2(texture_coordinate.x, 1.0f - texture_coordinate.y);
+    
+    position.y = amp * (texture(heightMap, coord).r - 0.5f);
 
     //set up height map normal
     //  F
     //L O R
     //  B
-    vec2 coord = texture_coordinate;
     vec3 offset = vec3(1.0f / 512.0f, 0.0f, 1.0f/ 512.0f);
-    float L = amplitude * texture(heightMap, (coord - offset.xy)).r;
-    float R = amplitude * texture(heightMap, (coord + offset.xy)).r;
-    float B = amplitude * texture(heightMap, (coord - offset.yz)).r;
-    float F = amplitude * texture(heightMap, (coord + offset.yz)).r;
+    float L = amp * texture(heightMap, (coord - offset.xy)).r;
+    float R = amp * texture(heightMap, (coord + offset.xy)).r;
+    float B = amp * texture(heightMap, (coord - offset.yz)).r;
+    float F = amp * texture(heightMap, (coord + offset.yz)).r;
 
     //vec3 norm = vec3((F - B)/2.0f, (R - L)/2.0f, -1.0f);
     vec3 tangent = vec3(1.0f, (R - L)/ 2, 0.0f);
