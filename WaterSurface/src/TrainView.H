@@ -115,6 +115,10 @@ public:
 		Shader* skyboxShader	= nullptr;
 		Texture3D* skyboxTex	= nullptr;
 		VAO* skybox				= nullptr;
+		Shader* tilesShader		= nullptr;
+		Texture3D* tilesCubeTex	= nullptr;
+		Texture2D* tilesTex		= nullptr;
+		VAO* tiles				= nullptr;
 		FBO* framebuffer		= nullptr;
 		Shader* frameShader		= nullptr;
 		Shader* pixelation		= nullptr;

@@ -2,12 +2,6 @@
 layout (location = 0) in vec3 position;
 layout (location = 2) in vec2 texture_coordinate;
 
-layout (std140, binding = 0) uniform commom_matrices
-{
-    mat4 u_projection;
-    mat4 u_view;
-};
-
 out V_OUT
 {
    vec3 position;

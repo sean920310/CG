@@ -22,6 +22,8 @@ uniform samplerCube skyboxTex;
 uniform float shininess = 77.0f; //物體specular反射程度
 uniform vec3 u_eyePosition;
 uniform DirLight dirLight;
+uniform sampler2D heightMap;
+
 
 vec3 addDirLight(DirLight dirLight, vec3 color);
 
@@ -47,8 +49,8 @@ void main()
 
     mixColor = mix(reflectColor, refractColor, 0.8);
     result = addDirLight(dirLight, mixColor);
-    //result = addDirLight(dirLight, u_color);
-
+    //vec4 h = texture(heightMap, f_in.texture_coordinate);
+    //result = vec3(h.r,h.r,h.r);
     f_color = vec4(result, 1.0f);
     //f_color = vec4(f_in.texture_coordinate.x,f_in.texture_coordinate.y,0.1, 1.0);
 }

@@ -19,6 +19,7 @@ struct DirLight {
 uniform vec3 u_color;
 uniform sampler2D u_texture;
 uniform samplerCube skyboxTex;
+uniform samplerCube tilesTex;
 uniform float shininess = 77.0f; //物體specular反射程度
 uniform vec3 u_eyePosition;
 uniform DirLight dirLight;
@@ -46,6 +47,7 @@ void main()
     vec3 result, mixColor;
 
     mixColor = mix(reflectColor, refractColor, 0.8);
+    //mixColor = mix(mixColor, u_color, 0.1);
     result = addDirLight(dirLight, mixColor);
     //result = addDirLight(dirLight, u_color);
 

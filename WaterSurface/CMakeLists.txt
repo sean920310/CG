@@ -23,7 +23,9 @@ set(SRC_SHADER
     ${SRC_DIR}shaders/waterSimulate.vert
     ${SRC_DIR}shaders/waterSimulate.frag
     ${SRC_DIR}shaders/skybox.vert
-    ${SRC_DIR}shaders/skybox.frag)
+    ${SRC_DIR}shaders/skybox.frag
+    ${SRC_DIR}shaders/tiles.vert
+    ${SRC_DIR}shaders/tiles.frag)
 
 set(SRC_RENDER_UTILITIES
     ${SRC_DIR}RenderUtilities/BufferObject.h

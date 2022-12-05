@@ -23,7 +23,9 @@ void main()
     float drop = max(0.0f, 1.0f - length(u_center - coord) / u_radius);
     drop = 0.5 - cos(drop * PI) * 0.5;
 
+    drop *= 0.5;
+
     info.r += drop * u_strength;
 
-    f_color = vec4(info.r, info.r, info.r, 1.0);
+    f_color = info;
 }
