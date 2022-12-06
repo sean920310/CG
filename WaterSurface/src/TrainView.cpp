@@ -261,9 +261,9 @@ void TrainView::draw()
 		{
 			this->frameShader = new
 				Shader(
-					PROJECT_DIR "/src/shaders/frame.vert",
+					"../shaders/frame.vert",
 					nullptr, nullptr, nullptr,
-					PROJECT_DIR "/src/shaders/frame.frag");
+					"../shaders/frame.frag");
 
 			this->frameShader->Use();
 			glUniform1i(glGetUniformLocation(frameShader->Program, "tex"), 0);
@@ -274,9 +274,9 @@ void TrainView::draw()
 		{
 			this->pixelation = new
 				Shader(
-					PROJECT_DIR "/src/shaders/pixelation.vert",
+					"../shaders/pixelation.vert",
 					nullptr, nullptr, nullptr,
-					PROJECT_DIR "/src/shaders/pixelation.frag");
+					"../shaders/pixelation.frag");
 
 			this->pixelation->Use();
 			glUniform1i(glGetUniformLocation(pixelation->Program, "tex"), 0);
@@ -286,21 +286,21 @@ void TrainView::draw()
 		if (!this->waterSinShader)
 			this->waterSinShader = new
 			Shader(
-				PROJECT_DIR "/src/shaders/waterSinWave.vert",
+				"../shaders/waterSinWave.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/waterSinWave.frag");
+				"../shaders/waterSinWave.frag");
 		if (!this->waterHeightShader)
 			this->waterHeightShader = new
 			Shader(
-				PROJECT_DIR "/src/shaders/waterHeightMap.vert",
+				"../shaders/waterHeightMap.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/waterHeightMap.frag");
+				"../shaders/waterHeightMap.frag");
 		if (!this->waterSimShader)
 			this->waterSimShader = new
 			Shader(
-				PROJECT_DIR "/src/shaders/waterSimulate.vert",
+				"../shaders/waterSimulate.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/waterSimulate.frag");
+				"../shaders/waterSimulate.frag");
 
 		if (!this->commom_matrices)
 		{
@@ -382,7 +382,7 @@ void TrainView::draw()
 		}
 
 		if (!this->waterTex)
-			this->waterTex = new Texture2D(PROJECT_DIR "/Images/church.png");
+			this->waterTex = new Texture2D("../Images/church.png");
 
 		if (!this->heightMapTex)
 		{
@@ -392,7 +392,7 @@ void TrainView::draw()
 				std::string num = std::to_string(i);
 				if (num.size() == 1) num = "00" + num;
 				else if (num.size() == 2) num = "0" + num;
-				std::string path = std::string(PROJECT_DIR "/Images/waves5/");
+				std::string path = std::string("../Images/waves5/");
 				path = path + num + ".png";
 				this->heightMapTex->at(i) = new Texture2D(path.c_str(),Texture2D::TEXTURE_HEIGHT);
 			}
@@ -485,17 +485,17 @@ void TrainView::draw()
 		if (!this->waterUpdateShader)
 		{
 			this->waterUpdateShader = new Shader(
-				PROJECT_DIR "/src/shaders/update.vert",
+				"../shaders/update.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/update.frag");
+				"../shaders/update.frag");
 		}
 
 		if (!this->waterDropShader)
 		{
 			this->waterDropShader = new Shader(
-				PROJECT_DIR "/src/shaders/drop.vert",
+				"../shaders/drop.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/drop.frag");
+				"../shaders/drop.frag");
 		}
 
 		if (!this->waterPickFBO)
@@ -543,9 +543,9 @@ void TrainView::draw()
 
 		if (!this->skyboxShader)
 			this->skyboxShader = new Shader(
-				PROJECT_DIR "/src/shaders/skybox.vert",
+				"../shaders/skybox.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/skybox.frag");
+				"../shaders/skybox.frag");
 
 		if (!this->skybox)
 		{
@@ -615,53 +615,53 @@ void TrainView::draw()
 		{
 			std::vector<std::string> faces
 			{
-				PROJECT_DIR "/Images/skybox/right.jpg",
-				PROJECT_DIR "/Images/skybox/left.jpg",
-				PROJECT_DIR "/Images/skybox/top.jpg",
-				PROJECT_DIR "/Images/skybox/bottom.jpg",
-				PROJECT_DIR "/Images/skybox/front.jpg",
-				PROJECT_DIR "/Images/skybox/back.jpg"
+				"../Images/skybox/right.jpg",
+				"../Images/skybox/left.jpg",
+				"../Images/skybox/top.jpg",
+				"../Images/skybox/bottom.jpg",
+				"../Images/skybox/front.jpg",
+				"../Images/skybox/back.jpg"
 			};
 			this->skyboxTex = new Texture3D(faces);
 		}
 
 		if (!this->tilesShader)
 			this->tilesShader = new Shader(
-				PROJECT_DIR "/src/shaders/tiles.vert",
+				"../shaders/tiles.vert",
 				nullptr, nullptr, nullptr,
-				PROJECT_DIR "/src/shaders/tiles.frag");
+				"../shaders/tiles.frag");
 
 		if (!this->tiles)
 		{
 			float tilesVertices[] = {
 				// positions          
-				-1.0f,  1.0f, -1.0f,
-				-1.0f, -1.0f, -1.0f,
-				 1.0f, -1.0f, -1.0f,
-				 1.0f, -1.0f, -1.0f,
-				 1.0f,  1.0f, -1.0f,
-				-1.0f,  1.0f, -1.0f,
+				//-1.0f,  1.0f, -1.0f,
+				//-1.0f, -1.0f, -1.0f,
+				// 1.0f, -1.0f, -1.0f,
+				// 1.0f, -1.0f, -1.0f,
+				// 1.0f,  1.0f, -1.0f,
+				//-1.0f,  1.0f, -1.0f,
 
-				-1.0f, -1.0f,  1.0f,
-				-1.0f, -1.0f, -1.0f,
-				-1.0f,  1.0f, -1.0f,
-				-1.0f,  1.0f, -1.0f,
-				-1.0f,  1.0f,  1.0f,
-				-1.0f, -1.0f,  1.0f,
+				//-1.0f, -1.0f,  1.0f,
+				//-1.0f, -1.0f, -1.0f,
+				//-1.0f,  1.0f, -1.0f,
+				//-1.0f,  1.0f, -1.0f,
+				//-1.0f,  1.0f,  1.0f,
+				//-1.0f, -1.0f,  1.0f,
 
-				 1.0f, -1.0f, -1.0f,
-				 1.0f, -1.0f,  1.0f,
-				 1.0f,  1.0f,  1.0f,
-				 1.0f,  1.0f,  1.0f,
-				 1.0f,  1.0f, -1.0f,
-				 1.0f, -1.0f, -1.0f,
+				// 1.0f, -1.0f, -1.0f,
+				// 1.0f, -1.0f,  1.0f,
+				// 1.0f,  1.0f,  1.0f,
+				// 1.0f,  1.0f,  1.0f,
+				// 1.0f,  1.0f, -1.0f,
+				// 1.0f, -1.0f, -1.0f,
 
-				-1.0f, -1.0f,  1.0f,
-				-1.0f,  1.0f,  1.0f,
-				 1.0f,  1.0f,  1.0f,
-				 1.0f,  1.0f,  1.0f,
-				 1.0f, -1.0f,  1.0f,
-				-1.0f, -1.0f,  1.0f,
+				//-1.0f, -1.0f,  1.0f,
+				//-1.0f,  1.0f,  1.0f,
+				// 1.0f,  1.0f,  1.0f,
+				// 1.0f,  1.0f,  1.0f,
+				// 1.0f, -1.0f,  1.0f,
+				//-1.0f, -1.0f,  1.0f,
 
 				//-1.0f,  1.0f, -1.0f,
 				// 1.0f,  1.0f, -1.0f,
@@ -699,19 +699,168 @@ void TrainView::draw()
 		{
 			std::vector<std::string> faces
 			{
-				PROJECT_DIR "/Images/tiles.jpg",
-				PROJECT_DIR "/Images/tiles.jpg",
-				PROJECT_DIR "/Images/tiles.jpg",
-				PROJECT_DIR "/Images/tiles.jpg",
-				PROJECT_DIR "/Images/tiles.jpg",
-				PROJECT_DIR "/Images/tiles.jpg"
+				"../Images/tiles.jpg",
+				"../Images/tiles.jpg",
+				"../Images/tiles.jpg",
+				"../Images/tiles.jpg",
+				"../Images/tiles.jpg",
+				"../Images/tiles.jpg"
 			};
 			this->tilesCubeTex = new Texture3D(faces);
 		}
 
 		if (!this->tilesTex)
 		{
-			this->tilesTex = new Texture2D(PROJECT_DIR "/Images/tiles.jpg");
+			this->tilesTex = new Texture2D("../Images/tiles.jpg");
+		}
+
+		if (!this->reflectionFBO)
+		{
+			this->reflectionFBO = new FBO;
+			//gen framebuffer
+			glGenFramebuffers(1, &this->reflectionFBO->fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, this->reflectionFBO->fbo);
+			//gen texture
+			glGenTextures(1, this->reflectionFBO->textures);
+			glBindTexture(GL_TEXTURE_2D, this->reflectionFBO->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->reflectionFBO->textures[0], 0);
+			//gen rbo
+			glGenRenderbuffers(1, &this->reflectionFBO->rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, this->reflectionFBO->rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w(), h());
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->reflectionFBO->rbo);
+
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "reflectionFBO complite\n";
+			else
+				std::cout << "reflectionFBO uncomplite\n";
+			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+		//use frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, this->reflectionFBO->fbo);
+		//update w & h
+		if (lastW != w() || lastH != h())
+		{
+			glBindTexture(GL_TEXTURE_2D, this->reflectionFBO->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glBindRenderbuffer(GL_RENDERBUFFER, this->reflectionFBO->rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w(), h());
+		}
+		
+
+		if (!this->refractionFBO)
+		{
+			this->refractionFBO = new FBO;
+			//gen framebuffer
+			glGenFramebuffers(1, &this->refractionFBO->fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, this->refractionFBO->fbo);
+			//gen texture
+			glGenTextures(1, this->refractionFBO->textures);
+			glBindTexture(GL_TEXTURE_2D, this->refractionFBO->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->refractionFBO->textures[0], 0);
+			//gen rbo
+			glGenRenderbuffers(1, &this->refractionFBO->rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, this->refractionFBO->rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w(), h());
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->refractionFBO->rbo);
+
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+				std::cout << "refractionFBO complite\n";
+			else
+				std::cout << "refractionFBO uncomplite\n";
+			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+		//use frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, this->refractionFBO->fbo);
+		//update w & h
+		if (lastW != w() || lastH != h())
+		{
+			glBindTexture(GL_TEXTURE_2D, this->refractionFBO->textures[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w(), h(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glBindRenderbuffer(GL_RENDERBUFFER, this->refractionFBO->rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w(), h());
+		}
+
+		if (!this->box)
+		{
+			float boxVertices[] = {
+				// positions          
+				-1.0f,  1.0f, -1.0f,
+				-1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+				 1.0f,  1.0f, -1.0f,
+				-1.0f,  1.0f, -1.0f,
+
+				-1.0f, -1.0f,  1.0f,
+				-1.0f, -1.0f, -1.0f,
+				-1.0f,  1.0f, -1.0f,
+				-1.0f,  1.0f, -1.0f,
+				-1.0f,  1.0f,  1.0f,
+				-1.0f, -1.0f,  1.0f,
+
+				 1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+
+				-1.0f, -1.0f,  1.0f,
+				-1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f, -1.0f,  1.0f,
+				-1.0f, -1.0f,  1.0f,
+
+				-1.0f,  1.0f, -1.0f,
+				 1.0f,  1.0f, -1.0f,
+				 1.0f,  1.0f,  1.0f,
+				 1.0f,  1.0f,  1.0f,
+				-1.0f,  1.0f,  1.0f,
+				-1.0f,  1.0f, -1.0f,
+
+				-1.0f, -1.0f, -1.0f,
+				-1.0f, -1.0f,  1.0f,
+				 1.0f, -1.0f, -1.0f,
+				 1.0f, -1.0f, -1.0f,
+				-1.0f, -1.0f,  1.0f,
+				 1.0f, -1.0f,  1.0f
+			};
+
+
+			this->box = new VAO;
+			glGenVertexArrays(1, &this->box->vao);
+			glGenBuffers(1, this->box->vbo);
+
+			glBindVertexArray(this->box->vao);
+
+			// Position attribute
+			glBindBuffer(GL_ARRAY_BUFFER, this->box->vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, 36 * 3 * sizeof(float), boxVertices, GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(0);
+
+			// Unbind VAO
+			glBindVertexArray(0);
+		}
+
+		if (!this->boxShader)
+		{
+			this->boxShader = new Shader(
+				"../shaders/box.vert",
+				nullptr, nullptr, nullptr,
+				"../shaders/box.frag");
 		}
 
 		if (!this->device) {
@@ -800,6 +949,9 @@ void TrainView::draw()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	setProjection();		// put the code to set up matrices here
+
+	//gl_ClipDistance[0]
+	glEnable(GL_CLIP_DISTANCE0);
 
 	//######################################################################
 	// TODO: 
@@ -930,6 +1082,7 @@ void TrainView::draw()
 		glUniform1f(glGetUniformLocation(program, "t"), t);
 		glUniform1f(glGetUniformLocation(program, "k"), 2 * PI / tw->wavelength->value()); 
 		glUniform2f(glGetUniformLocation(program, "direction"), cos(tw->waveDir->value() * PI / 180), sin(tw->waveDir->value() * PI / 180));
+
 		break;
 	case 2:
 		this->waterHeightShader->Use();
@@ -956,7 +1109,7 @@ void TrainView::draw()
 		}
 		glUniform1f(glGetUniformLocation(this->waterSimShader->Program, "amplitude"), tw->amplitude->value());
 		glm::mat4 model_matrix = glm::mat4(1);
-		model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 40.0f, 0.0f));
+		//model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 40.0f, 0.0f));
 		glUniformMatrix4fv(
 			glGetUniformLocation(this->waterSimShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
 
@@ -997,7 +1150,7 @@ void TrainView::draw()
 
 
 	glm::mat4 model_matrix = glm::mat4(1);
-	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 40.0f, 0.0f));
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
 	//model_matrix = glm::rotate(model_matrix, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	//model_matrix = glm::translate(model_matrix, this->source_pos);
 	//model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
@@ -1006,17 +1159,24 @@ void TrainView::draw()
 	glUniform3fv(
 		glGetUniformLocation(program, "u_color"),
 		1,
-		&glm::vec3(0.0f, 0.0f, 1.0f)[0]);
+		&glm::vec3(0.2, 0.5, 1.0)[0]);
 	this->waterTex->bind(1);
 	glUniform1i(glGetUniformLocation(program, "u_texture"), 1);
 	this->skyboxTex->bind(2); 
 	glUniform1i(glGetUniformLocation(program, "skyboxTex"), 2);
-	this->tilesCubeTex->bind(3);
+	this->tilesTex->bind(3);
 	glUniform1i(glGetUniformLocation(program, "tilesTex"), 3);
 
 	glm::vec3 eyePos = arcball.getEyePos();
 	glUniform3f(glGetUniformLocation(program, "u_eyePosition"), eyePos.x, eyePos.y, eyePos.z);
 	Shader::SetDirLight(program);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, this->reflectionFBO->textures[0]);
+	glUniform1i(glGetUniformLocation(program, "reflectTex"), 4);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, this->refractionFBO->textures[0]);
+	glUniform1i(glGetUniformLocation(program, "refractTex"), 5);
 
 
 	//bind VAO
@@ -1030,11 +1190,61 @@ void TrainView::draw()
 	//unbind shader(switch to fixed pipeline)
 	Shader::Unuse();
 
+	//use frame buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, this->refractionFBO->fbo);
+	//clear
+	glClearColor(0, 0, 0, 0);		// background should be black
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glEnable(GL_DEPTH);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//use frame buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, this->reflectionFBO->fbo);
+	//clear
+	glClearColor(0, 0, 0, 0);		// background should be black
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glEnable(GL_DEPTH);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	//*********************************************************************
 	// 
 	// draw tiles
 	// 
 	//*********************************************************************
+	//* frame buffer 
+	glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
+	glDisable(GL_CLIP_DISTANCE0);
+
+	glEnable(GL_CULL_FACE);
+	this->tilesShader->Use();
+	glUniform4fv(glGetUniformLocation(this->tilesShader->Program, "plane"), 1, &glm::vec4(0, -1, 0,10000)[0]);
+
+	model_matrix = glm::mat4(1);
+	model_matrix = glm::scale(model_matrix, glm::vec3(50.0f, 50.0f, 50.0f));
+	glUniformMatrix4fv(glGetUniformLocation(this->tilesShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+
+
+	glBindVertexArray(this->tiles->vao);
+	this->tilesCubeTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->tilesShader->Program, "tex"), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	//unbind VAO
+	glBindVertexArray(0);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_CLIP_DISTANCE0);
+
+
+	//* reflection FBO
+	setUBO(true);
+	glBindBufferRange(
+		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size); 
+
+	glBindFramebuffer(GL_FRAMEBUFFER, this->reflectionFBO->fbo);
+	glUniform4fv(glGetUniformLocation(this->tilesShader->Program, "plane"), 1, &glm::vec4(0, -1, 0, -0)[0]);
+	//glUniform4fv(glGetUniformLocation(this->tilesShader->Program, "plane"), 1, &glm::vec4(0, -1, 0, 100000)[0]);
 
 	glEnable(GL_CULL_FACE);
 	this->tilesShader->Use();
@@ -1048,7 +1258,32 @@ void TrainView::draw()
 	this->tilesCubeTex->bind(0);
 	glUniform1i(glGetUniformLocation(this->tilesShader->Program, "tex"), 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 30);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	//unbind VAO
+	glBindVertexArray(0);
+	glDisable(GL_CULL_FACE);
+	
+	//* refraction FBO
+	setUBO();
+	glBindBufferRange(
+		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->refractionFBO->fbo);
+	glUniform4fv(glGetUniformLocation(this->tilesShader->Program, "plane"), 1, &glm::vec4(0, -1, 0, 0)[0]);
+
+	glEnable(GL_CULL_FACE);
+	this->tilesShader->Use();
+
+	model_matrix = glm::mat4(1);
+	model_matrix = glm::scale(model_matrix, glm::vec3(50.0f, 50.0f, 50.0f));
+	glUniformMatrix4fv(glGetUniformLocation(this->tilesShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+
+
+	glBindVertexArray(this->tiles->vao);
+	this->tilesCubeTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->tilesShader->Program, "tex"), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	//unbind VAO
 	glBindVertexArray(0);
@@ -1059,6 +1294,8 @@ void TrainView::draw()
 	// draw skybox
 	// 
 	//*********************************************************************
+	//* frame buffer 
+	glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
 
 	glDepthFunc(GL_LEQUAL);
 
@@ -1067,6 +1304,122 @@ void TrainView::draw()
 	glBindVertexArray(this->skybox->vao);
 	this->skyboxTex->bind(0);
 	glUniform1i(glGetUniformLocation(this->skyboxShader->Program, "skybox"), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//unbind VAO
+	glBindVertexArray(0);
+
+	//* reflection FBO 
+	setUBO(true);
+	glBindBufferRange(
+		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->reflectionFBO->fbo);
+
+	glDepthFunc(GL_LEQUAL);
+
+	this->skyboxShader->Use();
+
+	glBindVertexArray(this->skybox->vao);
+	this->skyboxTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->skyboxShader->Program, "skybox"), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//unbind VAO
+	glBindVertexArray(0);
+
+	//* refraction FBO 
+	setUBO();
+	glBindBufferRange(
+		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->refractionFBO->fbo);
+
+	glDepthFunc(GL_LEQUAL);
+
+	this->skyboxShader->Use();
+
+	glBindVertexArray(this->skybox->vao);
+	this->skyboxTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->skyboxShader->Program, "skybox"), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//unbind VAO
+	glBindVertexArray(0);
+
+	//*********************************************************************
+	// 
+	// draw box
+	// 
+	//*********************************************************************
+
+	//* frame buffer 
+	glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
+	glDisable(GL_CLIP_DISTANCE0);
+
+	this->boxShader->Use();
+	glUniform4fv(glGetUniformLocation(this->boxShader->Program, "plane"), 1, &glm::vec4(0, -1, 0, 10000)[0]);
+
+	model_matrix = glm::mat4(1);
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 60.0f, 0.0f));
+	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
+	glUniformMatrix4fv(glGetUniformLocation(this->boxShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+
+
+	glBindVertexArray(this->skybox->vao);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//unbind VAO
+	glBindVertexArray(0);
+	glEnable(GL_CLIP_DISTANCE0);
+
+
+	//* reflection FBO
+	setUBO(true);
+	glBindBufferRange(
+		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, this->reflectionFBO->fbo);
+	glUniform4fv(glGetUniformLocation(this->boxShader->Program, "plane"), 1, &glm::vec4(0, 1, 0, -0)[0]);
+	//glUniform4fv(glGetUniformLocation(this->tilesShader->Program, "plane"), 1, &glm::vec4(0, -1, 0, 100000)[0]);
+
+	this->boxShader->Use();
+
+	model_matrix = glm::mat4(1);
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 60.0f, 0.0f));
+	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
+	glUniformMatrix4fv(glGetUniformLocation(this->boxShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+
+
+	glBindVertexArray(this->tiles->vao);
+	this->tilesCubeTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->boxShader->Program, "tex"), 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//unbind VAO
+	glBindVertexArray(0);
+
+	//* refraction FBO
+	setUBO();
+	glBindBufferRange(
+		GL_UNIFORM_BUFFER, /*binding point*/0, this->commom_matrices->ubo, 0, this->commom_matrices->size);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->refractionFBO->fbo);
+	glUniform4fv(glGetUniformLocation(this->boxShader->Program, "plane"), 1, &glm::vec4(0, -1, 0, 0)[0]);
+
+	this->boxShader->Use();
+
+	model_matrix = glm::mat4(1);
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 60.0f, 0.0f));
+	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
+	glUniformMatrix4fv(glGetUniformLocation(this->boxShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+
+
+	glBindVertexArray(this->tiles->vao);
+	this->tilesCubeTex->bind(0);
+	glUniform1i(glGetUniformLocation(this->boxShader->Program, "tex"), 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -1103,6 +1456,15 @@ void TrainView::draw()
 		else
 			glBindTexture(GL_TEXTURE_2D, this->waterFBO0->textures[0]);
 	}
+	if (tw->reflection->value())
+	{
+		glBindTexture(GL_TEXTURE_2D, this->reflectionFBO->textures[0]);
+	}
+	if (tw->refraction->value())
+	{
+		glBindTexture(GL_TEXTURE_2D, this->refractionFBO->textures[0]);
+	}
+
 
 	// Draw the framebuffer rectangle
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1281,7 +1643,7 @@ doPick()
 	printf("Selected Cube %d\n", selectedCube);
 }
 
-void TrainView::setUBO()
+void TrainView::setUBO(bool inverstPitch)
 {
 	float wdt = this->pixel_w();
 	float hgt = this->pixel_h();
@@ -1290,6 +1652,8 @@ void TrainView::setUBO()
 	glGetFloatv(GL_MODELVIEW_MATRIX, &view_matrix[0][0]);
 	//HMatrix view_matrix; 
 	//this->arcball.getMatrix(view_matrix);
+	if (inverstPitch)
+		view_matrix = viewMatrixInvertPitch(0);
 
 	glm::mat4 projection_matrix;
 	glGetFloatv(GL_PROJECTION_MATRIX, &projection_matrix[0][0]);
@@ -1343,7 +1707,7 @@ void TrainView::updateSurface()
 
 
 	this->waterUpdateShader->Use();
-	glUniform1f(glGetUniformLocation(this->waterUpdateShader->Program, "velocity"), tw->waveDir->value() / 180.0f);
+	glUniform1f(glGetUniformLocation(this->waterUpdateShader->Program, "velocity"), 230.0f / 180.0f);
 	glUniform2f(glGetUniformLocation(this->waterUpdateShader->Program, "delta"), 8.0f / 512, 8.0f / 512);
 	glUniform1f(glGetUniformLocation(this->waterUpdateShader->Program, "amplitude"), tw->amplitude->value() / 10.0f);
 
@@ -1408,4 +1772,23 @@ void TrainView::addDrop(float x, float y)
 	waterFBOTex = !waterFBOTex;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer->fbo);
+}
+
+glm::mat4 TrainView::viewMatrixInvertPitch(float waterHeight)
+{
+	float view[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, view);
+
+	glm::vec3 orient = glm::vec3(view[2], view[6], view[10]);
+	glm::vec3 pos = arcball.getEyePos();
+	glm::vec3 rY = glm::vec3(view[1], view[5], view[9]);
+	float dis = 2 * (pos.y - waterHeight);
+	pos.y -= dis;
+
+	orient.y = -orient.y;
+
+	//glm::vec3 up = (orient * rY) / (glm::dot(orient, orient));
+
+	glm::mat4 result = glm::lookAt(pos, orient, glm::vec3(0,-1,0));
+	return result;
 }

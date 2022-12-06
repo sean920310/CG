@@ -175,6 +175,12 @@ TrainWindow(const int x, const int y)
 		fboTest = new Fl_Button(605, pty, 80, 20, "fboTest");
 		togglify(fboTest, 0);
 
+		pty += 30;
+		reflection = new Fl_Button(605, pty, 80, 20, "reflection");
+		togglify(reflection, 0); 
+		refraction = new Fl_Button(700, pty, 80, 20, "refraction");
+		togglify(refraction, 0);
+
 		// TODO: add widgets for all of your fancier features here
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);

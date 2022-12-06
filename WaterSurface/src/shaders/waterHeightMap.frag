@@ -23,6 +23,10 @@ uniform float shininess = 77.0f; //物體specular反射程度
 uniform vec3 u_eyePosition;
 uniform DirLight dirLight;
 uniform sampler2D heightMap;
+uniform sampler2D reflectTex;
+uniform sampler2D refractTex;
+
+in vec2 ndc;
 
 
 vec3 addDirLight(DirLight dirLight, vec3 color);
@@ -41,13 +45,23 @@ void main()
 
     float ratio = 1.00 / 1.33;
     vec3 refractR = refract(I, normalize(f_in.normal), ratio);
+    if(I.y > 0)
+        refractR = refract(I, -normalize(f_in.normal), ratio);
     vec3 refractColor = vec3(texture(skyboxTex, refractR));
+
+    
+    vec2 reflectCoord = vec2 (1-ndc.x, ndc.y);
+    vec2 refractCoord = vec2 (ndc.x, ndc.y);
+
+    reflectColor = vec3(texture(reflectTex, reflectCoord + f_in.normal.xz));
+    refractColor = vec3(texture(refractTex, refractCoord + f_in.normal.xz));
 
     //set lighting
 
     vec3 result, mixColor;
 
-    mixColor = mix(reflectColor, refractColor, 0.8);
+    mixColor = mix(reflectColor, refractColor, 0.5);
+    mixColor = mix(mixColor, u_color, 0.3);
     result = addDirLight(dirLight, mixColor);
     //vec4 h = texture(heightMap, f_in.texture_coordinate);
     //result = vec3(h.r,h.r,h.r);

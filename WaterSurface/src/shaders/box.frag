@@ -7,5 +7,6 @@ uniform samplerCube tex;
 
 void main()
 {   
-    f_color = mix(texture(tex, TexCoords), vec4(0.2, 0.5, 1.0,1.0), 0.5);
+    //f_color = texture(tex, TexCoords);
+    f_color = vec4(1.0);
 }

@@ -86,7 +86,7 @@ class TrainView : public Fl_Gl_Window
 		void doPick();
 
 		//set ubo
-		void setUBO();
+		void setUBO(bool inverstPitch = false);
 
 		//pick water surface
 		void pickSurface();
@@ -94,6 +94,8 @@ class TrainView : public Fl_Gl_Window
 		void updateSurface();
 
 		void addDrop(float x, float y);
+
+		glm::mat4 viewMatrixInvertPitch(float waterHeight);
 public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube = -1;  // simple - just remember which cube is selected
@@ -124,6 +126,12 @@ public:
 		Shader* pixelation		= nullptr;
 		VAO* frame				= nullptr;
 		UBO* commom_matrices	= nullptr;
+		FBO* reflectionFBO		= nullptr;
+		FBO* refractionFBO		= nullptr;
+		VAO* box				= nullptr;
+		Shader* boxShader		= nullptr;
+
+
 
 		//OpenAL
 		glm::vec3 source_pos;

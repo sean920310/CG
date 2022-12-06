@@ -25,7 +25,9 @@ set(SRC_SHADER
     ${SRC_DIR}shaders/skybox.vert
     ${SRC_DIR}shaders/skybox.frag
     ${SRC_DIR}shaders/tiles.vert
-    ${SRC_DIR}shaders/tiles.frag)
+    ${SRC_DIR}shaders/tiles.frag
+    ${SRC_DIR}shaders/box.vert
+    ${SRC_DIR}shaders/box.frag)
 
 set(SRC_RENDER_UTILITIES
     ${SRC_DIR}RenderUtilities/BufferObject.h

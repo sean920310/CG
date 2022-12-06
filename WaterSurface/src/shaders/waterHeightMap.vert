@@ -6,6 +6,7 @@ layout (location = 2) in vec2 texture_coordinate;
 uniform mat4 u_model;
 uniform sampler2D heightMap;
 uniform float amplitude;
+out vec2 ndc;
 
 layout (std140, binding = 0) uniform commom_matrices
 {
@@ -29,12 +30,15 @@ void main()
     vec3 norm = normal;
 
     setHeightMap(pos, norm);
-    gl_Position = u_projection * u_view * u_model * vec4(pos, 1.0f);
+
+    vec4 resultPos = u_projection * u_view * u_model * vec4(pos, 1.0f);
+    gl_Position = resultPos;
 
     v_out.position = vec3(u_model * vec4(pos, 1.0f));
     v_out.normal = mat3(transpose(inverse(u_model))) * norm;
     //v_out.normal = norm;
     v_out.texture_coordinate = vec2(texture_coordinate.x, 1.0f - texture_coordinate.y);
+    ndc = (resultPos.xy/resultPos.w)/2.0 + 0.5;
 }
 
 

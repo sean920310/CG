@@ -19,7 +19,9 @@ struct DirLight {
 uniform vec3 u_color;
 uniform sampler2D u_texture;
 uniform samplerCube skyboxTex;
-uniform samplerCube tilesTex;
+uniform sampler2D tilesTex;
+uniform sampler2D reflectTex;
+uniform sampler2D refractTex;
 uniform float shininess = 77.0f; //物體specular反射程度
 uniform vec3 u_eyePosition;
 uniform DirLight dirLight;
@@ -27,7 +29,7 @@ uniform DirLight dirLight;
 vec3 addDirLight(DirLight dirLight, vec3 color);
 
 void main()
-{   
+{
     //vec3 color = vec3(texture(u_texture, f_in.texture_coordinate));
     
     //reflection
@@ -40,14 +42,49 @@ void main()
 
     float ratio = 1.00 / 1.33;
     vec3 refractR = refract(I, normalize(f_in.normal), ratio);
-    vec3 refractColor = vec3(texture(skyboxTex, refractR));
+    if(I.y > 0)
+        refractR = refract(I, -normalize(f_in.normal), ratio);
+    vec3 refractColor;
+    
+//    if(abs(refractR.x) > abs(refractR.y) && abs(refractR.x )> abs(refractR.z))
+//    {
+//        //yz face
+//        refractColor = vec3(texture(tilesTex, refractR.yz / reflectR.x));
+//    }
+//    else if(abs(refractR.z) > abs(refractR.y) && abs(refractR.z) > abs(refractR.x))
+//    {
+//        //xy face
+//        refractColor = vec3(texture(tilesTex, refractR.xy/ reflectR.z));
+//    }
+//    else
+//    {
+//        if(refractR.y > 0)
+//        {
+//            //skybox
+//            refractColor = vec3(texture(skyboxTex, refractR));
+//        }
+//        else
+//        {
+//            refractColor = vec3(texture(tilesTex, refractR.xz/ reflectR.y));
+//        }
+//    }
+
+    refractColor = vec3(texture(skyboxTex, refractR));
+
+
+    vec2 reflectCoord = vec2 (1-f_in.texture_coordinate.x, f_in.texture_coordinate.y);
+    vec2 refractCoord = vec2 (f_in.texture_coordinate.x, f_in.texture_coordinate.y);
+
+    reflectColor = vec3(texture(reflectTex, reflectCoord +  f_in.normal.xz));
+    refractColor = vec3(texture(refractTex, refractCoord + f_in.normal.xz));
+
 
     //set lighting
 
     vec3 result, mixColor;
 
-    mixColor = mix(reflectColor, refractColor, 0.8);
-    //mixColor = mix(mixColor, u_color, 0.1);
+    mixColor = mix(reflectColor, refractColor, 0.5);
+    mixColor = mix(mixColor, u_color, 0.3);
     result = addDirLight(dirLight, mixColor);
     //result = addDirLight(dirLight, u_color);
 

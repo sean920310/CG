@@ -29,12 +29,14 @@ void main()
     vec3 pos = position;
     vec3 norm = normal;
     setSinWave(pos, norm, t, direction, k, amplitude);
-    gl_Position = u_projection * u_view * u_model * vec4(pos, 1.0f);
+
+    vec4 resultPos = u_projection * u_view * u_model * vec4(pos, 1.0f);
+    gl_Position = resultPos;
 
     v_out.position = vec3(u_model * vec4(pos, 1.0f));
     v_out.normal = mat3(transpose(inverse(u_model))) * norm;
     //v_out.normal = norm;
-    v_out.texture_coordinate = vec2(texture_coordinate.x, 1.0f - texture_coordinate.y);
+    v_out.texture_coordinate = (resultPos.xy/resultPos.w)/2.0 + 0.5;
 }
 
 void setSinWave(inout vec3 position,inout vec3 normal,float t,vec2 direction,float k,float amplitude)
