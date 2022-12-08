@@ -1362,7 +1362,7 @@ void TrainView::draw()
 	glUniform4fv(glGetUniformLocation(this->boxShader->Program, "plane"), 1, &glm::vec4(0, -1, 0, 10000)[0]);
 
 	model_matrix = glm::mat4(1);
-	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 60.0f, 0.0f));
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 40.0f, 0.0f));
 	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
 	glUniformMatrix4fv(glGetUniformLocation(this->boxShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
 
@@ -1388,12 +1388,12 @@ void TrainView::draw()
 	this->boxShader->Use();
 
 	model_matrix = glm::mat4(1);
-	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 60.0f, 0.0f));
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 40.0f, 0.0f));
 	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
 	glUniformMatrix4fv(glGetUniformLocation(this->boxShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
 
 
-	glBindVertexArray(this->tiles->vao);
+	glBindVertexArray(this->skybox->vao);
 	this->tilesCubeTex->bind(0);
 	glUniform1i(glGetUniformLocation(this->boxShader->Program, "tex"), 0);
 
@@ -1412,12 +1412,12 @@ void TrainView::draw()
 	this->boxShader->Use();
 
 	model_matrix = glm::mat4(1);
-	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 60.0f, 0.0f));
+	model_matrix = glm::translate(model_matrix, glm::vec3(0.0f, 40.0f, 0.0f));
 	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
 	glUniformMatrix4fv(glGetUniformLocation(this->boxShader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
 
 
-	glBindVertexArray(this->tiles->vao);
+	glBindVertexArray(this->skybox->vao);
 	this->tilesCubeTex->bind(0);
 	glUniform1i(glGetUniformLocation(this->boxShader->Program, "tex"), 0);
 

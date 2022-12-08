@@ -1,12 +1,17 @@
 #pragma once
 #include "GameHeader.h"
 #include "Board.h"
+#include "GameManager.h"
+
+class GameManager;
 
 class Viewer
 {
 private:
 	static int SCREEN_WIDTH;
 	static int SCREEN_HEIGHT;
+
+	GameManager* m_game;
 
 	sf::RenderWindow* window;
 	sf::VideoMode videoMode;

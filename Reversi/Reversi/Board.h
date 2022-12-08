@@ -26,5 +26,8 @@ public:
 	Board& operator=(const Board& rhs);
 	void newBoard();
 	Team getChess(Coord coord) const;
-	//bool oneSideIsWin(Team& team);
+	std::vector<std::vector<Team>> getBoardArr();
+	std::vector<Coord> coordCanPlace(Team currentTeam);
+	void placeChess(Coord coord);
+	bool oneSideIsWin(Team& team);
 };

@@ -30,7 +30,7 @@
 
 enum class Team
 {
-	None,
+	None = 0,
 	Black,
 	White
 };
@@ -39,6 +39,7 @@ enum class InGameState
 {
 	start,
 	inputFile,
+	canPlace,
 	selectChess,
 	pressChess,
 	choiceMove,

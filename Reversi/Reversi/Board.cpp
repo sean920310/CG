@@ -57,3 +57,25 @@ Team Board::getChess(Coord coord) const
 	else
 		return boardArr[coord.x][coord.y];
 }
+
+std::vector<std::vector<Team>> Board::getBoardArr()
+{
+	return boardArr;
+}
+
+std::vector<Coord> Board::coordCanPlace(Team currentTeam)
+{
+	//TODO:
+	return std::vector<Coord>();
+}
+
+void Board::placeChess(Coord coord)
+{
+	//TODO:
+}
+
+bool Board::oneSideIsWin(Team& team)
+{
+	//TODO: judge if there is one team wins
+	return false;
+}
