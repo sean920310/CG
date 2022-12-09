@@ -6,15 +6,7 @@
 // 
 //*********************************************************************
 
-//mouse postion is on coord that choice to move
-bool isChoiceToMove(sf::Vector2i mouseCoord, Coord coord) {
 
-	float x, y;
-	x = CHECKBOARD_SCALE_SIZE * (coord.x * 233.75 + 34) + 35.0625 - CHESS_SCALE_SIZE * (606.0 / 2);
-	y = CHECKBOARD_SCALE_SIZE * (coord.y * 233.75 + 34) + 58.05 - CHESS_SCALE_SIZE * (606.0 / 2);
-	sf::IntRect circle(x, y, 60, 60);
-	return circle.contains(mouseCoord);
-}
 
 
 //*********************************************************************
@@ -27,7 +19,7 @@ GameManager::GameManager()
 {
 	m_currentPlayer = Team::Black;
 	m_board = new Board();
-	m_viewer = new Viewer();
+	m_viewer = new Viewer(this);
 }
 
 GameManager::~GameManager()
@@ -36,6 +28,26 @@ GameManager::~GameManager()
 		delete m_board;
 	if (m_viewer)
 		delete m_viewer;
+}
+
+void GameManager::run()
+{
+	while (true)
+	{
+		switch (this->menu())
+		{
+		case 0:
+			return;
+		case 1:
+			this->onePlayerGame(InGameState::start);
+			break;
+		case 2:
+			this->twoPlayerGame(InGameState::start);
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 int GameManager::menu()
@@ -69,13 +81,15 @@ int GameManager::menu()
 	return 0;
 }
 
-void GameManager::inGame(InGameState state)
+void GameManager::onePlayerGame(InGameState state)
 {
-	std::vector<std::vector<Team>> boardArr;
+	
 	std::vector<Coord> canPlacePosCoord;
-	Coord coordChoiseChess, coordChoiseToPlace;
-	bool isCheck = false;
-	Team teamCheck = Team::None, teamWin = Team::None;
+	Coord coordChoiseToPlace;
+	Team teamWin = Team::None, AITeam = Team::White;
+	const sf::Time aiWait = sf::seconds(1);
+	sf::Clock aiClock;
+	aiClock.restart();
 
 	while (m_viewer->windowIsOpen())
 	{
@@ -83,42 +97,57 @@ void GameManager::inGame(InGameState state)
 		{
 			//======================================================start====================================================	**start a new game
 		case InGameState::start:
+			srand(time(NULL));
 			m_file.close();
 			m_board->newBoard();
-			boardArr = m_board->getBoardArr();
 			m_currentPlayer = Team::Black;
-			isCheck = false;
+			aiClock.restart();
 			state = InGameState::canPlace;
-			break;
-
-			//====================================================inputFile==================================================	**start a game with input file
-		case InGameState::inputFile:
-			state = InGameState::oneSideWin;
 			break;
 
 			//====================================================canPlace==================================================	**load coord can place chess
 		case InGameState::canPlace:
 			canPlacePosCoord = m_board->coordCanPlace(m_currentPlayer);
-			state = InGameState::selectChess;
+			if (!canPlacePosCoord.size())
+				state = InGameState::oneSideWin;
+			else
+				state = InGameState::selectChess;
 			break;
 
 			//====================================================selectChess================================================	**wait for press a object
 		case InGameState::selectChess:
-			for (auto& coord : canPlacePosCoord) {
-				if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && isChoiceToMove(m_viewer->getMousePosition(), coord)) {
-					coordChoiseToPlace = coord;
+			if (m_currentPlayer == AITeam)
+			{
+				if(aiClock.getElapsedTime() >= aiWait)
+				{
+					aiClock.restart();
+					int size = canPlacePosCoord.size();
+					int i = rand() % size;
+					coordChoiseToPlace = canPlacePosCoord[i];
 					state = InGameState::choiceMove;
 					break;
 				}
 			}
-			state = InGameState::selectChess;
+			else
+			{
+				aiClock.restart();
+				if (m_viewer->mouseClick(sf::Mouse::Left))
+				{
+					auto pos = m_viewer->getMousePosition();
+					for (auto& coord : canPlacePosCoord) {
+						if (m_viewer->isChoiceToMove(pos, coord)) {
+							coordChoiseToPlace = coord;
+							state = InGameState::choiceMove;
+							break;
+						}
+					}
+				}
+			}
 			break;
 
 			//====================================================choiceMove================================================	**move the chess
 		case InGameState::choiceMove:
-			//board.getChess(coordChoiseChess)->move(board,coordChoiseToPlace);
-			//this->logFile(coordChoiseChess, coordChoiseToPlace);
-			m_board->placeChess(coordChoiseToPlace);
+			m_board->placeChess(m_currentPlayer, coordChoiseToPlace);
 			state = InGameState::oneSideWin;
 			break;
 
@@ -146,71 +175,151 @@ void GameManager::inGame(InGameState state)
 			break;
 		}
 
-	//	//update
-	//	switch (viewer.update())
-	//	{
-	//	case 0:
-	//		break;
-	//	case 1:
-	//		std::cout << "windows close\n";
-	//		return;
-	//		break;
-	//	case 2:
-	//		std::cout << "pause\n";
+		//update
+		switch (m_viewer->update())
+		{
+		case 0:
+			break;
+		case 1:
+			std::cout << "windows close\n";
+			return;
+			break;
+		case 2:
+			std::cout << "pause\n";
 
-	//		switch (this->pause())
-	//		{
-	//		case 0:
-	//			std::cout << "windows close\n";
-	//			return;
-	//			break;
-	//		case 1:
-	//			std::cout << "continue\n";
-	//			clock.restart();
-	//			break;
-	//		case 2:
-	//			std::cout << "back to menu\n";
-	//			return;
-	//			break;
-	//		}
-	//		break;
-	//	}
+			switch (this->pause())
+			{
+			case 0:
+				std::cout << "windows close\n";
+				return;
+				break;
+			case 1:
+				std::cout << "continue\n";
+				break;
+			case 2:
+				std::cout << "back to menu\n";
+				return;
+				break;
+			}
+			break;
+		}
 
-	//	//draw
-	//	viewer.clear();
-	//	auto boardSprites = this->board.getAllSprite();
-	//	viewer.drawSprite(boardSprites);
-	//	viewer.drawCanMovePos(canPlacePosCoord);
-	//	viewer.drawRightSideObject(currentPlayer);
-	//	viewer.drawTime(redTime, blackTime);
+		//draw
+		m_viewer->clear();
+		m_viewer->drawBoard();
+		m_viewer->drawChess();
+		m_viewer->drawCurrentPlayer(m_currentPlayer);
+		m_viewer->drawCanMovePos(canPlacePosCoord);
 
-	//	//surrender
-	//	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-	//		switch (viewer.showSurrender(true, currentPlayer))
-	//		{
-	//		case 0:
-	//			if (this->confirmSurrender()) {
-	//				teamWin = Team::Red;
-	//				oneSurrender = true;
-	//				state = InGameState::oneSideWin;
-	//			}
-	//			break;
-	//		case 1:
-	//			if (this->confirmSurrender()) {
-	//				teamWin = Team::Black;
-	//				oneSurrender = true;
-	//				state = InGameState::oneSideWin;
-	//			}
-	//			break;
-	//		default:
-	//			break;
-	//		}
-	//	}
-	//	else
-	//		viewer.showSurrender(true, currentPlayer);
+		m_viewer->display();
+	}
+}
 
-	//	if (isCheck)
-	//		viewer.showCheck(teamCheck);
+void GameManager::twoPlayerGame(InGameState state)
+{
+	std::vector<Coord> canPlacePosCoord;
+	Coord coordChoiseToPlace;
+	Team teamWin = Team::None;
+
+	while (m_viewer->windowIsOpen())
+	{
+		switch (state)
+		{
+			//======================================================start====================================================	**start a new game
+		case InGameState::start:
+			m_file.close();
+			m_board->newBoard();
+			m_currentPlayer = Team::Black;
+			state = InGameState::canPlace;
+			break;
+
+			//====================================================canPlace==================================================	**load coord can place chess
+		case InGameState::canPlace:
+			canPlacePosCoord = m_board->coordCanPlace(m_currentPlayer);
+			if (!canPlacePosCoord.size())
+				state = InGameState::oneSideWin;
+			else
+				state = InGameState::selectChess;
+			break;
+
+			//====================================================selectChess================================================	**wait for press a object
+		case InGameState::selectChess:
+			if (m_viewer->mouseClick(sf::Mouse::Left))
+			{
+				auto pos = m_viewer->getMousePosition();
+				for (auto& coord : canPlacePosCoord) {
+					if (m_viewer->isChoiceToMove(pos, coord)) {
+						coordChoiseToPlace = coord;
+						state = InGameState::choiceMove;
+						break;
+					}
+				}
+			}
+			break;
+
+			//====================================================choiceMove================================================	**move the chess
+		case InGameState::choiceMove:
+			m_board->placeChess(m_currentPlayer, coordChoiseToPlace);
+			state = InGameState::oneSideWin;
+			break;
+
+			//==================================================oneSideWin==================================================	**decide to play anthor game
+		case InGameState::oneSideWin:
+			//normal win
+			teamWin = m_currentPlayer;
+			if (m_board->oneSideIsWin(teamWin)) {
+				if (this->endGame(teamWin))
+					state = InGameState::start;
+				else
+					return;
+				continue;
+			}
+			else
+			{
+				if (m_currentPlayer == Team::White)
+					m_currentPlayer = Team::Black;
+				else
+					m_currentPlayer = Team::White;
+				state = InGameState::canPlace;
+			}
+			break;
+		}
+
+		//update
+		switch (m_viewer->update())
+		{
+		case 0:
+			break;
+		case 1:
+			std::cout << "windows close\n";
+			return;
+			break;
+		case 2:
+			std::cout << "pause\n";
+
+			switch (this->pause())
+			{
+			case 0:
+				std::cout << "windows close\n";
+				return;
+				break;
+			case 1:
+				std::cout << "continue\n";
+				break;
+			case 2:
+				std::cout << "back to menu\n";
+				return;
+				break;
+			}
+			break;
+		}
+
+		//draw
+		m_viewer->clear();
+		m_viewer->drawCurrentPlayer(m_currentPlayer);
+		m_viewer->drawBoard();
+		m_viewer->drawChess();
+		m_viewer->drawCanMovePos(canPlacePosCoord);
 
 		m_viewer->display();
 	}
@@ -218,6 +327,88 @@ void GameManager::inGame(InGameState state)
 
 bool GameManager::endGame(Team team)
 {
-	//TODO: show winner and chose what to do next
+	while (m_viewer->windowIsOpen()) {
+		//update
+		switch (m_viewer->update())
+		{
+		case 0:
+			break;
+		case 1:
+			return false;
+			break;
+		case 2:
+			return false;
+			break;
+		default:
+			break;
+		}
+
+		m_viewer->clear();
+		m_viewer->drawCurrentPlayer(m_currentPlayer);
+		m_viewer->drawBoard();
+		m_viewer->drawChess();
+		if (m_viewer->mouseClick(sf::Mouse::Left)) {
+			switch (m_viewer->showWinner(team))
+			{
+			case -1:
+				break;
+			case 0:
+				return false;
+			case 1:
+				return true;
+			default:
+				break;
+			}
+		}
+		else
+			m_viewer->showWinner(team);
+		m_viewer->display();
+	}
 	return false;
+}
+
+int GameManager::pause()
+{
+	while (m_viewer->windowIsOpen())
+	{
+
+		//update
+		switch (m_viewer->update())
+		{
+		case 0:
+			break;
+		case 1:
+			return 0;
+			break;
+		case 2:
+			return 1;
+			break;
+		default:
+			break;
+		}
+
+		//draw
+		m_viewer->clear();
+		m_viewer->drawCurrentPlayer(m_currentPlayer);
+		m_viewer->drawBoard();
+		m_viewer->drawChess();
+		if (m_viewer->mouseClick(sf::Mouse::Left)) {
+			switch (m_viewer->showPause())
+			{
+			case 0:
+				return 1;
+				break;
+			case 1:
+				return 2;
+				break;
+			default:
+				break;
+			}
+		}
+		else
+			m_viewer->showPause();
+
+		m_viewer->display();
+	}
+	return 0;
 }

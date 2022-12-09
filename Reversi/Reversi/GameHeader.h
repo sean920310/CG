@@ -15,18 +15,7 @@
 #include <string>
 #include <ctime>
 
-#define CHESS_BLACK "./Asset/Image/Chess/black.png"
-#define CHESS_WHITE "./Asset/Image/Chess/white.png"
-
 #define FONT_PATH "./Asset/Font/GenSenRounded-M.ttc"
-#define TIMEFONT_PATH "./Asset/Font/digital-7 (mono).ttf"
-
-#define CHESS_SCALE_SIZE 0.1f
-#define CHESS_CHOISE_SCALE_SIZE 0.108f
-#define CHECKBOARD_SCALE_SIZE 0.3f
-
-#define TIMELIMIT 60
-
 
 enum class Team
 {
@@ -38,12 +27,10 @@ enum class Team
 enum class InGameState
 {
 	start,
-	inputFile,
 	canPlace,
 	selectChess,
 	pressChess,
 	choiceMove,
-	isCheck,
 	oneSideWin
 };
 
@@ -72,5 +59,25 @@ typedef struct Coord {
 
 	bool operator==(const Coord& rhs) {
 		return (this->x == rhs.x && this->y == rhs.y);
+	}
+
+	Coord operator-(const Coord& rhs)
+	{
+		Coord newCoord(this->x - rhs.x, this->y - rhs.y);
+		if (newCoord.x < 0)
+			newCoord.x = 0;
+		if (newCoord.y < 0)
+			newCoord.y = 0;
+		return newCoord;
+	}
+
+	Coord operator+(const Coord& rhs)
+	{
+		Coord newCoord(this->x + rhs.x, this->y + rhs.y);
+		if (newCoord.x > 7)
+			newCoord.x = 7;
+		if (newCoord.y > 7)
+			newCoord.y = 7;
+		return newCoord;
 	}
 }Coord;

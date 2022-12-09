@@ -5,11 +5,41 @@
 
 class GameManager;
 
+typedef struct vec2
+{
+	float x, y;
+	vec2() :x(0), y(0)
+	{
+	}
+
+	vec2(int x, int y) :x(x), y(y)
+	{
+	}
+
+	vec2(const Coord& rhs) {
+		this->x = rhs.x;
+		this->y = rhs.y;
+	}
+
+	vec2& operator=(const Coord& rhs) {
+		this->x = rhs.x;
+		this->y = rhs.y;
+		return *this;
+	}
+
+	bool operator==(const Coord& rhs) {
+		return (this->x == rhs.x && this->y == rhs.y);
+	}
+}vec2;
+
 class Viewer
 {
+	friend class GameManager;
 private:
 	static int SCREEN_WIDTH;
 	static int SCREEN_HEIGHT;
+	static int BOARD_WIDTH;
+	static int BOARD_HEIGHT;
 
 	GameManager* m_game;
 
@@ -20,7 +50,7 @@ private:
 	sf::Font timeFont;
 	bool clickLock = false;
 public:
-	Viewer();
+	Viewer(GameManager* game);
 	~Viewer();
 
 	bool windowIsOpen();
@@ -33,21 +63,20 @@ public:
 	void clear();
 	//0:exit game 1:start new game 2:select a file
 	int showMenu();
-	void showCheck(Team team);
-	void showWinner(Team team);
 	//-1:no select 0:no 1:yes
-	int showOneMoreGame();
+	int showWinner(Team team);
 	//-1:no select 0:continue 1:to menu
 	int showPause();
-	//-1:no select 0:Black 1:Red
-	int showSurrender(bool canSelect, Team team);
-	//-1:no select 0:no 1:yes
-	int showConfirmSurrender();
-	void drawTime(sf::Time redTime, sf::Time blackTime);
-	void drawRightSideObject(Team team);
+	void drawBoard();
+	void drawChess();
 	void drawCanMovePos(std::vector<Coord> coords);
-	void drawSprite(std::vector<sf::Sprite> sprites);
+	void drawCurrentPlayer(Team team);
 	void display();
+
+public:
+	bool isChoiceToMove(sf::Vector2i mouseCoord, Coord coord); 
+	vec2 coordToVec2(const Coord& coord);
+
 public:
 	static const char	 MENU_EXIT;
 	static const char	 MENU_START;

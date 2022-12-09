@@ -16,9 +16,8 @@
 class Board
 {
 private:
-	std::vector<std::vector<Team>> boardArr;
-	sf::Texture checkBoardTexture;
-	sf::Sprite checkBoard;
+	std::vector<std::vector<Team>> m_boardArr;
+	int m_blackNum = 0, m_whiteNum = 0;
 
 public:
 	Board();
@@ -27,7 +26,8 @@ public:
 	void newBoard();
 	Team getChess(Coord coord) const;
 	std::vector<std::vector<Team>> getBoardArr();
+	int getChessNum(Team team);
 	std::vector<Coord> coordCanPlace(Team currentTeam);
-	void placeChess(Coord coord);
+	void placeChess(Team currentTeam, Coord coord);
 	bool oneSideIsWin(Team& team);
 };
