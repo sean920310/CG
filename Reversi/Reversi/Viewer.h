@@ -69,6 +69,7 @@ public:
 	int showPause();
 	void drawBoard();
 	void drawChess();
+	void drawChess(float t, std::vector<Coord> flips);
 	void drawCanMovePos(std::vector<Coord> coords);
 	void drawCurrentPlayer(Team team);
 	void display();

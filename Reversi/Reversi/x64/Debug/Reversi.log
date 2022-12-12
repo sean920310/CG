@@ -1,11 +1,8 @@
-﻿  GameManager.cpp
+﻿  Reversi.cpp
 E:\NTUST\CG\Reversi\Reversi\Viewer.h(15,23): warning C4244: '正在初始化': 將 'int' 轉換為 'float'，由於類型不同，可能導致資料遺失
 E:\NTUST\CG\Reversi\Reversi\Viewer.h(15,29): warning C4244: '正在初始化': 將 'int' 轉換為 'float'，由於類型不同，可能導致資料遺失
 E:\NTUST\CG\Reversi\Reversi\Viewer.h(20,16): warning C4244: '=': 將 'const int' 轉換為 'float'，由於類型不同，可能導致資料遺失
 E:\NTUST\CG\Reversi\Reversi\Viewer.h(21,16): warning C4244: '=': 將 'const int' 轉換為 'float'，由於類型不同，可能導致資料遺失
 E:\NTUST\CG\Reversi\Reversi\Viewer.h(25,16): warning C4244: '=': 將 'const int' 轉換為 'float'，由於類型不同，可能導致資料遺失
 E:\NTUST\CG\Reversi\Reversi\Viewer.h(26,16): warning C4244: '=': 將 'const int' 轉換為 'float'，由於類型不同，可能導致資料遺失
-E:\NTUST\CG\Reversi\Reversi\GameManager.cpp(100,14): warning C4244: '引數': 將 'time_t' 轉換為 'unsigned int'，由於類型不同，可能導致資料遺失
-E:\NTUST\CG\Reversi\Reversi\GameManager.cpp(124,40): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
-E:\NTUST\CG\Reversi\Reversi\GameManager.cpp(332,6): warning C4101: 'oneMore': 未參考的區域變數
   Reversi.vcxproj -> E:\NTUST\CG\Reversi\x64\Debug\Reversi.exe

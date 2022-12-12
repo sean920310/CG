@@ -194,11 +194,12 @@ std::vector<Coord> Board::coordCanPlace(Team currentTeam)
 	return canPlace;
 }
 
-void Board::placeChess(Team currentTeam, Coord coord)
+std::vector<Coord> Board::placeChess(Team currentTeam, Coord coord)
 {
 	m_boardArr[coord.x][coord.y] = currentTeam;
 
 	//*flip
+	std::vector<Coord> flips;
 	Team opponentTeam = (currentTeam == Team::White) ? Team::Black : Team::White;
 	Coord dx(1, 0), dy(0, 1), now(coord.x, coord.y), temp;
 	bool can = false, toggle = false;
@@ -224,7 +225,10 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp + dx;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
@@ -250,7 +254,10 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp - dx;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
@@ -276,7 +283,10 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp + dy;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
@@ -302,7 +312,10 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp - dy;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
@@ -328,7 +341,10 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp + dx + dy;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
@@ -354,7 +370,10 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp + dx - dy;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
@@ -380,7 +399,10 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp - dx + dy;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
@@ -406,12 +428,16 @@ void Board::placeChess(Team currentTeam, Coord coord)
 		{
 			temp = temp - dx - dy;
 			if (m_boardArr[temp.x][temp.y] == opponentTeam)
+			{
 				m_boardArr[temp.x][temp.y] = currentTeam;
+				flips.push_back(Coord(temp.x, temp.y));
+			}
 			else
 				break;
 		}
 	}
 
+	//*count
 	m_blackNum =  m_whiteNum = 0;
 	for (int i = 0; i < 8; i++)
 	{
@@ -423,7 +449,8 @@ void Board::placeChess(Team currentTeam, Coord coord)
 				m_blackNum++;
 		}
 	}
-	//*count
+
+	return flips;
 
 }
 

@@ -31,6 +31,7 @@ enum class InGameState
 	selectChess,
 	pressChess,
 	choiceMove,
+	flipChess,
 	oneSideWin
 };
 

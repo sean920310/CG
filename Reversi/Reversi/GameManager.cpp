@@ -84,11 +84,11 @@ int GameManager::menu()
 void GameManager::onePlayerGame(InGameState state)
 {
 	
-	std::vector<Coord> canPlacePosCoord;
+	std::vector<Coord> canPlacePosCoord, flips;
 	Coord coordChoiseToPlace;
 	Team teamWin = Team::None, AITeam = Team::White;
-	const sf::Time aiWait = sf::seconds(1);
-	sf::Clock aiClock;
+	const sf::Time aiWait = sf::seconds(1), flipTime = sf::milliseconds(500);
+	sf::Clock aiClock, flipClock;
 	aiClock.restart();
 
 	while (m_viewer->windowIsOpen())
@@ -147,8 +147,16 @@ void GameManager::onePlayerGame(InGameState state)
 
 			//====================================================choiceMove================================================	**move the chess
 		case InGameState::choiceMove:
-			m_board->placeChess(m_currentPlayer, coordChoiseToPlace);
-			state = InGameState::oneSideWin;
+			flips = m_board->placeChess(m_currentPlayer, coordChoiseToPlace);
+			canPlacePosCoord.clear();
+			flipClock.restart();
+			state = InGameState::flipChess;
+			break;
+
+			//====================================================flipChess================================================	**flip the chess
+		case InGameState::flipChess:
+			if(flipClock.getElapsedTime() >= flipTime)
+				state = InGameState::oneSideWin;
 			break;
 
 			//==================================================oneSideWin==================================================	**decide to play anthor game
@@ -207,7 +215,10 @@ void GameManager::onePlayerGame(InGameState state)
 		//draw
 		m_viewer->clear();
 		m_viewer->drawBoard();
-		m_viewer->drawChess();
+		if(state == InGameState::flipChess)
+			m_viewer->drawChess((float)(flipClock.getElapsedTime() / flipTime), flips);
+		else
+			m_viewer->drawChess();
 		m_viewer->drawCurrentPlayer(m_currentPlayer);
 		m_viewer->drawCanMovePos(canPlacePosCoord);
 
@@ -217,9 +228,11 @@ void GameManager::onePlayerGame(InGameState state)
 
 void GameManager::twoPlayerGame(InGameState state)
 {
-	std::vector<Coord> canPlacePosCoord;
+	std::vector<Coord> canPlacePosCoord, flips;
 	Coord coordChoiseToPlace;
 	Team teamWin = Team::None;
+	const sf::Time flipTime = sf::milliseconds(500);
+	sf::Clock flipClock;
 
 	while (m_viewer->windowIsOpen())
 	{
@@ -259,8 +272,16 @@ void GameManager::twoPlayerGame(InGameState state)
 
 			//====================================================choiceMove================================================	**move the chess
 		case InGameState::choiceMove:
-			m_board->placeChess(m_currentPlayer, coordChoiseToPlace);
-			state = InGameState::oneSideWin;
+			flips = m_board->placeChess(m_currentPlayer, coordChoiseToPlace);
+			canPlacePosCoord.clear();
+			flipClock.restart(); 
+			state = InGameState::flipChess;
+			break;
+
+			//====================================================flipChess================================================	**flip the chess
+		case InGameState::flipChess:
+			if (flipClock.getElapsedTime() >= flipTime)
+				state = InGameState::oneSideWin;
 			break;
 
 			//==================================================oneSideWin==================================================	**decide to play anthor game
@@ -318,7 +339,10 @@ void GameManager::twoPlayerGame(InGameState state)
 		m_viewer->clear();
 		m_viewer->drawCurrentPlayer(m_currentPlayer);
 		m_viewer->drawBoard();
-		m_viewer->drawChess();
+		if (state == InGameState::flipChess)
+			m_viewer->drawChess((float)(flipClock.getElapsedTime() / flipTime), flips);
+		else
+			m_viewer->drawChess();
 		m_viewer->drawCanMovePos(canPlacePosCoord);
 
 		m_viewer->display();

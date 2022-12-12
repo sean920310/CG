@@ -28,6 +28,6 @@ public:
 	std::vector<std::vector<Team>> getBoardArr();
 	int getChessNum(Team team);
 	std::vector<Coord> coordCanPlace(Team currentTeam);
-	void placeChess(Team currentTeam, Coord coord);
+	std::vector<Coord> placeChess(Team currentTeam, Coord coord);
 	bool oneSideIsWin(Team& team);
 };

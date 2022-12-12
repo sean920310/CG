@@ -420,6 +420,53 @@ void Viewer::drawChess()
 	}
 }
 
+void Viewer::drawChess(float t, std::vector<Coord> flips)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			Team team = this->m_game->m_board->getChess(Coord(i, j));
+			if (team == Team::None)
+				continue;
+
+			vec2 pos = coordToVec2(Coord(i, j));
+			sf::CircleShape chess(BOARD_WIDTH / 16.0f - 5.0f);
+			chess.setOrigin(BOARD_WIDTH / 16.0f - 5.0f, BOARD_WIDTH / 16.0f - 5.0f);
+			chess.setPosition(pos.x, pos.y);
+			chess.setOutlineThickness(1);
+			chess.setOutlineColor(sf::Color::Black);
+
+			bool flip = false;
+			for (int m = 0; m < flips.size(); m++)
+			{
+				if (flips[m] == Coord(i, j)) flip = true;
+			}
+
+			if (team == Team::White)
+				chess.setFillColor(sf::Color(255, 255, 255, 255));
+			else
+				chess.setFillColor(sf::Color(0, 0, 0, 255));
+			
+			if (flip)
+			{
+				float deg = t * 180;
+				if (deg < 90.0f)
+				{
+					if (team != Team::White)
+						chess.setFillColor(sf::Color(255, 255, 255, 255));
+					else
+						chess.setFillColor(sf::Color(0, 0, 0, 255));
+				}
+				//std::cout << deg << std::endl;
+				chess.scale(1.0f - sin(deg * 3.1415926 / 180), 1.0f);
+			}
+
+			this->window->draw(chess);
+		}
+	}
+}
+
 void Viewer::display()
 {
 
