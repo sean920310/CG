@@ -15,6 +15,7 @@ private:
 	std::vector<sf::Sprite> m_sprites;
 	std::fstream m_file;
 	std::wstring m_filePath;
+	sf::Music backgroundMusic;
 
 public:
 	GameManager();

@@ -16,6 +16,8 @@
 #include <ctime>
 
 #define FONT_PATH "./Asset/Font/GenSenRounded-M.ttc"
+#define MUSIC_PATH "./Asset/Music/backgroundMusic.wav"
+
 
 enum class Team
 {

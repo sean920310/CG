@@ -20,6 +20,7 @@ GameManager::GameManager()
 	m_currentPlayer = Team::Black;
 	m_board = new Board();
 	m_viewer = new Viewer(this);
+	backgroundMusic.openFromFile(MUSIC_PATH);
 }
 
 GameManager::~GameManager()
@@ -32,6 +33,9 @@ GameManager::~GameManager()
 
 void GameManager::run()
 {
+	backgroundMusic.setLoop(true);
+	backgroundMusic.play();
+	backgroundMusic.setVolume(50);
 	while (true)
 	{
 		switch (this->menu())

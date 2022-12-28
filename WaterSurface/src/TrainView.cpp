@@ -845,7 +845,7 @@ void TrainView::draw()
 
 			glBindVertexArray(this->box->vao);
 
-			// Position attribute
+			// Position attribute 
 			glBindBuffer(GL_ARRAY_BUFFER, this->box->vbo[0]);
 			glBufferData(GL_ARRAY_BUFFER, 36 * 3 * sizeof(float), boxVertices, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
