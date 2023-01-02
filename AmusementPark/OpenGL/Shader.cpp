@@ -71,10 +71,9 @@ void Shader::setFloat3(const std::string& name, glm::vec3 value) const
 	glUniform3fv(glGetUniformLocation(id, name.c_str()), 1, &value[0]);
 }
 
-void Shader::setDirLight(const DirLight* light, glm::mat4 viewMatrix)
+void Shader::setDirLight(const DirLight* light)
 {
-	glm::vec4 pos = glm::inverse(viewMatrix) * light->direction;
-	glUniform3fv(glGetUniformLocation(id, "dirLight.direction"), 1, glm::value_ptr(light->direction));
+	glUniform3fv(glGetUniformLocation(id, "dirLight.direction"), 1, &light->direction[0]);
 	glUniform3fv(glGetUniformLocation(id, "dirLight.ambient"), 1, &light->ambient[0]);
 	glUniform3fv(glGetUniformLocation(id, "dirLight.diffuse"), 1, &light->diffuse[0]);
 	glUniform3fv(glGetUniformLocation(id, "dirLight.specular"), 1, &light->specular[0]);
@@ -95,7 +94,7 @@ void Shader::setPosLight(const PosLight* light)
 void Shader::setSpotLight(const SpotLight* light)
 {
 	glUniform3fv(glGetUniformLocation(id, "spotLight.position"), 1, &light->position[0]);
-	glUniform3fv(glGetUniformLocation(id, "posLight.direction"), 1, &light->direction[0]);
+	glUniform3fv(glGetUniformLocation(id, "spotLight.direction"), 1, &light->direction[0]);
 	glUniform3fv(glGetUniformLocation(id, "spotLight.ambient"), 1, &light->ambient[0]);
 	glUniform3fv(glGetUniformLocation(id, "spotLight.diffuse"), 1, &light->diffuse[0]);
 	glUniform3fv(glGetUniformLocation(id, "spotLight.specular"), 1, &light->specular[0]);
@@ -104,8 +103,8 @@ void Shader::setSpotLight(const SpotLight* light)
 	glUniform1f(glGetUniformLocation(id, "spotLight.linear"), light->linear);
 	glUniform1f(glGetUniformLocation(id, "spotLight.quadratic"), light->quadratic);
 
-	glUniform1f(glGetUniformLocation(id, "spotLight.cutOff"), light->cutOff);
-	glUniform1f(glGetUniformLocation(id, "spotLight.outerCutOff"), light->outerCutOff);
+	glUniform1f(glGetUniformLocation(id, "spotLight.cutOff"), glm::cos(glm::radians(light->cutOff)));
+	glUniform1f(glGetUniformLocation(id, "spotLight.outerCutOff"), glm::cos(glm::radians(light->outerCutOff)));
 }
 
 void Shader::compileErrors(unsigned int shader, const char* type)

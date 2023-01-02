@@ -38,6 +38,7 @@ public:
 	VAO()
 	{
 		glGenVertexArrays(1, &id);
+		this->Bind();
 	}
 
 	void LinkAttrib(VBO& vbo, GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset)

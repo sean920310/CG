@@ -8,13 +8,14 @@ out V_OUT
    vec3 position;
    vec3 normal;
    vec2 texture_coordinate;
+   vec4 positionLightSpace;
 } v_out;
 
-uniform float scale;
 
 uniform mat4 u_model;
 uniform mat4 u_projection;
 uniform mat4 u_view;
+uniform mat4 u_lightSpaceMatrix;
 
 void main()
 {
@@ -24,4 +25,5 @@ void main()
     //v_out.normal = mat3(transpose(inverse(u_model))) * normal;
     v_out.normal = vec3(u_model * vec4(normal, 0.0f));
     v_out.texture_coordinate = texture_coordinate;
+    v_out.positionLightSpace = u_lightSpaceMatrix * vec4(v_out.position, 1.0);
 }

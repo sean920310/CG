@@ -4,6 +4,7 @@
 #include "BufferObject.h"
 #include "Texture.h"
 #include "Model.h"
+#include "Terrain.h"
 
 void frambufferCallback(GLFWwindow* window, int width, int height);
 void keyInputCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -18,7 +19,9 @@ public:
 	~Viewer();
 
 	void Init();
-	void Draw();
+	void DrawShadowMap();
+	void DrawEntity();
+	void DrawImGui();
 	void Update();
 
 	void frambufferCallbackHandler(int width, int height);
@@ -30,6 +33,8 @@ public:
 	int width, height;
 
 private:
+	glm::mat4 lightSpaceMatrix;
+
 	VAO* vao = nullptr;
 	Texture2D* texture = nullptr;
 	Shader* shader = nullptr;
@@ -42,8 +47,15 @@ private:
 	float cubeShininess = 1.0f;
 
 	DirLight* dirLight = nullptr;
+	SpotLight* spotLight = nullptr;
 
-	VAO* turrain = nullptr;
+	std::vector<Terrain*> terrains;
+	Shader* terrainShader = nullptr;
 
+	FBO* depthMapFBO = nullptr;
+	Shader* depthMapShader = nullptr;
+
+	VAO* debugVAO = nullptr;
+	Shader* debugShader = nullptr;
 };
 

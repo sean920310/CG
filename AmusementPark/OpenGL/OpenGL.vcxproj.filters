@@ -28,6 +28,12 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{e25aeac0-27d1-4d01-aa5a-4d7bc8f65774}</UniqueIdentifier>
     </Filter>
+    <Filter Include="來源檔案\Entity">
+      <UniqueIdentifier>{0f141ee2-5dfb-49bd-a1de-a7f98b40c41f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Entity">
+      <UniqueIdentifier>{6405aa33-f316-47b7-bfe2-9d00ec567e26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -72,6 +78,12 @@
     <ClCompile Include="GameManager.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Track.cpp">
+      <Filter>來源檔案\Entity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Asset\Shader\default.vert">
@@ -80,8 +92,30 @@
     <None Include="Asset\Shader\default.frag">
       <Filter>資源檔\Shaders</Filter>
     </None>
-    <None Include="Asset\Shader\skybox.frag" />
-    <None Include="Asset\Shader\skybox.vert" />
+    <None Include="Asset\Shader\skybox.frag">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\skybox.vert">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\terrain.vert">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\terrain.frag">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\depthMap.vert">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\depthMap.frag">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\debug.frag">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\debug.vert">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -141,9 +175,18 @@
     <ClInclude Include="Light.h">
       <Filter>標頭檔\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Track.h">
+      <Filter>標頭檔\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="wall.jpg">
+      <Filter>資源檔\Texture</Filter>
+    </Image>
+    <Image Include="Asset\Images\grass.png">
       <Filter>資源檔\Texture</Filter>
     </Image>
   </ItemGroup>

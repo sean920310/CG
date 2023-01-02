@@ -27,7 +27,7 @@ public:
 	void setFloat3(const std::string& name, glm::vec3 value) const;
 
 	
-	void setDirLight(const DirLight* light, glm::mat4 viewMatrix);
+	void setDirLight(const DirLight* light);
 	void setPosLight(const PosLight* light);
 	void setSpotLight(const SpotLight* light);
 

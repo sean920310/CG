@@ -174,13 +174,21 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb.cpp" />
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="Track.cpp" />
     <ClCompile Include="Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Asset\Shader\debug.frag" />
+    <None Include="Asset\Shader\debug.vert" />
     <None Include="Asset\Shader\default.frag" />
     <None Include="Asset\Shader\default.vert" />
+    <None Include="Asset\Shader\depthMap.frag" />
+    <None Include="Asset\Shader\depthMap.vert" />
     <None Include="Asset\Shader\skybox.frag" />
     <None Include="Asset\Shader\skybox.vert" />
+    <None Include="Asset\Shader\terrain.frag" />
+    <None Include="Asset\Shader\terrain.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BufferObject.h" />
@@ -200,10 +208,13 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Track.h" />
     <ClInclude Include="Viewer.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Asset\Images\grass.png" />
     <Image Include="wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
