@@ -70,9 +70,10 @@ void main()
 {
 	//FragColor = texture(tex0, texCoord) * vec4(color,1.0);
     vec3 viewDir = normalize(u_eyePosition - f_in.position);
+    vec3 normal = normalize(f_in.normal);
 
-    vec3 result = CalcDirLight(dirLight, u_color, f_in.normal, viewDir);
-	result += CalcSpotLight(spotLight, u_color, f_in.normal, f_in.position, viewDir);
+    vec3 result = CalcDirLight(dirLight, u_color, normal, viewDir);
+	result += CalcSpotLight(spotLight, u_color, normal, f_in.position, viewDir);
 
     FragColor = vec4(result,1.0);
 }
@@ -155,6 +156,8 @@ float CalcShadow(vec4 positionLightSpace, vec3 normal, vec3 lightDir)
     vec3 projCoords = positionLightSpace.xyz / positionLightSpace.w;
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
+    if(projCoords.z > 1.0)
+        return 0.0;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
     float closestDepth = texture(shadowMap, projCoords.xy).r; 
     // get depth of current fragment from light's perspective

@@ -228,6 +228,7 @@ void Viewer::Init()
 		dirLight = new DirLight(
 			glm::vec4(0.7f, -0.7f, 0.9f, 0.0f),
 			//glm::vec4(7.0f,-7.0f, 9.0f, 0.0f),
+			//glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
 			glm::vec4(0.2f, 0.2f, 0.2f, 1.0f),
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 			glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
@@ -283,9 +284,9 @@ void Viewer::Init()
 
 		depthMapShader = new Shader("./Asset/Shader/depthMap.vert", "./Asset/Shader/depthMap.frag");
 	
-		float near_plane = 1.0f, far_plane = 100.0f;
-		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-		glm::mat4 lightView = glm::lookAt(glm::vec3(-dirLight->direction * 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		float near_plane = 1.0f, far_plane = 50.0f;
+		glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+		glm::mat4 lightView = glm::lookAt(glm::vec3(-dirLight->direction * 20.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::cross(glm::vec3(1.0f, 0.0f, 0.0f),glm::normalize(glm::vec3(-dirLight->direction))));
 		
 		lightSpaceMatrix = lightProjection * lightView;
 	}
@@ -316,21 +317,29 @@ void Viewer::Init()
 
 		debugShader = new Shader("./Asset/Shader/debug.vert", "./Asset/Shader/debug.frag");
 	}
+
+	//Track
+	{
+		track = new Track("./Asset/Model/track.txt");
+	}
+
+	//Train
+	{
+		train = new Train(track);
+		trainCount = train->GetCarCount();
+	}
+
+	//pool
+	{
+		pool = new Model("./Asset/Model/pool.obj");
+		modelShader = new Shader("./Asset/Shader/textureShader.vert", "./Asset/Shader/textureShader.frag");
+	}
 }
 
 void Viewer::DrawEntity()
 {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	static float rotation = 0.0f, prevTime = glfwGetTime();
-	double curTime = glfwGetTime();
-	if (curTime - prevTime >= 1.0 / 60)
-	{
-		rotation += 0.5f;
-		prevTime = curTime;
-		if (rotation >= 360.0f)rotation -= 360.0f;
-	}
 
 	camera->Update();
 	camera->CommomMatrix();
@@ -368,7 +377,7 @@ void Viewer::DrawEntity()
 	{
 		shader->Use();
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		shader->setMat4("u_model", model);
@@ -388,8 +397,9 @@ void Viewer::DrawEntity()
 
 		cube->Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		model = glm::translate(model, glm::vec3(5.0f, 1.0f, 1.0f));
+		
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(8.0f, 1.0f, 45.0f));
 		shader->setMat4("u_model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -441,18 +451,88 @@ void Viewer::DrawEntity()
 		glDepthFunc(GL_LESS);
 	}
 
-	//debug
+	//track
 	{
-		debugShader->Use();
-		glActiveTexture(GL_TEXTURE0);
+		shader->Use();
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::scale(model, glm::vec3(0.1));
+		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		shader->setMat4("u_model", model);
+		shader->setMat4("u_view", camera->viewMatrix);
+		shader->setMat4("u_projection", camera->projectionMatrix);
+		shader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		shader->setFloat("shininess", cubeShininess);
+		shader->setFloat3("u_eyePosition", camera->position);
+		shader->setDirLight(dirLight);
+		shader->setSpotLight(spotLight);
+
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
-		debugShader->setInt("tex", 0);
+		shader->setInt("shadowMap", 1);
 
-
-		debugVAO->Bind();
-
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		track->Draw(shader);
 	}
+
+	//train
+	{
+		shader->Use();
+
+		shader->setMat4("u_view", camera->viewMatrix);
+		shader->setMat4("u_projection", camera->projectionMatrix);
+		shader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		shader->setFloat("shininess", cubeShininess);
+		shader->setFloat3("u_eyePosition", camera->position);
+		shader->setDirLight(dirLight);
+		shader->setSpotLight(spotLight);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
+		shader->setInt("shadowMap", 1);
+
+		train->Draw(shader);
+	}
+
+	//pool
+	{
+		modelShader->Use();
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(glm::vec3(5.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.1));
+		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		modelShader->setMat4("u_model", model);
+
+		modelShader->setMat4("u_view", camera->viewMatrix);
+		modelShader->setMat4("u_projection", camera->projectionMatrix);
+		modelShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		modelShader->setFloat("shininess", cubeShininess);
+		modelShader->setFloat3("u_eyePosition", camera->position);
+		modelShader->setDirLight(dirLight);
+		modelShader->setSpotLight(spotLight);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
+		modelShader->setInt("shadowMap", 1);
+
+		pool->Draw(*modelShader);
+	}
+
+	///debug
+	//{
+	//	debugShader->Use();
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
+	//	debugShader->setInt("tex", 0);
+
+
+	//	debugVAO->Bind();
+
+	//	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//}
 
 }
 
@@ -466,7 +546,7 @@ void Viewer::DrawShadowMap()
 	{
 		depthMapShader->Use();
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		depthMapShader->setMat4("u_model", model);
@@ -476,7 +556,8 @@ void Viewer::DrawShadowMap()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
-		model = glm::translate(model, glm::vec3(5.0f, 1.0f, 1.0f));
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(8.0f, 1.0f, 45.0f));
 		depthMapShader->setMat4("u_model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
@@ -496,6 +577,43 @@ void Viewer::DrawShadowMap()
 			terrain->Draw(depthMapShader);
 		}
 	}
+
+	//track
+	{
+		depthMapShader->Use();
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::scale(model, glm::vec3(0.1));
+		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		depthMapShader->setMat4("u_model", model);
+		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		track->Draw(depthMapShader);
+	}
+
+	//train
+	{
+		depthMapShader->Use();
+
+		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		train->Draw(depthMapShader);
+	}
+
+	//pool
+	{
+		depthMapShader->Use();
+		depthMapShader->Use();
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(glm::vec3(5.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.1));
+		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		depthMapShader->setMat4("u_model", model);
+		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		pool->Draw(*depthMapShader);
+	}
 }
 
 void Viewer::DrawImGui()
@@ -507,19 +625,50 @@ void Viewer::DrawImGui()
 
 	//ImGui
 	{
-		static int counter = 0;
+		ImGui::Begin("Control");                          // Create a window called "Hello, world!" and append into it.
+		if (ImGui::TreeNode("Train"))
+		{
+			ImGui::Checkbox("Train Run", &trainRun);
+			
+			ImGui::SliderFloat("Train Speed", &trainSpeed, 0.0f, 10.0f);
+			ImGui::Text("Train Count: ");
+			ImGui::SameLine();
+			if (ImGui::ArrowButton("reduce", ImGuiDir_Left))
+			{
+				trainCount--;
+				train->SetCarCount(trainCount);
+			}
+			ImGui::SameLine();
+			ImGui::Text("%d",trainCount);
+			ImGui::SameLine();
+			if(ImGui::ArrowButton("add", ImGuiDir_Right))
+			{
+				trainCount++;
+				train->SetCarCount(trainCount);
+			}
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Information"))
+		{
+			ImGui::SliderFloat("Shininess", &cubeShininess, 1.0f, 100.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Text("\nCamera Position: x:%.1f y:%.1f z:%.1f", camera->position.x, camera->position.y, camera->position.z);
+			ImGui::Text("Camera Orient: x:%.1f y:%.1f z:%.1f", camera->orientation.x, camera->orientation.y, camera->orientation.z);
+			ImGui::TreePop();
+		}
+		ImGui::End();
+	}
 
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+	if(true)
+	{
+		ImGui::Begin("shadow map Debugger");
 
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
+		ImVec2 pos = ImGui::GetCursorScreenPos();
 
-		ImGui::SliderFloat("shininess", &cubeShininess, 1.0f, 100.0f);
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::Text("\nCamera Position: x:%.1f y:%.1f z:%.1f", camera->position.x, camera->position.y, camera->position.z);
-		ImGui::Text("Camera Orient: x:%.1f y:%.1f z:%.1f", camera->orientation.x, camera->orientation.y, camera->orientation.z);
+		ImGui::GetWindowDrawList()->AddImage(
+			(void*)depthMapFBO->textures[0], ImVec2(pos),
+			ImVec2(pos.x + ImGui::GetWindowWidth(), pos.y + ImGui::GetWindowHeight()), ImVec2(0, 1), ImVec2(1, 0));
+
 		ImGui::End();
 	}
 
@@ -532,9 +681,11 @@ void Viewer::Update()
 {
 	while (!glfwWindowShouldClose(window))
 	{
+		UpdateObject();
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO->fbo);
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); 
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		DrawShadowMap();
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, width, height);
 		DrawEntity();
@@ -545,6 +696,21 @@ void Viewer::Update()
 		//¥æ´«front ©M back Buffer
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+	}
+}
+
+void Viewer::UpdateObject()
+{
+
+	static float rotation = 0.0f, prevTime = glfwGetTime();
+	double curTime = glfwGetTime();
+	if (curTime - prevTime >= 1.0 / 60)
+	{
+		float vel = trainSpeed;
+		//if (physics->value())
+		//	vel += vel * addPhysics();
+		if(trainRun)
+			train->AddTrainU(vel);
 	}
 }
 

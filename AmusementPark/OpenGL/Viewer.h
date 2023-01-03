@@ -5,6 +5,8 @@
 #include "Texture.h"
 #include "Model.h"
 #include "Terrain.h"
+#include "Track.h"
+#include "Train.h"
 
 void frambufferCallback(GLFWwindow* window, int width, int height);
 void keyInputCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -23,6 +25,7 @@ public:
 	void DrawEntity();
 	void DrawImGui();
 	void Update();
+	void UpdateObject();
 
 	void frambufferCallbackHandler(int width, int height);
 	void keyInputCallbackHandler(int key, int scancode, int action, int mode);
@@ -33,6 +36,7 @@ public:
 	int width, height;
 
 private:
+	//entity
 	glm::mat4 lightSpaceMatrix;
 
 	VAO* vao = nullptr;
@@ -44,7 +48,7 @@ private:
 	Shader* skyboxShader = nullptr;
 
 	VAO* cube = nullptr;
-	float cubeShininess = 1.0f;
+	float cubeShininess = 77.0f;
 
 	DirLight* dirLight = nullptr;
 	SpotLight* spotLight = nullptr;
@@ -57,5 +61,17 @@ private:
 
 	VAO* debugVAO = nullptr;
 	Shader* debugShader = nullptr;
+
+	Track* track = nullptr;
+	Train* train = nullptr;
+
+	Model* pool = nullptr;
+	Shader* modelShader = nullptr;
+private:
+	//value
+	float trainSpeed = 1.0f;
+	bool trainRun = true;
+	int trainCount;
+
 };
 

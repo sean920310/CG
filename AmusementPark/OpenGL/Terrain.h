@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <fstream>
 
 #include "GameHeader.h"
 #include "BufferObject.h"
@@ -16,7 +17,7 @@ public:
 	void Draw(Shader* shader);
 
 private:
-	const int SIZE = 800;
+	const int SIZE = 400;
 	const int VERTEX_COUNT = 128;
 
 	float x, z;

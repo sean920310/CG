@@ -71,46 +71,13 @@ void Camera::KeyInputs()
 	}
 	if (glfwGetKey(viewer->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 	{
-		speed = 0.04;
+		speed = 0.1;
 	}
 	else if (glfwGetKey(viewer->window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
 	{
-		speed = 0.01f;
+		speed = 0.05f;
 	}
-
-	//mouse 
-	//if (hideMouse)
-	//{
-	//	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-	//	if (firstClick)
-	//	{
-	//		glfwSetCursorPos(window, (width / 2), (height / 2));
-	//		firstClick = false;
-	//	}
-
-	//	double mX, mY;
-	//	glfwGetCursorPos(window, &mX, &mY);
-
-	//	float rotX = sensitivity * (float)(mY - height / 2) / height;
-	//	float rotY = sensitivity * (float)(mX - width / 2) / width;
-
-	//	glm::vec3 newOrientation = glm::rotate(orientation, glm::radians(-rotX), glm::normalize(glm::cross(orientation, up)));
-
-	//	if (!((glm::angle(newOrientation, up) <= glm::radians(5.0f)) || (glm::angle(newOrientation, -up) <= glm::radians(5.0f))))
-	//	{
-	//		orientation = newOrientation;
-	//	}
-
-	//	orientation = glm::rotate(orientation, glm::radians(-rotY), up);
-
-	//	glfwSetCursorPos(window, (width / 2), (height / 2));
-	//}
-	//else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
-	//{
-	//	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	//	firstClick = true;
-	//}
+	//if (position.y < 0.1f)position.y = 0.1f;
 }
 
 

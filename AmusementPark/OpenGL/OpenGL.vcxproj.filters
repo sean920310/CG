@@ -72,16 +72,19 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Viewer.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
     <ClCompile Include="GameManager.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
     <ClCompile Include="Track.cpp">
+      <Filter>來源檔案\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>來源檔案\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewer.cpp">
+      <Filter>來源檔案\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Train.cpp">
       <Filter>來源檔案\Entity</Filter>
     </ClCompile>
   </ItemGroup>
@@ -114,6 +117,12 @@
       <Filter>資源檔\Shaders</Filter>
     </None>
     <None Include="Asset\Shader\debug.vert">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\textureShader.vert">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\textureShader.frag">
       <Filter>資源檔\Shaders</Filter>
     </None>
   </ItemGroup>
@@ -163,9 +172,6 @@
     <ClInclude Include="imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Viewer.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="GameHeader.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
@@ -175,10 +181,16 @@
     <ClInclude Include="Light.h">
       <Filter>標頭檔\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="Track.h">
+      <Filter>標頭檔\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>標頭檔\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewer.h">
+      <Filter>標頭檔\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Train.h">
       <Filter>標頭檔\Entity</Filter>
     </ClInclude>
   </ItemGroup>
