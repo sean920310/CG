@@ -87,6 +87,15 @@
     <ClCompile Include="Train.cpp">
       <Filter>來源檔案\Entity</Filter>
     </ClCompile>
+    <ClCompile Include="WaterSurface.cpp">
+      <Filter>來源檔案\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleMaster.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Asset\Shader\default.vert">
@@ -123,6 +132,18 @@
       <Filter>資源檔\Shaders</Filter>
     </None>
     <None Include="Asset\Shader\textureShader.frag">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\waterHeightMap.frag">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\waterHeightMap.vert">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\terrainDepthMap.frag">
+      <Filter>資源檔\Shaders</Filter>
+    </None>
+    <None Include="Asset\Shader\terrainDepthMap.vert">
       <Filter>資源檔\Shaders</Filter>
     </None>
   </ItemGroup>
@@ -192,6 +213,15 @@
     </ClInclude>
     <ClInclude Include="Train.h">
       <Filter>標頭檔\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterSurface.h">
+      <Filter>標頭檔\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleMaster.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

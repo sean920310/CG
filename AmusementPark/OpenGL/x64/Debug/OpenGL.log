@@ -1,25 +1,57 @@
-﻿  Viewer.cpp
+﻿  Camera.cpp
 E:\NTUST\CG\AmusementPark\OpenGL\BufferObject.h(48,64): warning C4244: '引數': 將 'GLsizeiptr' 轉換為 'GLsizei'，由於類型不同，可能導致資料遺失
-E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(458,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Camera.cpp(74,14): warning C4305: '=': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Camera.cpp(90,12): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Camera.cpp(91,12): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Camera.cpp(95,17): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Camera.cpp(96,17): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Camera.cpp(97,11): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Camera.cpp(98,11): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+  GameManager.cpp
+E:\NTUST\CG\AmusementPark\OpenGL\BufferObject.h(48,64): warning C4244: '引數': 將 'GLsizeiptr' 轉換為 'GLsizei'，由於類型不同，可能導致資料遺失
+  main.cpp
+E:\NTUST\CG\AmusementPark\OpenGL\BufferObject.h(48,64): warning C4244: '引數': 將 'GLsizeiptr' 轉換為 'GLsizei'，由於類型不同，可能導致資料遺失
+  Particle.cpp
+E:\NTUST\CG\AmusementPark\OpenGL\BufferObject.h(48,64): warning C4244: '引數': 將 'GLsizeiptr' 轉換為 'GLsizei'，由於類型不同，可能導致資料遺失
+  ParticleMaster.cpp
+E:\NTUST\CG\AmusementPark\OpenGL\BufferObject.h(48,64): warning C4244: '引數': 將 'GLsizeiptr' 轉換為 'GLsizei'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\ParticleMaster.cpp(9,2): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
+  Viewer.cpp
+E:\NTUST\CG\AmusementPark\OpenGL\BufferObject.h(48,64): warning C4244: '引數': 將 'GLsizeiptr' 轉換為 'GLsizei'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(5,12): warning C4244: '引數': 將 'time_t' 轉換為 'unsigned int'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(459,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
           with
           [
               T=float
           ]
-E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(503,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(525,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
           with
           [
               T=float
           ]
-E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(585,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(552,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
           with
           [
               T=float
           ]
-E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(609,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(588,42): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
           with
           [
               T=float
           ]
-E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(669,35): warning C4312: '類型轉換': 將 'GLuint' 轉換為較大的 'void *'
-E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(705,41): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(619,43): warning C4305: '引數': 從 'double' 轉換為 'T'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(719,53): warning C4244: '引數': 將 'float' 轉換為 'int'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(719,47): warning C4244: '引數': 將 'float' 轉換為 'int'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(740,35): warning C4312: '類型轉換': 將 'GLuint' 轉換為較大的 'void *'
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(791,41): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(800,22): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(801,56): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+E:\NTUST\CG\AmusementPark\OpenGL\Viewer.cpp(832,14): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+  WaterSurface.cpp
+E:\NTUST\CG\AmusementPark\OpenGL\BufferObject.h(48,64): warning C4244: '引數': 將 'GLsizeiptr' 轉換為 'GLsizei'，由於類型不同，可能導致資料遺失
+  正在產生程式碼...
   OpenGL.vcxproj -> E:\NTUST\CG\AmusementPark\x64\Debug\OpenGL.exe

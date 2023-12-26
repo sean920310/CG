@@ -87,7 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Libraries\include</IncludePath>
+    <IncludePath>$(SolutionDir)Libraries\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -147,7 +147,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
@@ -157,7 +157,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -172,12 +172,15 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Particle.cpp" />
+    <ClCompile Include="ParticleMaster.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="Train.cpp" />
     <ClCompile Include="Viewer.cpp" />
+    <ClCompile Include="WaterSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Asset\Shader\debug.frag" />
@@ -190,8 +193,12 @@
     <None Include="Asset\Shader\skybox.vert" />
     <None Include="Asset\Shader\terrain.frag" />
     <None Include="Asset\Shader\terrain.vert" />
+    <None Include="Asset\Shader\terrainDepthMap.frag" />
+    <None Include="Asset\Shader\terrainDepthMap.vert" />
     <None Include="Asset\Shader\textureShader.frag" />
     <None Include="Asset\Shader\textureShader.vert" />
+    <None Include="Asset\Shader\waterHeightMap.frag" />
+    <None Include="Asset\Shader\waterHeightMap.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BufferObject.h" />
@@ -210,12 +217,15 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Particle.h" />
+    <ClInclude Include="ParticleMaster.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Train.h" />
     <ClInclude Include="Viewer.h" />
+    <ClInclude Include="WaterSurface.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Asset\Images\grass.png" />

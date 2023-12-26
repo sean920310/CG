@@ -7,22 +7,31 @@
 #include "Terrain.h"
 #include "Track.h"
 #include "Train.h"
+#include "WaterSurface.h"
+#include "ParticleMaster.h"
 
 void frambufferCallback(GLFWwindow* window, int width, int height);
 void keyInputCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 class Camera;
+class WaterSurface;
 
 class Viewer
 {
+	enum DrawType
+	{
+		Default = 0,
+		Shadow,
+		Reflect,
+		Refract
+	};
 public:
 	Viewer(int width, int height, const char* name);
 	~Viewer();
 
 	void Init();
-	void DrawShadowMap();
-	void DrawEntity();
+	void DrawEntity(DrawType type = DrawType::Default);
 	void DrawImGui();
 	void Update();
 	void UpdateObject();
@@ -41,7 +50,7 @@ private:
 
 	VAO* vao = nullptr;
 	Texture2D* texture = nullptr;
-	Shader* shader = nullptr;
+	Shader* colorShader = nullptr;
 
 	VAO* skybox = nullptr;
 	Texture3D* skyboxTex = nullptr;
@@ -67,11 +76,24 @@ private:
 
 	Model* pool = nullptr;
 	Shader* modelShader = nullptr;
+
+	WaterSurface* water = nullptr;
+	Shader* heightMapShader = nullptr;
+
+	Model* treeModel = nullptr;
+
+	ParticleMaster* rainParticles = nullptr;
+
 private:
 	//value
 	float trainSpeed = 1.0f;
 	bool trainRun = true;
 	int trainCount;
+	bool trainPhysic = false;
 
+	const float waterHeight = 0.9f - 1.7f;
+
+	bool rain = false;
+	int rainDence = 10;
 };
 

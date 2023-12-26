@@ -11,18 +11,21 @@
 class Terrain
 {
 public:
-	Terrain(int gridX, int gridZ, const std::string& texturePath);
+	Terrain(int gridX, int gridZ, const std::string& texturePath, const std::string& heightMapPath);
 	~Terrain();
 
 	void Draw(Shader* shader);
 
 private:
-	const int SIZE = 400;
-	const int VERTEX_COUNT = 128;
+	const int SIZE = 200;
+	const int VERTEX_COUNT = 256;
+	const float HEIGHT = 10.0;
 
 	float x, z;
 
 	VAO* m_vao = nullptr;
 	Texture2D* m_texture = nullptr;
+	Texture2D* m_heightMap = nullptr;
+
 };
 

@@ -2,6 +2,7 @@
 
 Viewer::Viewer(int width, int height, const char* name):width(width),height(height)
 {
+	srand(time(NULL));
 	//初始化GLFW
 	glfwInit();
 	//告訴GLFW OpenGL的Version (3.3)
@@ -71,7 +72,7 @@ void Viewer::Init()
 		};
 
 
-		shader = new Shader("./Asset/Shader/default.vert", "./Asset/Shader/default.frag");
+		colorShader = new Shader("./Asset/Shader/default.vert", "./Asset/Shader/default.frag");
 		vao = new VAO;
 		vao->Bind();
 
@@ -226,7 +227,7 @@ void Viewer::Init()
 	//Lights
 	{
 		dirLight = new DirLight(
-			glm::vec4(0.7f, -0.7f, 0.9f, 0.0f),
+			glm::vec4(0.5f, -0.9f, 0.7f, 0.0f),
 			//glm::vec4(7.0f,-7.0f, 9.0f, 0.0f),
 			//glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
 			glm::vec4(0.2f, 0.2f, 0.2f, 1.0f),
@@ -247,15 +248,16 @@ void Viewer::Init()
 
 	//terrain
 	{
-		for (int i = 0; i < 2; i++)
-		{
-			for (int j = 0; j < 2; j++)
-			{
-				Terrain* terrain = new Terrain(i-1, j-1, "./Asset/Images/grass.png");
-				terrains.push_back(terrain);
-			}
-		}
-		
+		//for (int i = 0; i < 2; i++)
+		//{
+		//	for (int j = 0; j < 2; j++)
+		//	{
+		//		Terrain* terrain = new Terrain(i-1, j-1, "./Asset/Images/grass.png","./Asset/Images/heightmap.png");
+		//		terrains.push_back(terrain);
+		//	}
+		//}
+		Terrain* terrain = new Terrain(0, 0, "./Asset/Images/grass.png", "./Asset/Images/heightmap.png");
+		terrains.push_back(terrain);
 		terrainShader = new Shader("./Asset/Shader/terrain.vert", "./Asset/Shader/terrain.frag");
 	}
 
@@ -334,10 +336,27 @@ void Viewer::Init()
 		pool = new Model("./Asset/Model/pool.obj");
 		modelShader = new Shader("./Asset/Shader/textureShader.vert", "./Asset/Shader/textureShader.frag");
 	}
+
+	//water
+	{
+		water = new WaterSurface(this);
+		heightMapShader = new Shader("./Asset/Shader/waterHeightMap.vert", "./Asset/Shader/waterHeightMap.frag");
+	}
+
+	//tree
+	{
+		treeModel = new Model("./Asset/Model/Low poly tree 2.obj");
+	}
+
+	//rain 
+	{
+		rainParticles = new ParticleMaster();
+	}
 }
 
-void Viewer::DrawEntity()
+void Viewer::DrawEntity(DrawType type)
 {
+	glEnable(GL_CLIP_DISTANCE0);
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -349,33 +368,21 @@ void Viewer::DrawEntity()
 		spotLight->position = glm::vec4(camera->position, 1.0f);
 		spotLight->direction = glm::vec4(camera->orientation, 1.0f);
 	}
-
-	//vao
-	{
-		shader->Use(); 
-
-		glm::mat4 model = glm::mat4(1.0f);
-		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		shader->setMat4("u_model", model);
-		shader->setMat4("u_view", camera->viewMatrix);
-		shader->setMat4("u_projection", camera->projectionMatrix);
-		shader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
-
-		texture->Bind(0);
-		shader->setInt("tex0", 0);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
-		shader->setInt("shadowMap", 1);
-
-		vao->Bind();
-		//glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
-	}
-
+	
+	Shader* shader = depthMapShader;
 	//cube
 	{
+		if (type != DrawType::Shadow)
+			shader = colorShader;
+
 		shader->Use();
+		if (type == DrawType::Reflect)
+			shader->setFloat4("u_plane", glm::vec4(0, 1, 0, -waterHeight));
+		else if (type == DrawType::Refract)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, waterHeight));
+		else if (type == DrawType::Default)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, 10000));
+
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -397,63 +404,57 @@ void Viewer::DrawEntity()
 
 		cube->Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(8.0f, 1.0f, 45.0f));
-		shader->setMat4("u_model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 	}
 
 	//terrain
 	{
-		terrainShader->Use();
+		if (type != DrawType::Shadow)
+			shader = terrainShader;
+
+		shader->Use();
+		if (type == DrawType::Reflect)
+			shader->setFloat4("u_plane", glm::vec4(0, 1, 0, -waterHeight));
+		else if (type == DrawType::Refract)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, waterHeight));
+		else if (type == DrawType::Default)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, 10000));
+
 		glm::mat4 model = glm::mat4(1.0f);
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		terrainShader->setMat4("u_model", model);
-		terrainShader->setMat4("u_view", camera->viewMatrix);
-		terrainShader->setMat4("u_projection", camera->projectionMatrix);
-		terrainShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+		shader->setMat4("u_model", model);
+		shader->setMat4("u_view", camera->viewMatrix);
+		shader->setMat4("u_projection", camera->projectionMatrix);
+		shader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
 
-		terrainShader->setFloat("shininess", 1.0f);
-		terrainShader->setFloat3("u_eyePosition", camera->position);
-		terrainShader->setDirLight(dirLight);
-		terrainShader->setSpotLight(spotLight);
+		shader->setFloat("shininess", 1.0f);
+		shader->setFloat3("u_eyePosition", camera->position);
+		shader->setDirLight(dirLight);
+		shader->setSpotLight(spotLight);
 		
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
-		terrainShader->setInt("shadowMap", 1);
+		shader->setInt("shadowMap", 1);
 
 		for (const auto& terrain : terrains)
 		{
-			terrain->Draw(terrainShader);
+			terrain->Draw(shader);
 		}
-	}
-
-
-	//skybox
-	{
-		glDepthFunc(GL_LEQUAL);
-		skyboxShader->Use();
-		skyboxShader->setMat4("u_view", camera->viewMatrix);
-		skyboxShader->setMat4("u_projection", camera->projectionMatrix);
-
-		skyboxTex->Bind(0);
-		skyboxShader->setInt("skybox", 0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
-		skyboxShader->setInt("shadowMap", 1);
-		
-		skybox->Bind();
-		
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glDepthFunc(GL_LESS);
 	}
 
 	//track
 	{
+		if (type != DrawType::Shadow)
+			shader = colorShader;
+
 		shader->Use();
+		if (type == DrawType::Reflect)
+			shader->setFloat4("u_plane", glm::vec4(0, 1, 0, -waterHeight));
+		else if (type == DrawType::Refract)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, waterHeight));
+		else if (type == DrawType::Default)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, 10000));
+
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(0.1));
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -477,7 +478,17 @@ void Viewer::DrawEntity()
 
 	//train
 	{
+		if (type != DrawType::Shadow)
+			shader = colorShader;
+
 		shader->Use();
+		if (type == DrawType::Reflect)
+			shader->setFloat4("u_plane", glm::vec4(0, 1, 0, -waterHeight));
+		else if (type == DrawType::Refract)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, waterHeight));
+		else if (type == DrawType::Default)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, 10000));
+
 
 		shader->setMat4("u_view", camera->viewMatrix);
 		shader->setMat4("u_projection", camera->projectionMatrix);
@@ -497,122 +508,173 @@ void Viewer::DrawEntity()
 
 	//pool
 	{
-		modelShader->Use();
+		if (type != DrawType::Shadow)
+			shader = modelShader;
+
+
+		shader->Use();
+		if (type == DrawType::Reflect)
+			shader->setFloat4("u_plane", glm::vec4(0, 1, 0, -waterHeight));
+		else if (type == DrawType::Refract)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, waterHeight));
+		else if (type == DrawType::Default)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, 10000));
+
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(glm::vec3(5.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.1));
+		model = glm::translate(glm::vec3(5.0f, -1.7f, -5.0f));
+		model = glm::scale(model, glm::vec3(0.2));
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		modelShader->setMat4("u_model", model);
+		shader->setMat4("u_model", model);
 
-		modelShader->setMat4("u_view", camera->viewMatrix);
-		modelShader->setMat4("u_projection", camera->projectionMatrix);
-		modelShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+		shader->setMat4("u_view", camera->viewMatrix);
+		shader->setMat4("u_projection", camera->projectionMatrix);
+		shader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
 
-		modelShader->setFloat("shininess", cubeShininess);
-		modelShader->setFloat3("u_eyePosition", camera->position);
-		modelShader->setDirLight(dirLight);
-		modelShader->setSpotLight(spotLight);
+		shader->setFloat("shininess", cubeShininess);
+		shader->setFloat3("u_eyePosition", camera->position);
+		shader->setDirLight(dirLight);
+		shader->setSpotLight(spotLight);
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
-		modelShader->setInt("shadowMap", 1);
+		shader->setInt("shadowMap", 1);
 
 		pool->Draw(*modelShader);
 	}
 
-	///debug
-	//{
-	//	debugShader->Use();
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
-	//	debugShader->setInt("tex", 0);
-
-
-	//	debugVAO->Bind();
-
-	//	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//}
-
-}
-
-void Viewer::DrawShadowMap()
-{
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-
-	//cube
+	//water
+	if (type == DrawType::Default) 
 	{
-		depthMapShader->Use();
+		heightMapShader->Use();
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+		model = glm::translate(glm::vec3(5.0f, waterHeight, -5.0f));
+		model = glm::scale(model, glm::vec3(0.4));
 		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		depthMapShader->setMat4("u_model", model);
-		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+		heightMapShader->setMat4("u_model", model);
 
-		cube->Bind();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		heightMapShader->setMat4("u_view", camera->viewMatrix);
+		heightMapShader->setMat4("u_projection", camera->projectionMatrix);
+		heightMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		heightMapShader->setFloat3("u_eyePosition", camera->position);
+		heightMapShader->setDirLight(dirLight);
+		heightMapShader->setSpotLight(spotLight);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
+		heightMapShader->setInt("shadowMap", 1);
+
+		water->Draw(heightMapShader);
+	}
+
+	//tree
+	{
+		if (type != DrawType::Shadow)
+			shader = modelShader;
+
+
+		shader->Use();
+		if (type == DrawType::Reflect)
+			shader->setFloat4("u_plane", glm::vec4(0, 1, 0, -waterHeight));
+		else if (type == DrawType::Refract)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, waterHeight));
+		else if (type == DrawType::Default)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, 10000));
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(glm::vec3(5.0f,-2.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.3));
+		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		shader->setMat4("u_model", model);
+		shader->setMat4("u_view", camera->viewMatrix);
+		shader->setMat4("u_projection", camera->projectionMatrix);
+		shader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		shader->setFloat("shininess", cubeShininess);
+		shader->setFloat3("u_eyePosition", camera->position);
+		shader->setDirLight(dirLight);
+		shader->setSpotLight(spotLight);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
+		shader->setInt("shadowMap", 1);
+
+		treeModel->Draw(*modelShader);
 
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(8.0f, 1.0f, 45.0f));
-		depthMapShader->setMat4("u_model", model);
+		model = glm::translate(glm::vec3(6.0f, -2.0f, -9.0f));
+		model = glm::scale(model, glm::vec3(0.25));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		shader->setMat4("u_model", model);
+		treeModel->Draw(*modelShader);
+
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(glm::vec3(10.0f, -1.0f, -5.0f));
+		model = glm::scale(model, glm::vec3(0.35));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		shader->setMat4("u_model", model);
+		treeModel->Draw(*modelShader);
+	}
+
+	//rain
+	if(rain)
+	{
+		dirLight->diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+
+		if (type != DrawType::Shadow)
+			shader = colorShader;
+
+		shader->Use();
+		if (type == DrawType::Reflect)
+			shader->setFloat4("u_plane", glm::vec4(0, 1, 0, -waterHeight));
+		else if (type == DrawType::Refract)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, waterHeight));
+		else if (type == DrawType::Default)
+			shader->setFloat4("u_plane", glm::vec4(0, -1, 0, 10000));
+
+
+		shader->setMat4("u_view", camera->viewMatrix);
+		shader->setMat4("u_projection", camera->projectionMatrix);
+		shader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
+
+		shader->setFloat("shininess", cubeShininess);
+		shader->setFloat3("u_eyePosition", camera->position);
+		shader->setDirLight(dirLight);
+		shader->setSpotLight(spotLight);
+
+		rainParticles->Draw(shader);
+	}
+	else
+	{
+		dirLight->diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+
+	//skybox
+	if (type != DrawType::Shadow)
+	{
+		glDepthFunc(GL_LEQUAL);
+		skyboxShader->Use();
+		skyboxShader->setMat4("u_view", camera->viewMatrix);
+		skyboxShader->setMat4("u_projection", camera->projectionMatrix);
+
+		skyboxTex->Bind(0);
+		skyboxShader->setInt("skybox", 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMapFBO->textures[0]);
+		skyboxShader->setInt("shadowMap", 1);
+
+		skybox->Bind();
+
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-	}
-
-	//terrain
-	{
-		depthMapShader->Use();
-		glm::mat4 model = glm::mat4(1.0f);
-		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		depthMapShader->setMat4("u_model", model);
-		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
-
-
-		for (const auto& terrain : terrains)
-		{
-			terrain->Draw(depthMapShader);
-		}
-	}
-
-	//track
-	{
-		depthMapShader->Use();
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1));
-		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		depthMapShader->setMat4("u_model", model);
-		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
-
-		track->Draw(depthMapShader);
-	}
-
-	//train
-	{
-		depthMapShader->Use();
-
-		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
-
-		train->Draw(depthMapShader);
-	}
-
-	//pool
-	{
-		depthMapShader->Use();
-		depthMapShader->Use();
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(glm::vec3(5.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.1));
-		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		depthMapShader->setMat4("u_model", model);
-		depthMapShader->setMat4("u_lightSpaceMatrix", lightSpaceMatrix);
-
-		pool->Draw(*depthMapShader);
+		glDepthFunc(GL_LESS);
 	}
 }
 
@@ -631,6 +693,7 @@ void Viewer::DrawImGui()
 			ImGui::Checkbox("Train Run", &trainRun);
 			
 			ImGui::SliderFloat("Train Speed", &trainSpeed, 0.0f, 10.0f);
+			ImGui::Checkbox("Train Physic", &trainPhysic);
 			ImGui::Text("Train Count: ");
 			ImGui::SameLine();
 			if (ImGui::ArrowButton("reduce", ImGuiDir_Left))
@@ -646,6 +709,14 @@ void Viewer::DrawImGui()
 				trainCount++;
 				train->SetCarCount(trainCount);
 			}
+
+			
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Particle"))
+		{
+			ImGui::Checkbox("Rain Partile", &rain);
+			ImGui::SliderInt("Rain Dense", &rainDence, 1.0f, 100.0f);
 			ImGui::TreePop();
 		}
 		if (ImGui::TreeNode("Information"))
@@ -659,7 +730,7 @@ void Viewer::DrawImGui()
 		ImGui::End();
 	}
 
-	if(true)
+	if(false)
 	{
 		ImGui::Begin("shadow map Debugger");
 
@@ -668,7 +739,6 @@ void Viewer::DrawImGui()
 		ImGui::GetWindowDrawList()->AddImage(
 			(void*)depthMapFBO->textures[0], ImVec2(pos),
 			ImVec2(pos.x + ImGui::GetWindowWidth(), pos.y + ImGui::GetWindowHeight()), ImVec2(0, 1), ImVec2(1, 0));
-
 		ImGui::End();
 	}
 
@@ -682,14 +752,31 @@ void Viewer::Update()
 	while (!glfwWindowShouldClose(window))
 	{
 		UpdateObject();
+
+		//shadow
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO->fbo);
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		DrawShadowMap();
+		DrawEntity(DrawType::Shadow);
 
+		//reflect
+		glBindFramebuffer(GL_FRAMEBUFFER, water->reflectionFBO->fbo);
+		glViewport(0, 0, width, height);
+		float distance = 2 * (camera->position.y - waterHeight);
+		camera->position.y -= distance;
+		camera->invertPitch();
+		DrawEntity(DrawType::Reflect);
+
+		//refract
+		glBindFramebuffer(GL_FRAMEBUFFER, water->refractionFBO->fbo);
+		glViewport(0, 0, width, height); 
+		camera->position.y += distance;
+		camera->invertPitch(); 
+		DrawEntity(DrawType::Refract);
+
+		//noraml
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, width, height);
-		DrawEntity();
-
+		DrawEntity(DrawType::Default);
 		DrawImGui();
 
 
@@ -701,16 +788,48 @@ void Viewer::Update()
 
 void Viewer::UpdateObject()
 {
-
 	static float rotation = 0.0f, prevTime = glfwGetTime();
 	double curTime = glfwGetTime();
 	if (curTime - prevTime >= 1.0 / 60)
 	{
-		float vel = trainSpeed;
-		//if (physics->value())
-		//	vel += vel * addPhysics();
-		if(trainRun)
+		static float vel = trainSpeed;
+		if (trainRun)
+		{
+			if (trainPhysic)
+			{
+				vel = 0.999 *vel + 0.01 * train->AddPhysics();
+				if (vel < trainSpeed * 0.1) vel += trainSpeed * 0.1;
+			}
+			else
+			{
+				vel = trainSpeed;
+			}
+			//v = v0 + at
+			//std::cout << vel << std::endl;
 			train->AddTrainU(vel);
+		}
+
+		if (water)
+			water->Update();
+		if (rain)
+		{
+			for (int i = 0; i < rainDence; i++)
+			{
+				float x = rand() % 50000 / 1000.0f - 25.f + camera->position.x;
+				float z = rand() % 50000 / 1000.0f - 25.f + camera->position.z;
+	
+				Particle* particle = new Particle(
+					glm::vec3(x, 50.0f, z),
+					glm::vec3(0.0f, -1.0f, 0.0f),
+					1.5f,
+					glm::vec3(0.01f, 0.5f, 0.01f)
+				);
+				rainParticles->AddParticle(particle);
+			}
+		}
+		rainParticles->Update(1.0f / 60);
+
+		prevTime = curTime;
 	}
 }
 
@@ -720,6 +839,8 @@ void Viewer::frambufferCallbackHandler(int width, int height)
 	this->width = width;
 	this->height = height;
 	Camera::Resize(width, height);
+	if (this->water)
+		water->ResizeFBO();
 }
 
 void Viewer::keyInputCallbackHandler(int key, int scancode, int action, int mode)

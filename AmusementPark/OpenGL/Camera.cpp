@@ -75,7 +75,7 @@ void Camera::KeyInputs()
 	}
 	else if (glfwGetKey(viewer->window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
 	{
-		speed = 0.05f;
+		speed = 0.01f;
 	}
 	//if (position.y < 0.1f)position.y = 0.1f;
 }
@@ -119,4 +119,15 @@ void Camera::MouseInputs(double xpos, double ypos)
 		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 		orientation = glm::normalize(direction);
 	}
+}
+
+void Camera::invertPitch()
+{
+	this->pitch = -this->pitch;
+
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	orientation = glm::normalize(direction);
 }

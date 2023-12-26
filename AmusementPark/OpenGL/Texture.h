@@ -36,6 +36,9 @@ public:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
 		else if (numColCh == 4)
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
+		else if(numColCh == 1)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, widthImg, heightImg, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, bytes);
+
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 

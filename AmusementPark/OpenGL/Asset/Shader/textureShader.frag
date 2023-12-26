@@ -51,7 +51,7 @@ struct SpotLight {
 };
 
 
-uniform sampler2D tex0;
+uniform sampler2D texture_diffuse0;
 uniform sampler2D shadowMap;
 uniform float shininess = 77.0f;
 uniform DirLight dirLight;
@@ -71,7 +71,7 @@ void main()
 	//FragColor = texture(tex0, texCoord) * vec4(color,1.0);
     vec3 viewDir = normalize(u_eyePosition - f_in.position);
     vec3 normal = normalize(f_in.normal);
-    vec3 color = vec3(texture(tex0, f_in.texture_coordinate));
+    vec3 color = vec3(texture(texture_diffuse0, f_in.texture_coordinate));
 
     vec3 result = CalcDirLight(dirLight, color, normal, viewDir);
 	result += CalcSpotLight(spotLight, color, normal, f_in.position, viewDir);
@@ -166,6 +166,20 @@ float CalcShadow(vec4 positionLightSpace, vec3 normal, vec3 lightDir)
     // check whether current frag pos is in shadow
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
     float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0; 
+
+    if(shadow==1.0)
+    {
+        vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+                shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+            }    
+        }
+        shadow /= 9.0;
+     }
 
     return shadow;
 }

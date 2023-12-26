@@ -16,10 +16,12 @@ uniform mat4 u_model;
 uniform mat4 u_projection;
 uniform mat4 u_view;
 uniform mat4 u_lightSpaceMatrix;
+uniform vec4 u_plane = vec4(0, -1, 0,10000);
 
 void main()
 {
-   gl_Position = u_projection * u_view * u_model * vec4(position, 1.0f);
+    gl_ClipDistance[0] = dot(u_model * vec4(position, 1.0f), u_plane);
+    gl_Position = u_projection * u_view * u_model * vec4(position, 1.0f);
 
     v_out.position = vec3(u_model * vec4(position, 1.0f));
     //v_out.normal = mat3(transpose(inverse(u_model))) * normal;

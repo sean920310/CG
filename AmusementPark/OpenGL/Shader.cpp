@@ -71,6 +71,11 @@ void Shader::setFloat3(const std::string& name, glm::vec3 value) const
 	glUniform3fv(glGetUniformLocation(id, name.c_str()), 1, &value[0]);
 }
 
+void Shader::setFloat4(const std::string& name, glm::vec4 value) const
+{
+	glUniform4fv(glGetUniformLocation(id, name.c_str()), 1, &value[0]);
+}
+
 void Shader::setDirLight(const DirLight* light)
 {
 	glUniform3fv(glGetUniformLocation(id, "dirLight.direction"), 1, &light->direction[0]);

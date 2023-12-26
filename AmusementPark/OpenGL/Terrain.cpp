@@ -1,12 +1,22 @@
 #include "Terrain.h"
 
-Terrain::Terrain(int gridX, int gridZ, const std::string& texturePath)
+Terrain::Terrain(int gridX, int gridZ, const std::string& texturePath, const std::string& heightMapPath)
 {
+	int widthImg, heightImg, numColCh;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* bytes = stbi_load(heightMapPath.c_str(), &widthImg, &heightImg, &numColCh, 0);
+
+	if (!bytes)
+		std::cout << "ERROR: Texture2D " << stbi_failure_reason() << ": " << heightMapPath << std::endl;
+	//*height map
+	m_heightMap = new Texture2D(heightMapPath.c_str());
+
+	//*texture
 	m_texture = new Texture2D(texturePath.c_str());
 	x = gridX * SIZE;
 	z = gridZ * SIZE;
 
-
+	//*vao
 	std::vector<GLuint>	element((VERTEX_COUNT - 1) * (VERTEX_COUNT - 1) * 2 * 3);
 	std::vector<GLfloat> textureCoordinate((VERTEX_COUNT * VERTEX_COUNT) * 2);
 	std::vector<GLfloat> vertices(VERTEX_COUNT * VERTEX_COUNT * 3);
@@ -16,9 +26,9 @@ Terrain::Terrain(int gridX, int gridZ, const std::string& texturePath)
 	{
 		for (int j = 0; j < VERTEX_COUNT; j++)
 		{
-			vertices[(i * VERTEX_COUNT + j) * 3 + 0] = (float)j * SIZE / (VERTEX_COUNT - 1) + x;
-			vertices[(i * VERTEX_COUNT + j) * 3 + 1] = 0.0f;
-			vertices[(i * VERTEX_COUNT + j) * 3 + 2] = (float)i * SIZE / (VERTEX_COUNT - 1) + z;
+			vertices[(i * VERTEX_COUNT + j) * 3 + 0] = (float)j * SIZE / (VERTEX_COUNT - 1) + x - SIZE/2;
+			vertices[(i * VERTEX_COUNT + j) * 3 + 1] = (float) bytes[4 * (i * widthImg + j)]/256.0f - 0.5f * 2.f * HEIGHT;
+			vertices[(i * VERTEX_COUNT + j) * 3 + 2] = (float)i * SIZE / (VERTEX_COUNT - 1) + z - SIZE / 2;
 
 			normal[(i * VERTEX_COUNT + j) * 3 + 0] = 0.0f;
 			normal[(i * VERTEX_COUNT + j) * 3 + 1] = 1.0f;
@@ -62,6 +72,7 @@ Terrain::Terrain(int gridX, int gridZ, const std::string& texturePath)
 	normalVBO.Delete();
 	textureCoordVBO.Delete();
 	ebo.Unbind();
+	stbi_image_free(bytes);
 }
 
 Terrain::~Terrain()
@@ -78,6 +89,10 @@ void Terrain::Draw(Shader* shader)
 
 	m_texture->Bind(0);
 	shader->setInt("tex", 0);
+
+	m_heightMap->Bind(3);
+	shader->setInt("heightMap", 3);
+	shader->setFloat("amplitude", HEIGHT);
 
 	m_vao->Bind();
 	glDrawElements(GL_TRIANGLES, (VERTEX_COUNT - 1) * (VERTEX_COUNT - 1) * 2 * 3, GL_UNSIGNED_INT, 0);

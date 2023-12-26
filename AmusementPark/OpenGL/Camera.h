@@ -47,10 +47,13 @@ public:
 	void Update();
 	void KeyInputs();
 	void MouseInputs(double xpos, double ypos);
+	
+	void invertPitch();
+
 private:
 	bool firstClick = true;
 
-	const float FOVdeg = 45.0f;
+	const float FOVdeg = 90.0f;
 	const float nearZ = 0.01f;
 	const float farZ = 1000.0f;
 
